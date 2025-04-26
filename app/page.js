@@ -1,12 +1,6 @@
-import Navbar from '@/components/Navbar'
-import React from 'react'
+// /app/page.js
+import { redirect } from 'next/navigation';
 
-const page = () => {
-  return (
-    <div>
-      <Navbar />
-    </div>
-  )
+export default function Home() {
+  redirect('/coupons');
 }
-
-export default page
