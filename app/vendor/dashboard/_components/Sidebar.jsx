@@ -25,7 +25,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activePage, setActivePage }) =>
         { icon: <FiUsers size={20} />, name: 'Customers', id: 'customers' },
         { icon: <FiFileText size={20} />, name: 'Reports', id: 'reports' },
         { icon: <FiSettings size={20} />, name: 'Settings', id: 'settings' },
-        { icon: <FiHelpCircle size={20} />, name: 'Help', id: 'help' }
+        { icon: <FiHelpCircle size={20} />, name: 'Help', id: 'help' },
+        { icon: <FiHelpCircle size={20} />, name: 'scan-coupon', id: 'scan-coupon' },
+        { icon: <FiHelpCircle size={20} />, name: 'coupon-requests', id: 'coupon-redemption-request' }
     ];
 
     return (

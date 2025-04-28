@@ -74,7 +74,8 @@ export async function createCoupon(formData) {
                 max_uses: formData.max_uses || null,
                 applies_to_all_locations: formData.applies_to_all_locations,
                 is_active: formData.is_active,
-                image_url: formData.image_url
+                image_url: formData.image_url,
+                coupon_type: formData.coupon_type
             })
             .select('id')
             .single();
@@ -155,7 +156,9 @@ export async function updateCoupon(id, formData) {
                 end_date: formData.end_date,
                 max_uses: formData.max_uses || null,
                 applies_to_all_locations: formData.applies_to_all_locations,
-                is_active: formData.is_active
+                is_active: formData.is_active,
+                image_url: formData.image_url,
+                coupon_type: formData.coupon_type
             })
             .eq('id', id);
 

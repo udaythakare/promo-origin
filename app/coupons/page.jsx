@@ -50,6 +50,11 @@ export default function CouponsPage() {
     loadSession();
   }, []);
 
+
+  const getUserLocation = () => {
+    console.log('this is user location')
+  }
+
   // Get user's location
   useEffect(() => {
     if (navigator.geolocation) {
@@ -231,10 +236,10 @@ export default function CouponsPage() {
                         {coupon.discount_type === "percentage"
                           ? `${coupon.discount_value}% off`
                           : coupon.discount_type === "fixed_amount"
-                          ? `$${coupon.discount_value} off`
-                          : coupon.discount_type === "buy_one_get_one"
-                          ? "Buy One Get One"
-                          : "Free Item"}
+                            ? `$${coupon.discount_value} off`
+                            : coupon.discount_type === "buy_one_get_one"
+                              ? "Buy One Get One"
+                              : "Free Item"}
                       </span>
                     </div>
                     <div className="flex items-start mb-3">
@@ -284,45 +289,7 @@ export default function CouponsPage() {
         )}
       </main>
 
-      {/* Navigation Footer */}
-      {/* <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 z-20">
-                <div className="container mx-auto flex justify-around">
-                    <Link href="/coupons" className="flex flex-col items-center p-1">
-                        <span className="text-blue-600">
-                            <Tag size={20} />
-                        </span>
-                        <span className="text-xs mt-1 font-medium text-blue-600">Coupons</span>
-                    </Link>
-                    <Link href="/businesses" className="flex flex-col items-center p-1">
-                        <span className="text-gray-500">
-                            <ShoppingBag size={20} />
-                        </span>
-                        <span className="text-xs mt-1 text-gray-500">Businesses</span>
-                    </Link>
-                    {session ? (
-                        <Link href="/profile" className="flex flex-col items-center p-1">
-                            <span className="text-gray-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg>
-                            </span>
-                            <span className="text-xs mt-1 text-gray-500">Profile</span>
-                        </Link>
-                    ) : (
-                        <Link href="/login" className="flex flex-col items-center p-1">
-                            <span className="text-gray-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                                    <polyline points="10 17 15 12 10 7"></polyline>
-                                    <line x1="15" y1="12" x2="3" y2="12"></line>
-                                </svg>
-                            </span>
-                            <span className="text-xs mt-1 text-gray-500">Login</span>
-                        </Link>
-                    )}
-                </div>
-            </footer> */}
+
     </div>
   );
 }

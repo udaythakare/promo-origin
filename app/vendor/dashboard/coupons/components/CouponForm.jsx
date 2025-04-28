@@ -61,7 +61,8 @@ export default function CouponForm({ coupon }) {
         tag_ids: [],
         max_uses: null,
         is_active: true,
-        image_url: '', // Added for storing the image URL
+        image_url: '', // Added for storing the image URL, 
+        coupon_type: 'redeem_at_store'
     });
 
     const handleChange = (e) => {
@@ -760,6 +761,30 @@ export default function CouponForm({ coupon }) {
                         {errors.end_date && <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>}
                     </div>
 
+                    <div>
+                        <label>
+                            <input
+                                type="radio"
+                                name="coupon_type"
+                                value="redeem_at_store"
+                                checked={formData.coupon_type === 'redeem_at_store'}
+                                onChange={handleChange}
+                            />
+                            Redeem at Store
+                        </label>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="coupon_type"
+                                value="redeem_online"
+                                checked={formData.coupon_type === 'redeem_online'}
+                                onChange={handleChange}
+                            />
+                            Redeem Online
+                        </label>
+                    </div>
+
 
 
                     <div>
@@ -863,6 +888,8 @@ export default function CouponForm({ coupon }) {
                     {isSubmitting ? 'Saving...' : isEditing ? 'Update Coupon' : 'Create Coupon'}
                 </button>
             </div>
+
+
         </form >
     );
 }
