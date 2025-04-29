@@ -34,7 +34,7 @@ export default async function Page() {
 
     const user = userResult.user
     const coupons = couponsResult.success ? couponsResult.coupons : []
-    console.log(coupons[0].coupons.businesses.primary_location.id)
+    // console.log(coupons[0].coupons.businesses.primary_location.id)
 
     return (
         <div className="min-h-screen bg-blue-50 py-8 px-4">

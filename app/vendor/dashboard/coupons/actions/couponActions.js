@@ -399,12 +399,14 @@ export async function getCouponTags() {
 
 export async function getAllCoupons(query = '', page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-
+    const session = await getServerSession(options);
+    const userId = session?.user?.id;
     let supabaseQuery = supabase
         .from('coupons')
         .select('*', { count: 'exact' }) // select all fields + count
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .range(offset, offset + limit - 1)
+        .eq("user_id", userId)
 
     if (query) {
         const lowerQuery = query.toLowerCase();

@@ -3,6 +3,8 @@ import React from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import DeleteBusinessButton from './components/DeleteBusinessButton';
+import { getServerSession } from 'next-auth';
+import { options } from '@/app/api/auth/[...nextauth]/options';
 
 // Initialize Supabase client (server-side)
 const supabase = createClient(
@@ -12,6 +14,9 @@ const supabase = createClient(
 
 export default async function BusinessesPage() {
     // Fetch businesses with their primary location using Supabase
+    const session = await getServerSession(options);
+    const userId = session?.user?.id;
+
     const { data: businesses, error } = await supabase
         .from('businesses')
         .select(`
@@ -27,7 +32,8 @@ export default async function BusinessesPage() {
       )
     `)
         .eq('business_locations.is_primary', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .eq('user_id', userId);
 
     if (error) {
         console.error('Error fetching businesses:', error);
