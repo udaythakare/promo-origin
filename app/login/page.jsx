@@ -56,14 +56,12 @@ export default function LoginPage() {
         }
     }
 
-
     const handleGoogleSignIn = async () => {
         try {
             const result = await signIn('google', {
                 callbackUrl: 'http://localhost:3000/',
                 redirect: false,
             });
-
 
             if (result?.error) {
                 console.log(result?.error)
@@ -77,31 +75,29 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
             <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-blue-700">CouponHub</h1>
-                    <p className="text-blue-600 mt-1">Your Ultimate Savings Destination</p>
+                <div className="mb-8 text-center">
+                    <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">CouponStall</h1>
+                    <p className="text-xl font-bold text-gray-800">Your Ultimate Savings Destination</p>
                 </div>
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="bg-blue-600 p-6 text-white text-center">
-                        <h2 className="text-2xl font-semibold">Welcome Back</h2>
-                        <p className="text-blue-100 mt-1">Sign in to access your account</p>
-                    </div>
-                    <div className="p-6">
+                
+                <div className="transform mb-6">
+                    <div className="bg-yellow-400 border-4 border-black rounded-none p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
+                        <h2 className="font-bold text-2xl mb-4 uppercase text-center">SIGN IN</h2>
+                        <p className="font-medium mb-6 text-center">Access your savings account</p>
+                        
                         {error && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                            <div className="mb-4 p-3 bg-red-500 border-2 border-black text-white font-bold rounded-none text-sm transform -rotate-1">
                                 {error}
                             </div>
                         )}
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Email Address
-                                </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <IoMailOutline className="h-5 w-5 text-gray-400" />
+                                        <IoMailOutline className="h-5 w-5 text-black" />
                                     </div>
                                     <input
                                         id="email"
@@ -110,18 +106,16 @@ export default function LoginPage() {
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 block w-full rounded-lg border border-gray-300 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="pl-10 block w-full rounded-none border-4 border-black py-3 text-black bg-white placeholder-gray-500 font-medium focus:ring-0 focus:outline-none"
                                         placeholder="you@example.com"
                                     />
                                 </div>
                             </div>
+                            
                             <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Password
-                                </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <RiLockPasswordLine className="h-5 w-5 text-gray-400" />
+                                        <RiLockPasswordLine className="h-5 w-5 text-black" />
                                     </div>
                                     <input
                                         id="password"
@@ -130,7 +124,7 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 block w-full rounded-lg border border-gray-300 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="pl-10 block w-full rounded-none border-4 border-black py-3 text-black bg-white placeholder-gray-500 font-medium focus:ring-0 focus:outline-none"
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -138,51 +132,64 @@ export default function LoginPage() {
                                         onClick={() => setShowPassword((prev) => !prev)}
                                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                     >
-                                        {showPassword ? <FiEyeOff className="h-5 w-5 text-gray-400" /> : <FiEye className="h-5 w-5 text-gray-400" />}
+                                        {showPassword ? <FiEyeOff className="h-5 w-5 text-black" /> : <FiEye className="h-5 w-5 text-black" />}
                                     </button>
                                 </div>
                             </div>
+                            
                             <div className="flex justify-end">
-                                <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                <a href="#" className="text-sm font-bold text-black underline hover:no-underline transform hover:-translate-y-1 transition-transform duration-200">
                                     Forgot your password?
                                 </a>
                             </div>
+                            
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-70"
+                                className="w-full bg-black text-white font-bold py-4 px-6 border-4 border-black rounded-none transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0 active:shadow-[0px_0px_0px_0px_rgba(0,0,0)] disabled:opacity-70 uppercase"
                             >
-                                {isLoading ? 'Signing in...' : 'Sign In'}
+                                {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
                             </button>
                         </form>
+                        
                         <div className="relative flex items-center mt-6">
-                            <div className="flex-grow border-t border-gray-300"></div>
-                            <span className="flex-shrink mx-4 text-gray-400 text-sm">or continue with</span>
-                            <div className="flex-grow border-t border-gray-300"></div>
+                            <div className="flex-grow border-t-4 border-black"></div>
+                            <span className="flex-shrink mx-4 text-black font-bold">OR</span>
+                            <div className="flex-grow border-t-4 border-black"></div>
                         </div>
+                        
                         <button
                             type="button"
                             onClick={handleGoogleSignIn}
-                            className="mt-4 w-full flex items-center justify-center gap-3 bg-white border border-gray-300 rounded-lg py-2.5 px-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                            className="mt-4 w-full bg-white hover:bg-gray-100 text-black font-bold py-4 px-2 border-4 border-black rounded-none transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] active:translate-y-0 active:shadow-[0px_0px_0px_0px_rgba(0,0,0)]"
                         >
-                            <FcGoogle className="h-5 w-5" />
-                            <span className="font-medium text-gray-700">Sign in with Google</span>
+                            <div className="flex items-center justify-center">
+                                <FcGoogle className="w-6 h-6 mr-3" />
+                                <span>Continue with Google</span>
+                            </div>
                         </button>
                     </div>
-                    <div className="px-6 pb-6 text-center">
-                        <p className="text-sm text-gray-600">
-                            Don't have an account?{' '}
-                            <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                                Create one now
-                            </a>
-                        </p>
+                </div>
+                
+                <div className="text-center">
+                    <div className="font-bold uppercase inline-block bg-red-500 px-4 py-2 transform -rotate-2 border-2 border-black">
+                        Don't have an account?{' '}
+                        <a href="/register" className="underline hover:no-underline">
+                            Create one now
+                        </a>
                     </div>
                 </div>
-                <div className="mt-8 text-center text-sm text-gray-500">
-                    <p>© 2025 CouponHub. All rights reserved.</p>
+                
+                <div className="mt-8 text-center">
+                    <p className="font-bold uppercase inline-block bg-blue-400 px-4 py-2 transform rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
+                        SAVE BIG TODAY!
+                    </p>
+                </div>
+                
+                <div className="mt-8 text-center text-sm font-bold">
+                    <p>© {new Date().getFullYear()} CouponStall. All rights reserved.</p>
                 </div>
             </div>
         </div>
     )
 }
-
