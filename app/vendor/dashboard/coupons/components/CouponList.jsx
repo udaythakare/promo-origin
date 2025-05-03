@@ -8,6 +8,7 @@ export default async function CouponsList({
 }) {
     const couponsPerPage = 10;
     const { coupons, totalCount } = await getAllCoupons(query, currentPage, couponsPerPage);
+    console.log(coupons, 'this is coupons');
     const totalPages = Math.ceil(totalCount / couponsPerPage);
 
     if (coupons.length === 0) {

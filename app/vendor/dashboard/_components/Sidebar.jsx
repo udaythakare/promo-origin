@@ -20,14 +20,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activePage, setActivePage }) =>
     const menuItems = [
         { icon: <FiHome size={20} />, name: 'Dashboard', id: 'dashboard' },
         { icon: <FiShoppingBag size={20} />, name: 'Coupons', id: 'coupons' },
-        { icon: <FiShoppingBag size={20} />, name: 'Businesses', id: 'businesses' },
-        { icon: <FiBarChart2 size={20} />, name: 'Analytics', id: 'analytics' },
-        { icon: <FiUsers size={20} />, name: 'Customers', id: 'customers' },
-        { icon: <FiFileText size={20} />, name: 'Reports', id: 'reports' },
-        { icon: <FiSettings size={20} />, name: 'Settings', id: 'settings' },
-        { icon: <FiHelpCircle size={20} />, name: 'Help', id: 'help' },
-        { icon: <FiHelpCircle size={20} />, name: 'scan-coupon', id: 'scan-coupon' },
-        { icon: <FiHelpCircle size={20} />, name: 'coupon-requests', id: 'coupon-redemption-request' }
+        { icon: <FiShoppingBag size={20} />, name: 'Business Info', id: 'business-info' },
+        // { icon: <FiBarChart2 size={20} />, name: 'Analytics', id: 'analytics' },
+        // { icon: <FiUsers size={20} />, name: 'Customers', id: 'customers' },
+        // { icon: <FiFileText size={20} />, name: 'Reports', id: 'reports' },
+        // { icon: <FiSettings size={20} />, name: 'Settings', id: 'settings' },
+        // { icon: <FiHelpCircle size={20} />, name: 'Help', id: 'help' },
+        { icon: <FiHelpCircle size={20} />, name: 'Scan Coupon', id: 'scan-coupon' },
+        { icon: <FiHelpCircle size={20} />, name: 'Coupon Analytics', id: 'analytics' }
     ];
 
     return (

@@ -61,7 +61,7 @@ export default function CouponForm({ coupon }) {
         tag_ids: [],
         max_uses: null,
         is_active: true,
-        image_url: '', // Added for storing the image URL, 
+        image_url: '',
         coupon_type: 'redeem_at_store'
     });
 
@@ -97,6 +97,7 @@ export default function CouponForm({ coupon }) {
                             ...coupon,
                             start_date: new Date(coupon.start_date).toISOString().split('T')[0],
                             end_date: new Date(coupon.end_date).toISOString().split('T')[0],
+                            max_uses: coupon.max_claims || 0
                         }));
 
                         // Set preview image if coupon has an image
@@ -257,9 +258,9 @@ export default function CouponForm({ coupon }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
-            return;
-        }
+        // if (!validateForm()) {
+        //     return;
+        // }
 
         setIsSubmitting(true);
 
@@ -307,43 +308,6 @@ export default function CouponForm({ coupon }) {
             setIsSubmitting(false);
         }
     };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-
-    //     if (!validateForm()) {
-    //         return;
-    //     }
-
-    //     setIsSubmitting(true);
-
-    //     try {
-    //         let result;
-
-    //         if (isEditing && coupon?.id) {
-    //             result = await updateCoupon(coupon.id, formData);
-    //         } else {
-    //             result = await createCoupon(formData);
-    //         }
-
-    //         if (result.error) {
-    //             setErrors({
-    //                 form: result.error
-    //             });
-    //             return;
-    //         }
-
-    //         router.push('/vendor/dashboard/coupons');
-    //         router.refresh();
-    //     } catch (error) {
-    //         console.error('Error submitting form:', error);
-    //         setErrors({
-    //             form: 'Failed to save coupon. Please try again.'
-    //         });
-    //     } finally {
-    //         setIsSubmitting(false);
-    //     }
-    // };
 
     const validateForm = () => {
         const newErrors = {};
@@ -394,10 +358,6 @@ export default function CouponForm({ coupon }) {
         return Object.keys(newErrors).length === 0;
     };
 
-
-
-
-
     const generateRandomCode = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let result = '';
@@ -433,63 +393,17 @@ export default function CouponForm({ coupon }) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 px-2 sm:px-4 md:px-6">
             {errors.form && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
                     {errors.form}
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Basic Information */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-medium text-blue-800">Basic Information</h2>
-
-                    {/* Business Selection (New) */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Business*
-                        </label>
-                        <select
-                            name="business_id"
-                            value={formData.business_id}
-                            onChange={handleChange}
-                            className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.business_id ? 'border-red-300' : ''}`}
-                            disabled={isEditing} // Can't change business when editing
-                        >
-                            <option value="">Select Business</option>
-                            {businesses.map((business) => (
-                                <option key={business.id} value={business.id}>{business.name}</option>
-                            ))}
-                        </select>
-                        {errors.business_id && <p className="mt-1 text-sm text-red-600">{errors.business_id}</p>}
-                        {businesses.length === 0 && (
-                            <p className="mt-1 text-sm text-amber-600">You don't have any businesses. Please create a business first.</p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Coupon Code*
-                        </label>
-                        <div className="flex">
-                            <input
-                                type="text"
-                                name="code"
-                                value={formData.code}
-                                onChange={handleChange}
-                                className={`block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.code ? 'border-red-300' : ''}`}
-                            />
-                            <button
-                                type="button"
-                                onClick={generateRandomCode}
-                                className="bg-gray-100 border border-l-0 border-gray-300 px-3 rounded-r-md hover:bg-gray-200"
-                            >
-                                Generate
-                            </button>
-                        </div>
-                        {errors.code && <p className="mt-1 text-sm text-red-600">{errors.code}</p>}
-                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -541,67 +455,6 @@ export default function CouponForm({ coupon }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Discount Type*
-                        </label>
-                        <select
-                            name="discount_type"
-                            value={formData.discount_type}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="percentage">Percentage Off</option>
-                            <option value="fixed_amount">Fixed Amount Off</option>
-                            <option value="buy_one_get_one">Buy One Get One Free</option>
-                            <option value="free_item">Free Item</option>
-                            <option value="other">Other</option>
-
-                        </select>
-                    </div>
-
-
-                    {!['other'].includes(formData.discount_type) && (
-                        <>
-                            {['percentage', 'fixed_amount'].includes(formData.discount_type) && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {formData.discount_type === 'percentage' ? 'Percentage (%)' : 'Amount ($)'}*
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="discount_value"
-                                        value={formData.discount_value}
-                                        onChange={handleChange}
-                                        min="0"
-                                        step={formData.discount_type === 'percentage' ? '1' : '0.01'}
-                                        max={formData.discount_type === 'percentage' ? '100' : undefined}
-                                        className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.discount_value ? 'border-red-300' : ''}`}
-                                    />
-                                    {errors.discount_value && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.discount_value}</p>
-                                    )}
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Minimum Purchase Amount ($)
-                                </label>
-                                <input
-                                    type="number"
-                                    name="minimum_purchase"
-                                    value={formData.minimum_purchase}
-                                    onChange={handleChange}
-                                    min="0"
-                                    step="0.01"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
-                            </div>
-                        </>
-                    )}
-
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
                             Usage Limit
                         </label>
                         <input
@@ -617,118 +470,7 @@ export default function CouponForm({ coupon }) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Application Settings */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-medium text-blue-800">Application Settings</h2>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Applies To*
-                        </label>
-                        <select
-                            name="applies_to"
-                            value={formData.applies_to}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="entire_purchase">Entire Purchase</option>
-                            <option value="specific_category">Specific Category</option>
-                            <option value="specific_product">Specific Product</option>
-                        </select>
-                    </div>
-
-                    {formData.applies_to === 'specific_category' && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Category*
-                            </label>
-                            <select
-                                name="specific_category_id"
-                                value={formData.specific_category_id || ''}
-                                onChange={handleChange}
-                                className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.specific_category_id ? 'border-red-300' : ''}`}
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
-                                ))}
-                            </select>
-                            {errors.specific_category_id && <p className="mt-1 text-sm text-red-600">{errors.specific_category_id}</p>}
-                            {categories.length === 0 && (
-                                <p className="mt-1 text-sm text-amber-600">No categories found. Please create product categories first.</p>
-                            )}
-                        </div>
-                    )}
-
-                    {formData.applies_to === 'specific_product' && (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Product*
-                            </label>
-                            <select
-                                name="specific_product_id"
-                                value={formData.specific_product_id || ''}
-                                onChange={handleChange}
-                                className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${errors.specific_product_id ? 'border-red-300' : ''}`}
-                            >
-                                <option value="">Select Product</option>
-                                {products.map((product) => (
-                                    <option key={product.id} value={product.id}>{product.name}</option>
-                                ))}
-                            </select>
-                            {errors.specific_product_id && <p className="mt-1 text-sm text-red-600">{errors.specific_product_id}</p>}
-                            {products.length === 0 && (
-                                <p className="mt-1 text-sm text-amber-600">No products found. Please add products first.</p>
-                            )}
-                        </div>
-                    )}
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Location Availability
-                        </label>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="applies_to_all_locations"
-                                checked={formData.applies_to_all_locations}
-                                onChange={handleCheckboxChange}
-                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-gray-700">Valid at all locations</span>
-                        </div>
-
-                        {!formData.applies_to_all_locations && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Locations</label>
-                                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                                    {businessLocations.length > 0 ? (
-                                        businessLocations.map((location) => (
-                                            <label key={location.id} className="inline-flex items-center space-x-2 text-sm text-gray-700">
-                                                <input
-                                                    type="checkbox"
-                                                    value={location.id}
-                                                    checked={formData.location_ids?.includes(location.id)}
-                                                    onChange={(e) => handleCheckboxChange2(e, 'location_ids', location.id)}
-                                                    className="form-checkbox text-blue-600"
-                                                />
-                                                <span>{location.address}, {location.city}</span>
-                                            </label>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-amber-600">No locations found. Please add business locations first.</p>
-                                    )}
-                                </div>
-                                {errors.location_ids && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.location_ids}</p>
-                                )}
-                            </div>
-                        )}
-
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Validity Period & Tags */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-medium text-blue-800">Validity Period</h2>
@@ -761,59 +503,33 @@ export default function CouponForm({ coupon }) {
                         {errors.end_date && <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>}
                     </div>
 
-                    <div>
-                        <label>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <label className="inline-flex items-center">
                             <input
                                 type="radio"
                                 name="coupon_type"
                                 value="redeem_at_store"
                                 checked={formData.coupon_type === 'redeem_at_store'}
                                 onChange={handleChange}
+                                className="mr-2"
                             />
                             Redeem at Store
                         </label>
 
-                        <label>
+                        <label className="inline-flex items-center">
                             <input
                                 type="radio"
                                 name="coupon_type"
                                 value="redeem_online"
                                 checked={formData.coupon_type === 'redeem_online'}
                                 onChange={handleChange}
+                                className="mr-2"
                             />
                             Redeem Online
                         </label>
                     </div>
-
-
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tags
-                        </label>
-                        <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                            {tags.length > 0 ? (
-                                tags.map((tag) => (
-                                    <label key={tag.id} className="inline-flex items-center space-x-2 text-sm text-gray-700">
-                                        <input
-                                            type="checkbox"
-                                            value={tag.id}
-                                            checked={formData.tag_ids?.includes(tag.id)}
-                                            onChange={(e) => handleCheckboxChange2(e, 'tag_ids', tag.id)}
-                                            className="form-checkbox text-blue-600"
-                                        />
-                                        <span>{tag.name}</span>
-                                    </label>
-                                ))
-                            ) : (
-                                <p className="text-sm text-amber-600">No tags available.</p>
-                            )}
-                        </div>
-                    </div>
-
                 </div>
             </div>
-
 
             {/* Image Upload Section */}
             <div className="border p-4 rounded-md">
@@ -871,25 +587,22 @@ export default function CouponForm({ coupon }) {
                 )}
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
                 <button
                     type="button"
                     onClick={() => router.push('/coupons')}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={isSubmitting || businesses.length === 0}
-                    className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isSubmitting || businesses.length === 0 ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
+                    className={`w-full sm:w-auto px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isSubmitting || businesses.length === 0 ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                 >
                     {isSubmitting ? 'Saving...' : isEditing ? 'Update Coupon' : 'Create Coupon'}
                 </button>
             </div>
-
-
-        </form >
+        </form>
     );
 }

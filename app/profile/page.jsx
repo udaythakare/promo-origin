@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
 import { fetchUserCoupons, fetchUserData } from './actions/userActions'
-import RedeemComponent from './RedeemComponent'
 import { getUserId } from '@/helpers/userHelper'
 
 export default async function Page() {
@@ -89,9 +88,9 @@ export default async function Page() {
                                         </span>
                                     </p>
 
-                                    <div>
+                                    {/* <div>
                                         <RedeemComponent couponId={uc.coupons.id} userId={userId} businessLocationId={uc.coupons.businesses.primary_location.id} userCouponId={uc.id} />
-                                    </div>
+                                    </div> */}
                                 </div>
                             )
                         })}

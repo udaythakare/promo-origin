@@ -1,7 +1,9 @@
 // app/vendors/onboard/components/AddressSection.jsx
 import { motion } from 'framer-motion';
 
-export default function AddressSection({ formData, handleInputChange }) {
+export default function AddressSection({ formData, handleInputChange, areaData, cityData, stateData }) {
+    console.log(areaData, cityData, stateData, "AddressSection Dropdown Data");
+
     const inputVariants = {
         focus: { scale: 1.02, borderColor: '#2563eb', transition: { duration: 0.2 } },
         blur: { scale: 1, borderColor: '#e5e7eb', transition: { duration: 0.2 } }
@@ -42,45 +44,79 @@ export default function AddressSection({ formData, handleInputChange }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                                City <span className="text-red-500">*</span>
+                            <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">
+                                Area <span className="text-red-500">*</span>
                             </label>
-                            <motion.input
+                            <motion.select
                                 variants={inputVariants}
                                 initial="blur"
                                 whileFocus="focus"
-                                type="text"
-                                id="city"
-                                name="city"
-                                value={formData.city}
+                                id="area"
+                                name="area"
+                                value={formData.area || ''}
                                 onChange={handleInputChange}
                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Your city"
                                 required
-                            />
+                            >
+                                <option value="">Select an area</option>
+                                {areaData && areaData.map((area) => (
+                                    <option key={area.id} value={area.name}>
+                                        {area.name}
+                                    </option>
+                                ))}
+                            </motion.select>
                         </div>
 
                         <div>
-                            <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                                State/Province <span className="text-red-500">*</span>
+                            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                                City <span className="text-red-500">*</span>
                             </label>
-                            <motion.input
+                            <motion.select
                                 variants={inputVariants}
                                 initial="blur"
                                 whileFocus="focus"
-                                type="text"
-                                id="state"
-                                name="state"
-                                value={formData.state}
+                                id="city"
+                                name="city"
+                                value={formData.city || ''}
                                 onChange={handleInputChange}
                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Your state"
                                 required
-                            />
+                            >
+                                <option value="">Select a city</option>
+                                {cityData && cityData.map((city) => (
+                                    <option key={city.id} value={city.name}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </motion.select>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+                                State/Province <span className="text-red-500">*</span>
+                            </label>
+                            <motion.select
+                                variants={inputVariants}
+                                initial="blur"
+                                whileFocus="focus"
+                                id="state"
+                                name="state"
+                                value={formData.state || ''}
+                                onChange={handleInputChange}
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                            >
+                                <option value="">Select a state</option>
+                                {stateData && stateData.map((state) => (
+                                    <option key={state.id} value={state.name}>
+                                        {state.name}
+                                    </option>
+                                ))}
+                            </motion.select>
+                        </div>
+
                         <div>
                             <label htmlFor="postal_code" className="block text-sm font-medium text-gray-700 mb-1">
                                 Postal Code <span className="text-red-500">*</span>
@@ -96,25 +132,6 @@ export default function AddressSection({ formData, handleInputChange }) {
                                 onChange={handleInputChange}
                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="12345"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-                                Country <span className="text-red-500">*</span>
-                            </label>
-                            <motion.input
-                                variants={inputVariants}
-                                initial="blur"
-                                whileFocus="focus"
-                                type="text"
-                                id="country"
-                                name="country"
-                                value={formData.country}
-                                onChange={handleInputChange}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Your country"
                                 required
                             />
                         </div>

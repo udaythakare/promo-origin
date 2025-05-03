@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { options } from '@/app/api/auth/[...nextauth]/options';
 import { getServerSession } from 'next-auth';
+import { getUserId } from '@/helpers/userHelper';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -36,6 +37,7 @@ export async function getUserBusinesses() {
 
 // Create a new coupon
 export async function createCoupon(formData) {
+    console.log('reached here')
     const session = await getServerSession(options);
 
     if (!session?.user?.id) {
@@ -60,22 +62,15 @@ export async function createCoupon(formData) {
             .from('coupons')
             .insert({
                 business_id: formData.business_id,
-                code: formData.code,
                 title: formData.title,
                 description: formData.description || null,
-                discount_type: formData.discount_type,
-                discount_value: formData.discount_value,
-                minimum_purchase: formData.minimum_purchase || 0,
-                applies_to: formData.applies_to,
-                specific_category_id: formData.specific_category_id || null,
-                specific_product_id: formData.specific_product_id || null,
                 start_date: formData.start_date,
                 end_date: formData.end_date,
-                max_uses: formData.max_uses || null,
-                applies_to_all_locations: formData.applies_to_all_locations,
                 is_active: formData.is_active,
                 image_url: formData.image_url,
-                coupon_type: formData.coupon_type
+                coupon_type: formData.coupon_type,
+                max_claims: formData.max_uses || null,
+                user_id: session?.user?.id
             })
             .select('id')
             .single();
@@ -143,22 +138,15 @@ export async function updateCoupon(id, formData) {
         const { error: updateError } = await supabase
             .from('coupons')
             .update({
-                code: formData.code,
                 title: formData.title,
                 description: formData.description || null,
-                discount_type: formData.discount_type,
-                discount_value: formData.discount_value,
-                minimum_purchase: formData.minimum_purchase || 0,
-                applies_to: formData.applies_to,
-                specific_category_id: formData.specific_category_id || null,
-                specific_product_id: formData.specific_product_id || null,
                 start_date: formData.start_date,
                 end_date: formData.end_date,
-                max_uses: formData.max_uses || null,
-                applies_to_all_locations: formData.applies_to_all_locations,
                 is_active: formData.is_active,
                 image_url: formData.image_url,
-                coupon_type: formData.coupon_type
+                coupon_type: formData.coupon_type,
+                max_claims: formData.max_uses || null,
+                user_id: session?.user?.id
             })
             .eq('id', id);
 
@@ -166,49 +154,49 @@ export async function updateCoupon(id, formData) {
 
         // Handle location-specific coupons
         // First, delete existing locations
-        const { error: deleteLocationsError } = await supabase
-            .from('coupon_locations')
-            .delete()
-            .eq('coupon_id', id);
+        // const { error: deleteLocationsError } = await supabase
+        //     .from('coupon_locations')
+        //     .delete()
+        //     .eq('coupon_id', id);
 
-        if (deleteLocationsError) throw deleteLocationsError;
+        // if (deleteLocationsError) throw deleteLocationsError;
 
-        // Then add new ones if needed
-        if (!formData.applies_to_all_locations && formData.location_ids?.length > 0) {
-            const locationRecords = formData.location_ids.map(locationId => ({
-                coupon_id: id,
-                business_location_id: locationId
-            }));
+        // // Then add new ones if needed
+        // if (!formData.applies_to_all_locations && formData.location_ids?.length > 0) {
+        //     const locationRecords = formData.location_ids.map(locationId => ({
+        //         coupon_id: id,
+        //         business_location_id: locationId
+        //     }));
 
-            const { error: insertLocationsError } = await supabase
-                .from('coupon_locations')
-                .insert(locationRecords);
+        //     const { error: insertLocationsError } = await supabase
+        //         .from('coupon_locations')
+        //         .insert(locationRecords);
 
-            if (insertLocationsError) throw insertLocationsError;
-        }
+        //     if (insertLocationsError) throw insertLocationsError;
+        // }
 
-        // Handle tags
-        // First, delete existing tags
-        const { error: deleteTagsError } = await supabase
-            .from('coupon_tag_relations')
-            .delete()
-            .eq('coupon_id', id);
+        // // Handle tags
+        // // First, delete existing tags
+        // const { error: deleteTagsError } = await supabase
+        //     .from('coupon_tag_relations')
+        //     .delete()
+        //     .eq('coupon_id', id);
 
-        if (deleteTagsError) throw deleteTagsError;
+        // if (deleteTagsError) throw deleteTagsError;
 
-        // Then add new ones if needed
-        if (formData.tag_ids?.length > 0) {
-            const tagRecords = formData.tag_ids.map(tagId => ({
-                coupon_id: id,
-                tag_id: tagId
-            }));
+        // // Then add new ones if needed
+        // if (formData.tag_ids?.length > 0) {
+        //     const tagRecords = formData.tag_ids.map(tagId => ({
+        //         coupon_id: id,
+        //         tag_id: tagId
+        //     }));
 
-            const { error: insertTagsError } = await supabase
-                .from('coupon_tag_relations')
-                .insert(tagRecords);
+        //     const { error: insertTagsError } = await supabase
+        //         .from('coupon_tag_relations')
+        //         .insert(tagRecords);
 
-            if (insertTagsError) throw insertTagsError;
-        }
+        //     if (insertTagsError) throw insertTagsError;
+        // }
 
         revalidatePath('/coupons');
         return { success: true };
@@ -399,8 +387,9 @@ export async function getCouponTags() {
 
 export async function getAllCoupons(query = '', page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    const session = await getServerSession(options);
-    const userId = session?.user?.id;
+    // const session = await getServerSession(options);
+    // const userId = session?.user?.id;
+    const userId = await getUserId(); // Assuming you have a function to get the user ID
     let supabaseQuery = supabase
         .from('coupons')
         .select('*', { count: 'exact' }) // select all fields + count

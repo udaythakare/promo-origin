@@ -2,19 +2,38 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import VendorInfoSection from './components/VendorInfoSection';
 import AddressSection from './components/AddressSection';
 import SubmitSection from './components/SubmitSection';
 import FormProgress from './components/FormProgress';
 import { insertVendorOnboardApplication } from './actions/onboardActions';
+import { getAddressDropdowns } from '@/actions/addressActions';
 
 export default function VendorOnboardingPage() {
 
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [areaData, setAreaData] = useState([]);
+    const [cityData, setCityData] = useState([]);
+    const [stateData, setStateData] = useState([]);
+    useEffect(() => {
+        const fetchDropDownData = async () => {
+            const response = await getAddressDropdowns();
+            console.log(response, "DropDown Data")
+            if (response.success) {
+                setAreaData(response.areaData || []);
+                setCityData(response.cityData || []);
+                setStateData(response.stateData || []);
+            } else {
+                alert(response.message);
+            }
+        }
+        fetchDropDownData();
+    }, [])
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -57,7 +76,8 @@ export default function VendorOnboardingPage() {
             const resp = await insertVendorOnboardApplication(formData)
 
             if (resp.success) {
-                router.push('/vendor-onboard/success');
+                alert("Vendor application submitted successfully!");
+                router.push('/');
                 return;
             }
 
@@ -120,6 +140,9 @@ export default function VendorOnboardingPage() {
                             <AddressSection
                                 formData={formData}
                                 handleInputChange={handleInputChange}
+                                areaData={areaData}
+                                cityData={cityData}
+                                stateData={stateData}
                             />
                         </motion.div>
                     )}

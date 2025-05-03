@@ -116,6 +116,8 @@ export const options = {
                         .eq('email', user.email)
                         .single();
 
+                    let dbUserId;
+
                     if (existingUser) {
                         // User exists, update last login time
                         await supabaseAdmin
@@ -124,46 +126,70 @@ export const options = {
                             .eq('id', existingUser.id);
 
                         await logLogin(existingUser.id, 'success');
-                        return true;
+                        dbUserId = existingUser.id;
+
+                        // Update the NextAuth user object with our database ID
+                        user.id = existingUser.id;
+                    } else {
+                        // If not found, create a new user
+                        // Generate a unique username from email
+                        const usernameBase = user.email.split('@')[0];
+                        const timestamp = Date.now().toString().substring(8);
+                        const username = `${usernameBase}_${timestamp}`;
+
+                        // Insert the new user
+                        const { data: newUser, error: createError } = await supabaseAdmin
+                            .from('users')
+                            .insert([{
+                                email: user.email,
+                                username: username,
+                                password: '', // OAuth users don't need passwords
+                                created_at: new Date().toISOString()
+                            }])
+                            .select('*')
+                            .single();
+
+                        if (createError) {
+                            await logLogin(null, 'failed', `Google sign-in error: ${createError.message}`);
+                            throw createError;
+                        }
+
+                        // Assign default role to the new user (e.g., 'app_user')
+                        const { error: roleError } = await supabaseAdmin
+                            .from('user_roles')
+                            .insert([{
+                                user_id: newUser.id,
+                                role: 'app_user',
+                                is_active: true
+                            }]);
+
+                        if (roleError) {
+                            console.error('Error assigning role:', roleError);
+                        }
+
+                        console.log('New user created:', newUser.id);
+
+                        await logLogin(newUser.id, 'success');
+                        dbUserId = newUser.id;
+
+                        // Update the NextAuth user object with our database ID
+                        user.id = newUser.id;
                     }
 
-                    // If not found, create a new user
-                    // Generate a unique username from email
-                    const usernameBase = user.email.split('@')[0];
-                    const timestamp = Date.now().toString().substring(8);
-                    const username = `${usernameBase}_${timestamp}`;
-
-                    // Insert the new user
-                    const { data: newUser, error: createError } = await supabaseAdmin
-                        .from('users')
-                        .insert([{
-                            email: user.email,
-                            username: username,
-                            password: '', // OAuth users don't need passwords
-                            created_at: new Date().toISOString()
-                        }])
-                        .select('*')
-                        .single();
-
-                    if (createError) {
-                        await logLogin(null, 'failed', `Google sign-in error: ${createError.message}`);
-                        throw createError;
-                    }
-
-                    // Assign default role to the new user (e.g., 'app_user')
-                    const { error: roleError } = await supabaseAdmin
+                    // Get user roles from the database
+                    const { data: userRoles, error: rolesError } = await supabaseAdmin
                         .from('user_roles')
-                        .insert([{
-                            user_id: newUser.id,
-                            role: 'app_user',
-                            is_active: true
-                        }]);
+                        .select('role')
+                        .eq('user_id', dbUserId)
+                        .eq('is_active', true);
 
-                    if (roleError) {
-                        console.error('Error assigning role:', roleError);
+                    if (!rolesError && userRoles) {
+                        // Add roles to user object
+                        user.roles = userRoles.map(role => role.role);
+                        user.username = existingUser?.username || user.email.split('@')[0];
                     }
 
-                    await logLogin(newUser.id, 'success');
+                    return true;
                 } catch (error) {
                     console.error('Google sign-in error:', error);
                     await logLogin(null, 'failed', `Google sign-in error: ${error.message}`);
@@ -181,23 +207,6 @@ export const options = {
 
                 if (account) {
                     token.provider = account.provider;
-
-                    // For Google login, fetch roles if they weren't provided
-                    if (account.provider === 'google' && (!user.roles || user.roles.length === 0)) {
-                        try {
-                            const { data: userRoles, error } = await supabaseAdmin
-                                .from('user_roles')
-                                .select('role')
-                                .eq('user_id', user.id)
-                                .eq('is_active', true);
-
-                            if (!error && userRoles) {
-                                token.roles = userRoles.map(role => role.role);
-                            }
-                        } catch (error) {
-                            console.error('Error fetching roles in JWT callback:', error);
-                        }
-                    }
                 }
             }
             return token;

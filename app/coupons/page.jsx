@@ -115,25 +115,30 @@ export default function CouponsPage() {
       fetchCoupons();
     }
   }, [radius]);
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
 
   async function fetchCoupons(explicitLocation = null) {
     // Use explicitly provided location if available, otherwise use the state
-    const locationToUse = explicitLocation || location;
+    // const locationToUse = explicitLocation || location;
 
-    if (!locationToUse) return;
+    // if (!locationToUse) return;
 
     setLoading(true);
     setSearchPerformed(true);
 
     try {
       // Call the updated stored function to find nearest coupons
-      const { data, error } = await supabase.rpc("find_nearest_coupons2", {
-        user_lat: locationToUse.latitude,
-        user_long: locationToUse.longitude,
-        radius_km: radius,
-        filter_category_id: selectedCategory,
-        limit_count: itemsPerPage * page,
-      });
+      // const { data, error } = await supabase.rpc("find_nearest_coupons2", {
+      //   user_lat: locationToUse.latitude,
+      //   user_long: locationToUse.longitude,
+      //   radius_km: radius,
+      //   filter_category_id: selectedCategory,
+      //   limit_count: itemsPerPage * page,
+      // });
+
+      const { data, error } = await supabase.from("coupons").select("*").eq("is_active", true);
 
       console.log(data, 'this is data');
 
@@ -470,15 +475,7 @@ export default function CouponsPage() {
                       </span>
                     </div>
                     <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-100">
-                      {coupon.distance_km !== null ? (
-                        <span className="text-sm text-gray-500">
-                          {coupon.distance_km.toFixed(1)} km away
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-500">
-                          &nbsp;
-                        </span>
-                      )}
+
                       <Link
                         href={`/coupons/${coupon.coupon_id}`}
                         className="flex items-center text-blue-600 font-medium text-sm"
