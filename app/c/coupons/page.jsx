@@ -1,9 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { MapPin, Search, Filter, ChevronRight, Tag, Calendar, Store, ExternalLink } from 'lucide-react';
+import { MapPin, Search, Filter, ChevronRight, Tag, Calendar, Store } from 'lucide-react';
 import { claimCoupon, fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
 import { getAddressDropdowns } from '@/actions/addressActions';
-
+import Link from 'next/link';
 const CouponPage = () => {
     const [coupons, setCoupons] = useState([]);
     const [areas, setAreas] = useState([]);
@@ -134,6 +134,9 @@ const CouponPage = () => {
                 <div className="container mx-auto">
                     <h1 className="text-2xl font-bold">Exclusive Coupons</h1>
                     <p className="text-blue-100">Save big with our special offers</p>
+                </div>
+                <div>
+                    <Link href="/v/onboard-form" className="text-white hover:text-blue-200 underline text-sm">Become a vendor</Link>
                 </div>
             </div>
 
@@ -273,8 +276,8 @@ const CouponPage = () => {
                                         onClick={() => handleClaimCoupon(coupon.id)}
                                         disabled={coupon.current_claims >= coupon.max_claims || coupon.is_claimed}
                                         className={`w-full py-2 px-4 rounded-md text-white font-medium flex items-center justify-center transition-all ${coupon.current_claims >= coupon.max_claims || coupon.is_claimed
-                                                ? 'bg-gray-400 opacity-70 cursor-not-allowed hover:bg-gray-400 text-gray-200'
-                                                : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'
+                                            ? 'bg-gray-400 opacity-70 cursor-not-allowed hover:bg-gray-400 text-gray-200'
+                                            : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'
                                             }`}
                                     >
                                         <Tag size={16} className={`mr-2 ${coupon.current_claims >= coupon.max_claims || coupon.is_claimed ? 'opacity-70' : ''}`} />

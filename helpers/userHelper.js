@@ -12,6 +12,16 @@ export async function getUserId() {
     return session.user.id
 }
 
+export async function getSessionData() {
+    const session = await getServerSession(options);
+    if (!session) {
+        return { msg: "user not logged in" }
+    }
+
+    return session?.user
+
+}
+
 export async function getUserData(userId) {
     const { data, error } = await supabaseAdmin
         .from("users")
@@ -41,4 +51,5 @@ export async function getCouponStatus(couponId, userId) {
     }
 
     return { success: true, couponStatus: data };
-}   
+}
+

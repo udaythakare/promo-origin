@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './_components/Sidebar';
 import TopBar from './_components/TopBar';
+import VendorBottomBar from '@/components/VendorBottomBar';
 
 export default function DashboardLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,6 +63,7 @@ export default function DashboardLayout({ children }) {
                 activePage={activePage}
                 setActivePage={handlePageChange}
             />
+            <VendorBottomBar />
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <TopBar toggleSidebar={toggleSidebar} />

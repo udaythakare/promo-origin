@@ -200,6 +200,7 @@ export const options = {
         },
 
         async jwt({ token, user, account, profile }) {
+            console.log(token, 'this is token')
             if (user) {
                 token.id = user.id;
                 token.username = user.username;
