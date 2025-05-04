@@ -1,21 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Home, Tag, MapPin, Heart, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { ListCheck, Tag, User } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const MobileBottomNav = () => {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState('coupons');
+    const pathname = usePathname();
+    const [activeTab, setActiveTab] = useState('');
 
     const navItems = [
-        { id: '/c/coupons', icon: Tag, label: 'COUPONS', bgColor: 'bg-yellow-300' },
-        { id: '/u/profile', icon: User, label: 'MY PROFILE', bgColor: 'bg-blue-300' }
+        { id: '/c/coupons', icon: Tag, label: 'COUPONS', bgColor: 'bg-yellow-200' },
+        { id: '/c/c', icon: ListCheck, label: 'MY COUPONS', bgColor: 'bg-red-200' },
+        { id: '/u/profile', icon: User, label: 'MY PROFILE', bgColor: 'bg-blue-200' },
     ];
+
+    // Update active tab based on current pathname
+    useEffect(() => {
+        // Check if the current path starts with any of our nav item paths
+        const matchingItem = navItems.find(item => 
+            pathname === item.id || pathname.startsWith(`${item.id}/`)
+        );
+        
+        if (matchingItem) {
+            setActiveTab(matchingItem.id);
+        }
+    }, [pathname]);
 
     const handleTabChange = (id) => {
         setActiveTab(id);
-        router.push(`${id}`);
+        router.push(id);
     }
 
     return (
@@ -24,7 +38,7 @@ const MobileBottomNav = () => {
                 {navItems.map((item) => (
                     <button
                         key={item.id}
-                        className={`flex flex-col items-center justify-center  px-4 font-black transition-transform ${
+                        className={`flex flex-col items-center justify-center px-4 font-black transition-transform ${
                             activeTab === item.id ? 'scale-105' : ''
                         }`}
                         onClick={() => handleTabChange(item.id)}

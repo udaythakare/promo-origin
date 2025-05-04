@@ -14,6 +14,7 @@ import {
     Filter as FilterIcon,
     MapPin
 } from 'lucide-react';
+import GlobalFilterSection from './GlobalFilterSection';
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -194,19 +195,12 @@ export default function Navbar() {
             <div className="px-4 py-3">
 
                 <div className="flex justify-between items-center">
-                    {/* Mobile menu button */}
-                    <button
-                        aria-label="Toggle mobile menu"
-                        className="md:hidden p-2 bg-yellow-400 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
-                        onClick={toggleMobileMenu}
-                    >
-                        <MenuIcon size={20} />
-                    </button>
+                
 
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/">
-                            <h1 className="text-lg font-black uppercase tracking-tight transform -rotate-1">CouponHub</h1>
+                            <h1 className="text-lg font-black uppercase tracking-tight transform -rotate-1">CouponStall</h1>
                         </Link>
                     </div>
 
@@ -228,13 +222,15 @@ export default function Navbar() {
                         )}
                     </div>
 
+                    
+
                     {/* Filters dropdown and Profile dropdown */}
                     <div className="flex items-center space-x-2">
                         {/* Filters dropdown */}
                         <div className="relative" ref={filtersRef}>
                             <button
                                 onClick={toggleFiltersDropdown}
-                                className="p-2 bg-green-400 border-2 border-black rounded-none font-bold text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
+                                className="p-2 bg-green-200 border-2 border-black rounded-none font-bold text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
                                 aria-label="Open filter menu"
                                 aria-expanded={filtersOpen}
                             >
@@ -248,44 +244,22 @@ export default function Navbar() {
 
                             {/* Filters dropdown menu */}
                             {filtersOpen && (
-                                <div className="absolute right-0 mt-2 w-64 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] py-1 z-50">
-                                    <div className="px-4 py-3 border-b-2 border-black bg-yellow-400">
-                                        <p className="text-sm font-black uppercase">Filter By Area</p>
-                                    </div>
-
-                                    <div className="px-3 py-2">
-                                        <button
-                                            onClick={() => handleAreaChange('')}
-                                            className={`w-full text-left px-3 py-2 text-sm font-bold hover:bg-yellow-300 ${selectedArea === '' ? 'bg-yellow-200' : ''}`}
-                                        >
-                                            ALL AREAS
-                                        </button>
-
-                                        {areas.map((area) => (
-                                            <button
-                                                key={area.id}
-                                                onClick={() => handleAreaChange(area.name)}
-                                                className={`w-full text-left px-3 py-2 text-sm font-bold hover:bg-yellow-300 flex items-center ${selectedArea === area.name ? 'bg-yellow-200' : ''}`}
-                                            >
-                                                <MapPin size={14} className="mr-2" />
-                                                {area.name.toUpperCase()}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {selectedArea && (
-                                        <div className="px-4 py-2 border-t-2 border-black">
-                                            <button
-                                                onClick={clearFilters}
-                                                className="w-full bg-red-400 text-black text-sm font-bold py-2 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all uppercase"
-                                            >
-                                                Clear Filter
-                                            </button>
-                                        </div>
-                                    )}
+                                <div className="absolute right-0 mt-2 w-72 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] py-1 z-50">
+                                  
+                                       <GlobalFilterSection />
+                                   
                                 </div>
                             )}
                         </div>
+
+                            {/* Mobile menu button */}
+                    <button
+                        aria-label="Toggle mobile menu"
+                        className="md:hidden p-2 bg-yellow-200 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
+                        onClick={toggleMobileMenu}
+                    >
+                        <MenuIcon size={20} />
+                    </button>
 
                         {/* Profile dropdown or Login buttons */}
                         {session && (
@@ -341,10 +315,10 @@ export default function Navbar() {
                         aria-modal="true"
                     >
                         {/* Background overlay */}
-                        <div className="absolute inset-0 bg-black bg-opacity-25" aria-hidden="true"></div>
+                        <div className="absolute inset-0 bg-black/25 backdrop-blur-xl" aria-hidden="true"></div>
 
                         {/* Menu panel */}
-                        <div className="absolute top-0 left-0 w-3/4 max-w-xs h-full bg-white border-r-4 border-black shadow-lg transform transition-all ease-in-out duration-300">
+                        <div className="absolute top-0 right-0 w-3/4 max-w-xs h-full bg-white border-l-4 border-black shadow-lg transform transition-all ease-in-out duration-300">
                             <div className="p-4 border-b-4 border-black bg-yellow-400">
                                 <div className="flex items-center justify-between">
                                     <h2 className="text-lg font-black uppercase tracking-tight">Menu</h2>
@@ -384,47 +358,7 @@ export default function Navbar() {
                                     </Link>
                                 )}
 
-                                {/* Filter by Area in mobile menu */}
-                                <div className="px-4 py-3 border-b-2 border-black">
-                                    <h3 className="text-base font-black uppercase mb-2">Filter By Area</h3>
-                                    <div className="bg-white border-2 border-black mb-2">
-                                        <button
-                                            onClick={() => {
-                                                handleAreaChange('');
-                                                setMobileMenuOpen(false);
-                                            }}
-                                            className={`w-full text-left px-3 py-2 text-sm font-bold ${selectedArea === '' ? 'bg-yellow-200' : ''}`}
-                                        >
-                                            ALL AREAS
-                                        </button>
-
-                                        {areas.map((area) => (
-                                            <button
-                                                key={area.id}
-                                                onClick={() => {
-                                                    handleAreaChange(area.name);
-                                                    setMobileMenuOpen(false);
-                                                }}
-                                                className={`w-full text-left px-3 py-2 text-sm font-bold flex items-center ${selectedArea === area.name ? 'bg-yellow-200' : ''}`}
-                                            >
-                                                <MapPin size={14} className="mr-2" />
-                                                {area.name.toUpperCase()}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {selectedArea && (
-                                        <button
-                                            onClick={() => {
-                                                clearFilters();
-                                                setMobileMenuOpen(false);
-                                            }}
-                                            className="w-full bg-red-400 text-black text-sm font-bold py-2 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all uppercase"
-                                        >
-                                            Clear Filter
-                                        </button>
-                                    )}
-                                </div>
+                               
 
                                 {/* User profile section in the mobile menu */}
                                 {session ? (

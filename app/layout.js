@@ -1,3 +1,4 @@
+import DotBackground from "@/components/layout/DotBackground";
 import "./globals.css";
 import { JetBrains_Mono } from "next/font/google";
 
@@ -15,7 +16,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${jetBrainsMono.variable} antialiased`}>
-        {children}
+        <DotBackground>
+          {children}
+        </DotBackground>
       </body>
     </html>
   );

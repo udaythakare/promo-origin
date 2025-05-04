@@ -46,7 +46,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activePage, setActivePage }) =>
             <div className="px-6 py-8">
                 <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                     <FiShoppingBag className="text-blue-300" size={24} />
-                    CouponHub
+                    CouponStall
                 </h1>
                 <p className="text-blue-200 text-sm">Vendor Portal</p>
             </div>
