@@ -29,90 +29,90 @@ const CouponAnalyticsTable = ({ coupons }) => {
     ];
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Coupon Analytics</h1>
+        <div className="space-y-8">
+            <h1 className="text-3xl font-black text-black bg-yellow-300 inline-block px-4 py-2 transform rotate-1 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">Coupon Analytics</h1>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg shadow p-4 border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-pink-300 rounded-none transform -rotate-1 p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                     <div className="flex flex-row items-center justify-between pb-2">
-                        <h3 className="text-sm font-medium text-gray-600">Total Available Coupons</h3>
-                        <Package className="h-4 w-4 text-gray-500" />
+                        <h3 className="text-sm font-bold text-black">Total Available Coupons</h3>
+                        <Package className="h-5 w-5 text-black" />
                     </div>
-                    <div className="text-2xl font-bold">{totalMaxClaims}</div>
+                    <div className="text-3xl font-black">{totalMaxClaims}</div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow p-4 border">
+                <div className="bg-blue-300 rounded-none transform rotate-1 p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                     <div className="flex flex-row items-center justify-between pb-2">
-                        <h3 className="text-sm font-medium text-gray-600">Total Claimed Coupons</h3>
-                        <Users className="h-4 w-4 text-gray-500" />
+                        <h3 className="text-sm font-bold text-black">Total Claimed Coupons</h3>
+                        <Users className="h-5 w-5 text-black" />
                     </div>
-                    <div className="text-2xl font-bold">{totalCurrentClaims}</div>
+                    <div className="text-3xl font-black">{totalCurrentClaims}</div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow p-4 border">
+                <div className="bg-green-300 rounded-none transform -rotate-1 p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                     <div className="flex flex-row items-center justify-between pb-2">
-                        <h3 className="text-sm font-medium text-gray-600">Total Redeemed Coupons</h3>
-                        <CheckCircle className="h-4 w-4 text-gray-500" />
+                        <h3 className="text-sm font-bold text-black">Total Redeemed Coupons</h3>
+                        <CheckCircle className="h-5 w-5 text-black" />
                     </div>
-                    <div className="text-2xl font-bold">{totalRedemptions}</div>
+                    <div className="text-3xl font-black">{totalRedemptions}</div>
                 </div>
             </div>
 
             {/* Responsive Table */}
-            <div className="overflow-x-auto rounded-md border bg-white">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="overflow-x-auto border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <table className="min-w-full">
+                    <thead className="bg-yellow-300">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider border-b-2 border-black">
                                 Title
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider border-b-2 border-black hidden md:table-cell">
                                 Description
                             </th>
-                            <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider border-b-2 border-black">
                                 Available
                             </th>
-                            <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider border-b-2 border-black">
                                 Claimed
                             </th>
-                            <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider border-b-2 border-black">
                                 Redeemed
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider border-b-2 border-black">
                                 Validity
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {coupons.map((coupon) => (
-                            <tr key={coupon.id}>
-                                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                    <tbody>
+                        {coupons.map((coupon, index) => (
+                            <tr key={coupon.id} className={index % 2 === 0 ? 'bg-purple-50' : 'bg-blue-50'}>
+                                <td className="px-6 py-4 whitespace-nowrap font-bold text-black border-b-2 border-black">
                                     {coupon.title}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-gray-500 hidden md:table-cell">
+                                <td className="px-6 py-4 whitespace-nowrap text-black hidden md:table-cell border-b-2 border-black">
                                     {coupon.description}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-gray-500 text-center">
+                                <td className="px-6 py-4 whitespace-nowrap text-black text-center border-b-2 border-black">
                                     {coupon.max_claims}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <td className="px-6 py-4 whitespace-nowrap text-center border-b-2 border-black">
                                     <button
                                         onClick={() => openModal(coupon, 'claims')}
-                                        className="text-blue-600 hover:underline font-medium"
+                                        className="bg-blue-400 text-black hover:bg-blue-500 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                                     >
                                         {coupon.current_claims}
                                     </button>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <td className="px-6 py-4 whitespace-nowrap text-center border-b-2 border-black">
                                     <button
                                         onClick={() => openModal(coupon, 'redemptions')}
-                                        className="text-blue-600 hover:underline font-medium"
+                                        className="bg-pink-400 text-black hover:bg-pink-500 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                                     >
                                         {coupon.current_redemption}
                                     </button>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-black border-b-2 border-black">
                                     {new Date(coupon.start_date).toLocaleDateString()} - {new Date(coupon.end_date).toLocaleDateString()}
                                 </td>
                             </tr>
@@ -124,14 +124,14 @@ const CouponAnalyticsTable = ({ coupons }) => {
             {/* Modal */}
             {isModalOpen && selectedCoupon && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full max-h-screen overflow-hidden">
-                        <div className="px-4 py-3 border-b flex justify-between items-center">
-                            <h3 className="font-medium text-lg">
+                    <div className="bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] rounded-none max-w-md w-full max-h-screen overflow-hidden transform rotate-1">
+                        <div className="px-4 py-3 bg-yellow-300 border-b-4 border-black flex justify-between items-center">
+                            <h3 className="font-black text-lg text-black">
                                 Users Who {modalType === 'claims' ? 'Claimed' : 'Redeemed'} "{selectedCoupon.title}"
                             </h3>
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="text-gray-500 hover:text-gray-700"
+                                className="bg-red-400 text-black hover:bg-red-500 p-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -139,20 +139,20 @@ const CouponAnalyticsTable = ({ coupons }) => {
                         <div className="p-4 max-h-96 overflow-y-auto">
                             {((modalType === 'claims' && selectedCoupon.current_claims > 0) ||
                                 (modalType === 'redemptions' && selectedCoupon.current_redemption > 0)) ? (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     {mockUsers.slice(0, modalType === 'claims' ?
                                         selectedCoupon.current_claims : selectedCoupon.current_redemption).map(user => (
-                                            <div key={user.id} className="p-3 rounded-md border">
-                                                <p className="font-medium">{user.name}</p>
-                                                <p className="text-sm text-gray-500">{user.email}</p>
-                                                <p className="text-xs text-gray-400">
+                                            <div key={user.id} className="p-3 border-3 border-black bg-purple-100 transform -rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                                <p className="font-bold text-black">{user.name}</p>
+                                                <p className="text-sm text-black">{user.email}</p>
+                                                <p className="text-xs text-black font-medium">
                                                     {modalType === 'claims' ? 'Claimed' : 'Redeemed'}: {new Date(user.claimed_at).toLocaleString()}
                                                 </p>
                                             </div>
                                         ))}
                                 </div>
                             ) : (
-                                <p className="text-center py-4 text-gray-500">
+                                <p className="text-center py-4 text-black font-bold">
                                     No {modalType === 'claims' ? 'claims' : 'redemptions'} yet
                                 </p>
                             )}
@@ -193,9 +193,9 @@ const Page = () => {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading coupon data...</p>
+                <div className="text-center bg-yellow-300 border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform rotate-2">
+                    <div className="animate-spin rounded-full h-12 w-12 border-8 border-black border-t-transparent mx-auto"></div>
+                    <p className="mt-4 text-black font-bold">Loading coupon data...</p>
                 </div>
             </div>
         );
@@ -204,12 +204,12 @@ const Page = () => {
     if (error) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                    <h2 className="text-lg font-medium text-red-800">Error Loading Data</h2>
-                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                <div className="bg-red-300 border-4 border-black rounded-none p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform -rotate-1">
+                    <h2 className="text-lg font-black text-black">Error Loading Data</h2>
+                    <p className="text-black font-bold mt-1">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-3 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-md text-sm"
+                        className="mt-4 px-4 py-2 bg-black hover:bg-gray-800 text-white font-bold rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] transform rotate-1"
                     >
                         Try Again
                     </button>
@@ -219,7 +219,7 @@ const Page = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 bg-orange-50">
             <CouponAnalyticsTable coupons={coupons} />
         </div>
     );

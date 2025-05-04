@@ -40,8 +40,6 @@ export default function ScanPage() {
             console.log(fetchedCouponData, "coupon data in scan page");
             console.log(fetchedUserData, "user data in scan page");
 
-
-
             setCouponData(fetchedCouponData);
             setUserData(fetchedUserData.user);
             setShowCouponCard(true);
@@ -67,20 +65,20 @@ export default function ScanPage() {
 
 
     return (
-        <main className="flex min-h-screen flex-col items-center p-4 bg-gray-50">
-            <h1 className="text-3xl font-bold mt-4 mb-8">QR Code Scanner</h1>
+        <main className="flex min-h-screen flex-col items-center p-6 bg-pink-200">
+            <h1 className="text-4xl font-black mt-6 mb-10 text-black tracking-tight transform -rotate-1">QR CODE SCANNER</h1>
 
             <QRScanner onDetected={handleQRDetected} />
 
             {loading && (
-                <div className="mt-6 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <div className="mt-8 flex items-center justify-center">
+                    <div className="animate-spin rounded-none h-16 w-16 border-4 border-black"></div>
                 </div>
             )}
 
             {showCouponCard && couponData && userData && (
-                <div className="mt-6 w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div className="relative w-full h-48 bg-gray-300">
+                <div className="mt-8 w-full max-w-md bg-cyan-300 rounded-none border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden transform rotate-1">
+                    <div className="relative w-full h-48 bg-gray-300 border-b-4 border-black">
                         {couponData.image_url && (
                             <img
                                 src={couponData.image_url}
@@ -95,58 +93,58 @@ export default function ScanPage() {
                     </div>
 
                     <div className="p-6">
-                        <h2 className="text-2xl font-bold text-gray-800">{couponData.title}</h2>
-                        <p className="text-gray-600 mt-1">{couponData.description}</p>
+                        <h2 className="text-3xl font-black text-black transform -rotate-1">{couponData.title}</h2>
+                        <p className="text-black font-bold mt-2">{couponData.description}</p>
 
-                        <div className="mt-4 space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Valid Until:</span>
-                                <span className="font-medium">
+                        <div className="mt-6 space-y-3">
+                            <div className="flex justify-between font-bold">
+                                <span className="text-black">Valid Until:</span>
+                                <span className="font-black bg-white px-2 py-1 border-2 border-black transform rotate-1">
                                     {new Date(couponData.end_date).toLocaleDateString()}
                                 </span>
                             </div>
 
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Coupon Type:</span>
-                                <span className="font-medium capitalize">
+                            <div className="flex justify-between font-bold">
+                                <span className="text-black">Coupon Type:</span>
+                                <span className="font-black bg-white px-2 py-1 border-2 border-black transform -rotate-1 capitalize">
                                     {couponData.coupon_type.replace(/_/g, ' ')}
                                 </span>
                             </div>
 
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Available Claims:</span>
-                                <span className="font-medium">
+                            <div className="flex justify-between font-bold">
+                                <span className="text-black">Available Claims:</span>
+                                <span className="font-black bg-white px-2 py-1 border-2 border-black transform rotate-1">
                                     {couponData.max_claims - couponData.current_claims} of {couponData.max_claims}
                                 </span>
                             </div>
 
                             {isRedeemed && (
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Status:</span>
-                                    <span className="font-medium text-red-500">
+                                <div className="flex justify-between font-bold">
+                                    <span className="text-black">Status:</span>
+                                    <span className="font-black bg-red-400 px-2 py-1 border-2 border-black transform -rotate-2">
                                         Already Redeemed
                                     </span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                            <h3 className="font-semibold text-gray-700">User Details</h3>
-                            <p className="text-gray-600">{userData.full_name}</p>
-                            <p className="text-gray-500 text-sm">{userData.email}</p>
+                        <div className="mt-6 pt-4 border-t-4 border-black">
+                            <h3 className="font-black text-xl text-black">User Details</h3>
+                            <p className="text-black font-bold mt-2">{userData.full_name}</p>
+                            <p className="text-black font-bold">{userData.email}</p>
                         </div>
 
                         {!isRedeemed ? (
                             <button
                                 onClick={handleAccept}
-                                className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
+                                className="mt-6 w-full bg-green-400 hover:bg-green-500 text-black font-black py-4 px-6 rounded-none border-4 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all text-xl uppercase"
                             >
-                                Accept
+                                Accept Coupon
                             </button>
                         ) : (
-                            <div className="mt-6 w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            <div className="mt-6 w-full bg-gray-400 text-black font-black py-4 px-6 rounded-none border-4 border-black flex justify-center items-center text-xl uppercase">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                                 Coupon Already Redeemed
                             </div>
@@ -155,9 +153,9 @@ export default function ScanPage() {
                 </div>
             )}
 
-            <div className="mt-8 text-center text-gray-600">
-                <p>This scanner works on both desktop and mobile devices.</p>
-                <p>Allow camera permissions when prompted to scan QR codes.</p>
+            <div className="mt-12 text-center">
+                <p className="text-black font-bold text-lg transform rotate-1">This scanner works on both desktop and mobile devices.</p>
+                <p className="text-black font-bold text-lg transform -rotate-1">Allow camera permissions when prompted to scan QR codes.</p>
             </div>
         </main>
     );

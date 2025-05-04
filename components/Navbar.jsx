@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getAddressDropdowns } from '@/actions/addressActions';
 import { fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
-import { 
-  Menu as MenuIcon, 
-  X as XIcon, 
-  User as UserIcon, 
-  LogOut as LogOutIcon, 
-  ChevronDown,
-  Filter as FilterIcon,
-  MapPin
+import {
+    Menu as MenuIcon,
+    X as XIcon,
+    User as UserIcon,
+    LogOut as LogOutIcon,
+    ChevronDown,
+    Filter as FilterIcon,
+    MapPin
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -25,7 +25,7 @@ export default function Navbar() {
     const [selectedArea, setSelectedArea] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    
+
     const profileRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const filtersRef = useRef(null);
@@ -36,7 +36,7 @@ export default function Navbar() {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setProfileOpen(false);
             }
-            
+
             if (mobileMenuOpen && mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
                 setMobileMenuOpen(false);
             }
@@ -45,7 +45,7 @@ export default function Navbar() {
                 setFiltersOpen(false);
             }
         }
-        
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -58,14 +58,14 @@ export default function Navbar() {
         const fetchSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             setSession(session);
-            
+
             if (session?.user) {
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('id', session.user.id)
                     .single();
-                
+
                 if (!error && data) {
                     setUser(data);
                 }
@@ -78,14 +78,14 @@ export default function Navbar() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, currentSession) => {
                 setSession(currentSession);
-                
+
                 if (currentSession?.user) {
                     const { data, error } = await supabase
                         .from('users')
                         .select('*')
                         .eq('id', currentSession.user.id)
                         .single();
-                    
+
                     if (!error && data) {
                         setUser(data);
                     }
@@ -175,7 +175,7 @@ export default function Navbar() {
     // Clear all filters
     const clearFilters = async () => {
         setSelectedArea('');
-        
+
         try {
             setLoading(true);
             const response = await fetchAllCoupons();
@@ -192,9 +192,10 @@ export default function Navbar() {
     return (
         <nav className="bg-white border-b-4 border-black">
             <div className="px-4 py-3">
+
                 <div className="flex justify-between items-center">
                     {/* Mobile menu button */}
-                    <button 
+                    <button
                         aria-label="Toggle mobile menu"
                         className="md:hidden p-2 bg-yellow-400 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                         onClick={toggleMobileMenu}
@@ -239,9 +240,9 @@ export default function Navbar() {
                             >
                                 <FilterIcon size={16} className="mr-1" />
                                 Filters
-                                <ChevronDown 
-                                    size={16} 
-                                    className={`ml-1 transition-transform duration-200 ${filtersOpen ? 'transform rotate-180' : ''}`} 
+                                <ChevronDown
+                                    size={16}
+                                    className={`ml-1 transition-transform duration-200 ${filtersOpen ? 'transform rotate-180' : ''}`}
                                 />
                             </button>
 
@@ -251,7 +252,7 @@ export default function Navbar() {
                                     <div className="px-4 py-3 border-b-2 border-black bg-yellow-400">
                                         <p className="text-sm font-black uppercase">Filter By Area</p>
                                     </div>
-                                    
+
                                     <div className="px-3 py-2">
                                         <button
                                             onClick={() => handleAreaChange('')}
@@ -259,7 +260,7 @@ export default function Navbar() {
                                         >
                                             ALL AREAS
                                         </button>
-                                        
+
                                         {areas.map((area) => (
                                             <button
                                                 key={area.id}
@@ -271,7 +272,7 @@ export default function Navbar() {
                                             </button>
                                         ))}
                                     </div>
-                                    
+
                                     {selectedArea && (
                                         <div className="px-4 py-2 border-t-2 border-black">
                                             <button
@@ -289,7 +290,7 @@ export default function Navbar() {
                         {/* Profile dropdown or Login buttons */}
                         {session && (
                             <div className="relative" ref={profileRef}>
-                                <button 
+                                <button
                                     onClick={toggleProfileDropdown}
                                     className="flex items-center p-2 bg-white border-2 border-black rounded-none hover:bg-gray-100 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                                     aria-label="Open user menu"
@@ -298,9 +299,9 @@ export default function Navbar() {
                                     <div className="h-6 w-6 rounded-none bg-black flex items-center justify-center">
                                         <UserIcon size={14} className="text-white" />
                                     </div>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`ml-1 transition-transform duration-200 ${profileOpen ? 'transform rotate-180' : ''}`} 
+                                    <ChevronDown
+                                        size={16}
+                                        className={`ml-1 transition-transform duration-200 ${profileOpen ? 'transform rotate-180' : ''}`}
                                     />
                                 </button>
 
@@ -311,8 +312,8 @@ export default function Navbar() {
                                             <p className="text-sm font-black uppercase">{user?.username || user?.full_name || 'User'}</p>
                                             <p className="text-xs font-bold truncate">{user?.email || session?.user?.email}</p>
                                         </div>
-                                        <Link 
-                                            href="/profile" 
+                                        <Link
+                                            href="/profile"
                                             className="block px-4 py-2 text-sm font-bold hover:bg-yellow-300 hover:text-black uppercase"
                                             onClick={() => setProfileOpen(false)}
                                         >
@@ -334,14 +335,14 @@ export default function Navbar() {
 
                 {/* Mobile menu, show/hide based on menu state */}
                 {mobileMenuOpen && (
-                    <div 
+                    <div
                         ref={mobileMenuRef}
                         className="fixed inset-0 z-40 md:hidden"
                         aria-modal="true"
                     >
                         {/* Background overlay */}
                         <div className="absolute inset-0 bg-black bg-opacity-25" aria-hidden="true"></div>
-                        
+
                         {/* Menu panel */}
                         <div className="absolute top-0 left-0 w-3/4 max-w-xs h-full bg-white border-r-4 border-black shadow-lg transform transition-all ease-in-out duration-300">
                             <div className="p-4 border-b-4 border-black bg-yellow-400">
@@ -356,33 +357,33 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="py-2">
-                                <Link href="/" 
+                                <Link href="/"
                                     className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     Home
                                 </Link>
-                                <Link href="/coupons" 
+                                <Link href="/coupons"
                                     className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:rotate-1 transition-all"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     Coupons
                                 </Link>
-                                <Link href="/about" 
+                                <Link href="/about"
                                     className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     About
                                 </Link>
                                 {session && (
-                                    <Link href="/my-coupons" 
+                                    <Link href="/my-coupons"
                                         className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:rotate-1 transition-all"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         My Coupons
                                     </Link>
                                 )}
-                                
+
                                 {/* Filter by Area in mobile menu */}
                                 <div className="px-4 py-3 border-b-2 border-black">
                                     <h3 className="text-base font-black uppercase mb-2">Filter By Area</h3>
@@ -396,7 +397,7 @@ export default function Navbar() {
                                         >
                                             ALL AREAS
                                         </button>
-                                        
+
                                         {areas.map((area) => (
                                             <button
                                                 key={area.id}
@@ -411,7 +412,7 @@ export default function Navbar() {
                                             </button>
                                         ))}
                                     </div>
-                                    
+
                                     {selectedArea && (
                                         <button
                                             onClick={() => {
@@ -424,7 +425,7 @@ export default function Navbar() {
                                         </button>
                                     )}
                                 </div>
-                                
+
                                 {/* User profile section in the mobile menu */}
                                 {session ? (
                                     <div className="border-t-4 border-black mt-2 pt-2 bg-red-400">

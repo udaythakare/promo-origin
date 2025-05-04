@@ -221,59 +221,42 @@ const QRScanner = ({ onDetected }) => {
             />
 
             <div className="flex flex-col items-center justify-center w-full max-w-lg mx-auto">
-                <div className="w-full p-4 bg-white rounded-lg shadow-md">
-                    <h2 className="text-2xl font-bold mb-4 text-center">QR Code Scanner</h2>
+                <div className="w-full p-6 bg-yellow-300 rounded-none border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <h2 className="text-3xl font-black mb-6 text-center tracking-tight">QR Code Scanner</h2>
 
                     {/* Error States */}
                     {!cameraSupported && (
-                        <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-md flex items-center gap-2">
-                            <AlertTriangle size={20} />
-                            <p>Your device or browser doesn't support camera access.</p>
+                        <div className="mb-6 p-4 bg-red-400 text-black rounded-none border-4 border-black flex items-center gap-3">
+                            <AlertTriangle size={24} className="text-black" />
+                            <p className="font-bold">Your device or browser doesn't support camera access.</p>
                         </div>
                     )}
 
                     {scriptError && (
-                        <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md flex items-center gap-2">
-                            <AlertTriangle size={20} />
-                            <p>Failed to load QR scanner library. Please refresh and try again.</p>
+                        <div className="mb-6 p-4 bg-red-400 text-black rounded-none border-4 border-black flex items-center gap-3">
+                            <AlertTriangle size={24} className="text-black" />
+                            <p className="font-bold">Failed to load QR scanner library. Please refresh and try again.</p>
                         </div>
                     )}
 
                     {/* Loading State */}
                     {!scriptLoaded && !scriptError && (
                         <div className="flex justify-center p-6">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                            <div className="animate-spin rounded-none h-16 w-16 border-4 border-black"></div>
                         </div>
                     )}
 
                     {/* Scanner Controls - Not Scanning */}
                     {scriptLoaded && !scanning && (
-                        <div className="flex flex-col items-center space-y-4">
+                        <div className="flex flex-col items-center space-y-6">
                             <button
                                 onClick={startScanner}
-                                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                className="flex items-center justify-center gap-3 px-6 py-4 bg-green-400 text-black font-black rounded-none border-4 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
                                 disabled={!scriptLoaded || !cameraSupported}
                             >
-                                <Camera size={24} />
-                                <span>Start Scanning</span>
+                                <Camera size={28} />
+                                <span className="text-xl">START SCANNING</span>
                             </button>
-
-                            {/* Result Display */}
-                            {/* {result && (
-                                <div className="mt-4 p-4 bg-gray-100 rounded-lg w-full">
-                                    <h3 className="font-semibold">Scanned Result:</h3>
-                                    <p className="break-all">{result}</p>
-
-                                    <div className="mt-2 flex justify-end">
-                                        <button
-                                            onClick={() => navigator.clipboard.writeText(result)}
-                                            className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-                                        >
-                                            Copy
-                                        </button>
-                                    </div>
-                                </div>
-                            )} */}
                         </div>
                     )}
 
@@ -284,20 +267,20 @@ const QRScanner = ({ onDetected }) => {
                             <div
                                 id="qr-reader"
                                 ref={scannerContainerRef}
-                                className="w-full max-w-md rounded-lg overflow-hidden"
+                                className="w-full max-w-md rounded-none border-4 border-black overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
                             ></div>
 
-                            <div className="mt-4">
+                            <div className="mt-6">
                                 <button
                                     onClick={stopScanner}
-                                    className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                    className="flex items-center justify-center gap-3 px-6 py-4 bg-red-400 text-black font-black rounded-none border-4 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
                                 >
-                                    <X size={18} />
-                                    <span>Stop Scanning</span>
+                                    <X size={28} />
+                                    <span className="text-xl">STOP SCANNING</span>
                                 </button>
                             </div>
 
-                            <p className="mt-4 text-center text-sm text-gray-600">
+                            <p className="mt-6 text-center text-lg font-bold">
                                 Position QR code within the frame to scan
                             </p>
                         </div>
