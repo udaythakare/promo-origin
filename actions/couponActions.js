@@ -314,7 +314,6 @@ export async function fetchUserClaimedCoupons() {
         return { success: false, error };
     }
 
-    console.log(data[0].coupons.businesses, 'this is the business data')
 
     return {
         success: true,
