@@ -294,3 +294,28 @@ export async function fetchUserCoupons(couponId) {
         coupons: data || [],
     };
 }
+
+export async function fetchUserClaimedCoupons() {
+    const userId = await getUserId();
+    if (!userId) {
+        return { success: false, message: "User not logged in" };
+    }
+
+    const { data, error } = await supabaseAdmin
+        .from("user_coupons")
+        .select("*, coupons(*, businesses(name))")
+        .eq("user_id", userId)
+        .eq("coupon_status", "claimed");
+
+    if (error) {
+        console.error("Error fetching user claimed coupons:", error);
+        return { success: false, error };
+    }
+
+    console.log(data[0].coupons.businesses, 'this is the business data')
+
+    return {
+        success: true,
+        coupons: data || [],
+    };
+}

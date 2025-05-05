@@ -67,7 +67,6 @@ export async function fetchUserCoupons() {
                 id,
                 title,
                 description,
-                code,
                 discount_type,
                 discount_value,
                 minimum_purchase,

@@ -11,7 +11,6 @@ import { ChevronRight, LogOut, MapPin, Settings, ShoppingBag, User } from 'lucid
 
 export default async function Page() {
     const userResult = await fetchUserData()
-    const userCouponsResult = await fetchUserCoupons()
     let userId = await getUserId();
     let userSessionData = await getSessionData();
 
@@ -20,7 +19,7 @@ export default async function Page() {
             <div className="min-h-screen flex flex-col items-center justify-center bg-yellow-100">
                 <div className="bg-white p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)]">
                     <p className="text-red-600 font-black">Error: User not logged in</p>
-                    <Link href="/api/auth/signin" 
+                    <Link href="/api/auth/signin"
                         className="mt-4 inline-block bg-blue-400 text-black font-bold px-4 py-2 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                         LOGIN HERE
                     </Link>
@@ -37,7 +36,7 @@ export default async function Page() {
                     <p className="mb-4 text-lg font-bold text-black">
                         Please login to view your coupons.
                     </p>
-                    <Link href="/api/auth/signin" 
+                    <Link href="/api/auth/signin"
                         className="inline-block bg-blue-400 text-black font-bold px-4 py-2 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                         LOGIN HERE
                     </Link>
@@ -47,7 +46,6 @@ export default async function Page() {
     }
 
     const user = userResult.user
-    const coupons = userCouponsResult.success ? userCouponsResult.coupons : []
 
     return (
         <div className="min-h-screen py-6">
@@ -114,52 +112,7 @@ export default async function Page() {
                     </div>
 
                     {/* Coupons section */}
-                    <div className="bg-blue-300 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden mb-20">
-                        <div className="p-4 border-b-4 border-black bg-blue-400">
-                            <h2 className="text-xl font-black text-black flex items-center">
-                                <ShoppingBag className="h-5 w-5 mr-2" />
-                                YOUR CLAIMED COUPONS
-                            </h2>
-                        </div>
 
-                        <div className="divide-y-4 divide-black">
-                            {coupons.length > 0 ? (
-                                coupons.map(coupon => (
-                                    <div key={coupon.id} className={`p-4 bg-white hover:bg-yellow-100 transition ${coupon.status === 'expired' ? 'opacity-60' : ''}`}>
-                                        <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center">
-                                            <div className="mb-2 xs:mb-0">
-                                                <span className="font-black text-base">{coupon.business}</span>
-                                                <div className="text-sm font-bold">Code: <span className="bg-black text-white px-2">{coupon.code}</span></div>
-                                            </div>
-                                            <div className="xs:text-right">
-                                                <div className="font-black text-lg bg-yellow-300 inline-block px-2 border-2 border-black">{coupon.discount}</div>
-                                                <div className="text-sm font-bold mt-1">
-                                                    {coupon.status === 'active' ? (
-                                                        <>Valid until {new Date(coupon.validUntil).toLocaleDateString()}</>
-                                                    ) : (
-                                                        <span className="bg-red-400 text-black px-2 py-1 border-2 border-black">EXPIRED</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="p-6 text-center bg-white">
-                                    <p className="font-black text-lg">You haven't claimed any coupons yet</p>
-                                    <div className="w-16 h-1 bg-black mx-auto my-3"></div>
-                                    <p className="font-bold">Find deals in your area now!</p>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="bg-yellow-300 p-4 text-center border-t-4 border-black">
-                            <Link href="/coupons" 
-                                className="inline-block bg-white text-black font-black px-4 py-2 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                                BROWSE AVAILABLE COUPONS
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
