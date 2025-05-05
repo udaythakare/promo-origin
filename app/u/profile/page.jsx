@@ -8,6 +8,8 @@ import { fetchUserCoupons } from '@/actions/couponActions'
 // import CouponsList from './components/CouponsList'
 import CouponsList from './components/CouponList'
 import { ChevronRight, LogOut, MapPin, Settings, ShoppingBag, User } from 'lucide-react'
+import { handleLogout } from '@/utils/authUtils'
+import LogoutButton from './components/LogoutButton'
 
 export default async function Page() {
     const userResult = await fetchUserData()
@@ -47,6 +49,7 @@ export default async function Page() {
 
     const user = userResult.user
 
+
     return (
         <div className="min-h-screen py-6">
             <div className="max-w-5xl mx-auto px-3">
@@ -67,10 +70,7 @@ export default async function Page() {
                                 <Settings className="h-5 w-5 mr-1" />
                                 <span className="hidden xs:inline">SETTINGS</span>
                             </button>
-                            <button className="bg-red-400 text-black font-bold px-3 py-2 border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center">
-                                <LogOut className="h-5 w-5 mr-1" />
-                                <span className="hidden xs:inline">LOGOUT</span>
-                            </button>
+                            <LogoutButton />
                         </div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@ export default async function Page() {
                         <div className="p-4 border-b-4 border-black bg-green-300">
                             <h2 className="text-xl font-black text-black flex items-center">
                                 <MapPin className="h-5 w-5 mr-2" />
-                                DELIVERY ADDRESS
+                                YOUR LOCATION
                             </h2>
                         </div>
 
@@ -115,6 +115,6 @@ export default async function Page() {
 
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

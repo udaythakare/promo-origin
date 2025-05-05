@@ -45,7 +45,7 @@ export async function fetchAllCoupons() {
 
     // If no user is logged in, return all coupons without is_claimed field
     if (!userId) {
-        const { data, error } = await supabaseAdmin.from("coupons").select("*");
+        const { data, error } = await supabaseAdmin.from("coupons").select("*, businesses(name)");
         if (error) {
             console.error("Error fetching coupons:", error);
             return { success: false, error };
@@ -58,12 +58,14 @@ export async function fetchAllCoupons() {
         // Fetch all coupons
         const { data: couponsData, error: couponsError } = await supabaseAdmin
             .from("coupons")
-            .select("*");
+            .select("*, businesses(name)");
 
         if (couponsError) {
             console.error("Error fetching coupons:", couponsError);
             return { success: false, error: couponsError };
         }
+
+        console.log(couponsData, '************************')
 
         // Fetch user's claimed coupons
         const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
@@ -140,7 +142,7 @@ export async function fetchAreaCoupons(areaName) {
         // Fetch all coupons for the specified businesses
         const { data: couponsData, error: couponsError } = await supabaseAdmin
             .from("coupons")
-            .select("*")
+            .select("*, businesses(name)")
             .in("business_id", businessIds);
         console.log(couponsData)
 
@@ -313,6 +315,30 @@ export async function fetchUserClaimedCoupons() {
     }
 
     console.log(data[0].coupons.businesses, 'this is the business data')
+
+    return {
+        success: true,
+        coupons: data || [],
+    };
+}
+
+export async function fetchUserRedeemedCoupons() {
+    const userId = await getUserId();
+    if (!userId) {
+        return { success: false, message: "User not logged in" };
+    }
+
+    const { data, error } = await supabaseAdmin
+        .from("user_coupons")
+        .select("*, coupons(*, businesses(name))")
+        .eq("user_id", userId)
+        .eq("coupon_status", "redeemed");
+
+    if (error) {
+        console.error("Error fetching user claimed coupons:", error);
+        return { success: false, error };
+    }
+
 
     return {
         success: true,
