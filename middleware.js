@@ -1,7 +1,5 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
-// import type { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
 
 // Define paths that should be accessible without authentication
 const publicPaths = [
@@ -31,9 +29,14 @@ export async function middleware(request) {
         return NextResponse.next();
     }
 
-    // Check for authentication token in cookies
+    // Check for authentication tokens in cookies
+    // Handle both production and development cookie formats
     const authToken = request.cookies.get('auth-token')?.value;
-    const sessionToken = request.cookies.get('next-auth.session-token')?.value;
+
+    // Check both the regular and __Secure- prefixed session tokens
+    const sessionToken =
+        request.cookies.get('next-auth.session-token')?.value ||
+        request.cookies.get('__Secure-next-auth.session-token')?.value;
 
     // If no auth token found, redirect to login
     if (!authToken && !sessionToken) {
