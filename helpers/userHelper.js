@@ -12,6 +12,15 @@ export async function getUserId() {
     return session.user.id
 }
 
+export async function getUser() {
+    const session = await getServerSession(options);
+    if (!session) {
+        return { msg: "user not logged in" }
+    }
+
+    return session.user
+}
+
 export async function getSessionData() {
     const session = await getServerSession(options);
     if (!session) {
