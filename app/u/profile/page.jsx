@@ -1,54 +1,41 @@
 // app/profile/page.js
-import Link from 'next/link'
-import React from 'react'
-import { fetchUserData } from './actions/userActions'
-import { getSessionData, getUserId } from '@/helpers/userHelper'
-import LocationSection from './components/LocationSection'
-import { fetchUserCoupons } from '@/actions/couponActions'
-// import CouponsList from './components/CouponsList'
-import CouponsList from './components/CouponList'
-import { ChevronRight, LogOut, MapPin, Settings, ShoppingBag, User } from 'lucide-react'
-import { handleLogout } from '@/utils/authUtils'
-import LogoutButton from './components/LogoutButton'
+import Link from 'next/link';
+import React from 'react';
+import { fetchUserData, fetchUserCoupons } from './actions/userActions';
+import { getSessionData, getUserId } from '@/helpers/userHelper';
+import LocationSection from './components/LocationSection';
+import CouponsList from './components/CouponList';
+import { ChevronRight, LogOut, MapPin, Settings, ShoppingBag, User } from 'lucide-react';
+import LogoutButton from './components/LogoutButton';
 
 export default async function Page() {
-    const userResult = await fetchUserData()
-    let userId = await getUserId();
-    let userSessionData = await getSessionData();
+    // Run all data fetches in parallel
+    const [userResult, sessionData] = await Promise.all([
+        fetchUserData(),
+        getSessionData(),
+    ]);
 
-    if (userId.msg) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-yellow-100">
-                <div className="bg-white p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)]">
-                    <p className="text-red-600 font-black">Error: User not logged in</p>
-                    <Link href="/api/auth/signin"
-                        className="mt-4 inline-block bg-blue-400 text-black font-bold px-4 py-2 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                        LOGIN HERE
-                    </Link>
-                </div>
-            </div>
-        )
-    }
 
-    // If not authenticated, prompt login
-    if (!userResult.success) {
+    console.log(userResult, sessionData, "****************** ");
+
+    // Login check
+    if (userResult.success === false) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-yellow-100">
                 <div className="bg-white p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)]">
                     <p className="mb-4 text-lg font-bold text-black">
-                        Please login to view your coupons.
+                        Please login to view your profile.
                     </p>
-                    <Link href="/api/auth/signin"
+                    <Link href="/login"
                         className="inline-block bg-blue-400 text-black font-bold px-4 py-2 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                         LOGIN HERE
                     </Link>
                 </div>
             </div>
-        )
+        );
     }
 
-    const user = userResult.user
-
+    const user = userResult.user;
 
     return (
         <div className="min-h-screen py-6">
@@ -78,7 +65,7 @@ export default async function Page() {
                 {/* Main content grid */}
                 <div className="grid grid-cols-1 gap-6">
                     {/* Business owner section */}
-                    {userSessionData.roles.includes('app_business_owner') && (
+                    {sessionData.roles?.includes('app_business_owner') && (
                         <div className="bg-yellow-500 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] p-5">
                             <h2 className="font-black text-xl mb-2 uppercase">Business Dashboard</h2>
                             <p className="mb-4 text-sm font-bold">Manage your business listings, promotions and analytics</p>
@@ -99,7 +86,7 @@ export default async function Page() {
                             </h2>
                         </div>
 
-                        <div className=" bg-white border-b-4 border-black">
+                        <div className="bg-white border-b-4 border-black">
                             <LocationSection userData={user} />
                         </div>
 
@@ -112,9 +99,21 @@ export default async function Page() {
                     </div>
 
                     {/* Coupons section */}
-
+                    {/* {couponsResult.success && couponsResult.coupons.length > 0 && (
+                        <div className="bg-purple-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
+                            <div className="p-4 border-b-4 border-black bg-purple-300">
+                                <h2 className="text-xl font-black text-black flex items-center">
+                                    <ShoppingBag className="h-5 w-5 mr-2" />
+                                    YOUR COUPONS
+                                </h2>
+                            </div>
+                            <div className="bg-white">
+                                <CouponsList coupons={couponsResult.coupons} />
+                            </div>
+                        </div>
+                    )} */}
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

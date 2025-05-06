@@ -9,9 +9,6 @@ export const options = {
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            // callbackUrl: (process.env.NODE_ENV === "development"
-            //     ? process.env.NEXTAUTH_URL_DEVELOPMENT
-            //     : process.env.NEXTAUTH_URL_PRODUCTION) + '/api/auth/callback/google'
         }),
         CredentialsProvider({
             name: 'Credentials',
