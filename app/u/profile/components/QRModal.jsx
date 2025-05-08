@@ -2,6 +2,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
+import { X } from 'lucide-react';
 
 export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
     const modalRef = useRef(null);
@@ -33,26 +34,24 @@ export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
                 ref={modalRef}
-                className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl"
+                className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-md w-full"
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-blue-700">Redeem Coupon</h2>
+                <div className="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
+                    <h2 className="text-2xl font-black uppercase tracking-tight">Redeem Coupon</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-blue-700 transition-colors"
+                        className="p-2 bg-white border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all"
                         aria-label="Close modal"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X size={20} />
                     </button>
                 </div>
 
                 <div className="flex flex-col items-center">
-                    <div className="bg-white p-4 rounded-lg border-2 border-blue-200">
+                    <div className="bg-white p-4 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         <QRCodeCanvas
                             value={qrValue}
                             size={250}
@@ -60,11 +59,11 @@ export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
                         />
                     </div>
 
-                    <div className="mt-4 text-center">
-                        <p className="text-gray-600 mb-2">{couponTitle}</p>
-                        <p className="text-gray-500 text-sm mb-4">Show this QR code to the store staff</p>
+                    <div className="mt-6 text-center">
+                        <p className="text-xl font-bold mb-2">{couponTitle}</p>
+                        <p className="text-gray-600 mb-6">Show this QR code to the store staff</p>
 
-                        {/* <button
+                        <button
                             onClick={() => {
                                 const canvas = document.querySelector('canvas');
                                 const url = canvas.toDataURL('image/png');
@@ -73,10 +72,10 @@ export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
                                 link.href = url;
                                 link.click();
                             }}
-                            className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors w-full md:w-auto"
+                            className="px-6 py-3 bg-blue-100 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
                         >
                             Download QR Code
-                        </button> */}
+                        </button>
                     </div>
                 </div>
             </div>

@@ -10,7 +10,7 @@ const MobileBottomNav = () => {
     const [activeTab, setActiveTab] = useState('');
 
     const navItems = [
-        { id: '/c/coupons', icon: Tag, label: 'COUPONS', bgColor: 'bg-yellow-200' },
+        { id: '/coupons', icon: Tag, label: 'COUPONS', bgColor: 'bg-yellow-200' },
         { id: '/u/profile/my-coupons', icon: ListCheck, label: 'MY COUPONS', bgColor: 'bg-red-200' },
         { id: '/u/profile', icon: User, label: 'MY PROFILE', bgColor: 'bg-blue-200' },
     ];
@@ -33,7 +33,7 @@ const MobileBottomNav = () => {
     }
 
     return (
-        <div className="fixed bottom-2 left-2 right-2 md:hidden z-50">
+        <div className="fixed bottom-2 left-2 right-2 md:hidden z-40">
             <div className="flex justify-between items-center p-2 bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0)]">
                 {navItems.map((item) => (
                     <button

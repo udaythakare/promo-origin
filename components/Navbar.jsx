@@ -163,8 +163,8 @@ export default function Navbar() {
             }
 
             // Navigate to coupons page if not already there
-            if (window.location.pathname !== '/c/coupons') {
-                router.push('/c/coupons');
+            if (window.location.pathname !== '/coupons') {
+                router.push('/coupons');
             }
         } catch (error) {
             console.error('Error fetching coupons by area:', error);
@@ -230,7 +230,7 @@ export default function Navbar() {
                         <div className="relative" ref={filtersRef}>
                             <button
                                 onClick={toggleFiltersDropdown}
-                                className="p-2 bg-green-200 border-2 border-black rounded-none font-bold text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
+                                className="p-2 bg-yellow-200 border-2 border-black rounded-none font-bold text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
                                 aria-label="Open filter menu"
                                 aria-expanded={filtersOpen}
                             >
@@ -244,22 +244,27 @@ export default function Navbar() {
 
                             {/* Filters dropdown menu */}
                             {filtersOpen && (
-                                <div className="absolute right-0 mt-2 w-72 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] py-1 z-50">
-
-                                    <GlobalFilterSection />
-
-                                </div>
+                                <>
+                                    {/* Dark overlay */}
+                                    <div 
+                                        className="fixed inset-0 bg-black/50 z-50"
+                                        onClick={() => setFiltersOpen(false)}
+                                    />
+                                    <div className="absolute right-0 mt-2 w-72 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] z-50">
+                                        <GlobalFilterSection />
+                                    </div>
+                                </>
                             )}
                         </div>
 
                         {/* Mobile menu button */}
-                        <button
+                        {/* <button
                             aria-label="Toggle mobile menu"
                             className="md:hidden p-2 bg-yellow-200 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                             onClick={toggleMobileMenu}
                         >
                             <MenuIcon size={20} />
-                        </button>
+                        </button> */}
 
                         {/* Profile dropdown or Login buttons */}
                         {session && (

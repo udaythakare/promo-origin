@@ -1,52 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Home, Tag, MapPin, Heart, User } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import { Home, LayoutDashboard, Ticket, QrCode, BarChart2, ArrowLeft } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const VendorBottomBar = () => {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState('coupons');
+    const pathname = usePathname();
 
     const navItems = [
-        { id: '/c/coupons', icon: MapPin, label: 'Home' },
-        { id: '/vendor/dashboard', icon: MapPin, label: 'Dashboard' },
-        { id: '/vendor/dashboard/coupons', icon: MapPin, label: 'Coupons' },
-        { id: '/vendor/dashboard/scan-coupon', icon: MapPin, label: 'Scan' },
-        { id: '/vendor/dashboard/analytics', icon: MapPin, label: 'Analytics' },
+        { id: '/u/profile', icon: ArrowLeft, label: 'profile', bgColor: 'bg-pink-400' },
+        { id: '/business/dashboard', icon: LayoutDashboard, label: 'Dashboard', bgColor: 'bg-yellow-400' },
+        { id: '/business/dashboard/coupons', icon: Ticket, label: 'Coupons', bgColor: 'bg-green-400' },
+        { id: '/business/dashboard/scan-coupon', icon: QrCode, label: 'Scan', bgColor: 'bg-blue-400' },
     ];
 
     const handleTabChange = (id) => {
-        setActiveTab(id);
-        router.push(`${id}`);
+        router.push(id);
     }
 
-    return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-100 shadow-lg md:hidden z-50">
-            <div className="flex justify-around items-center">
-                {navItems.map((item) => (
-                    <button
-                        key={item.id}
-                        className={`flex flex-col items-center justify-center py-2 px-3 w-1/5 relative ${activeTab === item.id ? 'text-blue-600' : 'text-gray-500'
-                            }`}
-                        onClick={() => handleTabChange(item.id)}
-                    >
-                        {activeTab === item.id && (
-                            <motion.div
-                                layoutId="bottomNavIndicator"
-                                className="absolute top-0 h-1 w-12 bg-blue-600 rounded-b-md"
-                                initial={false}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            />
-                        )}
+    const isActive = (path) => pathname === path;
 
-                        <item.icon size={20} className={activeTab === item.id ? 'text-blue-600' : 'text-gray-500'} />
-                        <span className={`text-xs mt-1 ${activeTab === item.id ? 'font-medium' : ''}`}>
-                            {item.label}
-                        </span>
-                    </button>
-                ))}
+    return (
+        <div className="fixed bottom-4 left-4 right-4 md:hidden z-50">
+            <div className="flex justify-between items-center p-2 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)]">
+                {navItems.map((item) => {
+                    const active = isActive(item.id);
+                    return (
+                        <button
+                            key={item.id}
+                            className={`flex flex-col items-center justify-center px-2 py-1.5 w-1/4 font-black transition-all duration-200
+                                ${active ? 'scale-105' : 'hover:scale-105'}`}
+                            onClick={() => handleTabChange(item.id)}
+                        >
+                            <div className={`
+                                ${active ? item.bgColor : 'bg-white'} 
+                                p-1.5 border-2 border-black rounded-none
+                                ${active ? 'shadow-[4px_4px_0px_0px_rgba(0,0,0)]' : 'hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)]'}
+                                transition-all duration-200
+                                transform hover:-translate-y-1 active:translate-y-0
+                            `}>
+                                <item.icon size={18} className="text-black" />
+                            </div>
+                            <span className={`text-[10px] mt-1.5 font-bold uppercase tracking-wider
+                                ${active ? 'bg-black text-white px-1.5 py-0.5 border-2 border-black' : 'text-black'}`}>
+                                {item.label}
+                            </span>
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

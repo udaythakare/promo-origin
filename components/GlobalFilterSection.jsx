@@ -125,7 +125,7 @@ const GlobalFilterSection = () => {
     }, []);
 
     return (
-        <div className="bg-green-400 sticky top-0 z-10 p-4 border-b-6 border-black">
+        <div className="bg-green-200 sticky top-0 z-10 p-4 border-b-6 border-black">
             <div className="container mx-auto">
                 <div className="flex justify-between items-start sm:items-center">
                     <h2 className="text-xl font-black text-black mb-2 sm:mb-0">FIND COUPONS</h2>

@@ -265,7 +265,7 @@ export async function claimCoupon(couponId) {
 
 
     revalidatePath("/u/profile");
-    revalidatePath("/c/coupons");
+    revalidatePath("/coupons");
 
 
 

@@ -128,7 +128,7 @@ const RedeemedCoupons = ({ data }) => {
             </div>
 
             <div className="bg-yellow-300 p-4 text-center border-t-4 border-black">
-                <button onClick={() => router.push("/c/coupons")} className="inline-block bg-white text-black font-black px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                <button onClick={() => router.push("/coupons")} className="inline-block bg-white text-black font-black px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                     BROWSE AVAILABLE COUPONS
                 </button>
             </div>

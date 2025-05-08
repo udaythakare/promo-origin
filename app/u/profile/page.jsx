@@ -60,7 +60,7 @@ export default async function Page() {
                         <div className="bg-yellow-500 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] p-5">
                             <h2 className="font-black text-xl mb-2 uppercase">Business Dashboard</h2>
                             <p className="mb-4 text-sm font-bold">Manage your business listings, promotions and analytics</p>
-                            <Link href="/vendor/dashboard"
+                            <Link href="/business/dashboard"
                                 className="flex items-center justify-between bg-white text-black font-black px-4 py-3 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                                 MANAGE YOUR BUSINESS
                                 <ChevronRight className="h-5 w-5" />
