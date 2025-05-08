@@ -98,10 +98,12 @@ export async function fetchUserCoupons() {
 
 export async function updateUserLocation(locationData) {
     try {
-        const userId = await getAuthenticatedUserId();
+        const userId = await getUserId();
         if (!userId) {
             return { success: false, message: 'Login first' };
         }
+
+        console.log(userId, 'this is userId in updateUserLocation');
 
         // Validate in one step with early return
         const requiredFields = ['address', 'city', 'state', 'postal_code'];
@@ -122,7 +124,6 @@ export async function updateUserLocation(locationData) {
                     postal_code: locationData.postal_code,
                     is_primary: true,
                     area: locationData.area || null,
-                    updated_at: new Date().toISOString()
                 },
                 { onConflict: 'user_id' }
             );
