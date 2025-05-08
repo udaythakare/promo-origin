@@ -7,6 +7,7 @@ export default function RegisterPage() {
     const [form, setForm] = useState({ fullname: '', mobile_number: '', email: '', password: '', confirm: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,15 +15,19 @@ export default function RegisterPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSuccessMessage('');
+
+        // Validate passwords match
         if (form.password !== form.confirm) {
             setError('Passwords do not match');
             return;
         }
+
         setLoading(true);
 
         try {
             // Step 1: Register the user
-            const res = await fetch('/api/register-user', {
+            const regRes = await fetch('/api/register-user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -33,35 +38,78 @@ export default function RegisterPage() {
                 }),
             });
 
-            const data = await res.json();
-            if (data.success) {
-                // Step 2: Generate token and send magic link email
-                const emailRes = await fetch('/api/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: form.email,
-                        subject: 'Verify your account',
-                        message: `<p>Click the link below to verify your account:</p>
-                              <a href="${process.env.WEB_URL}/verify?token=${data.token}">Verify Account</a>`
-                    })
-                });
+            const regData = await regRes.json();
 
-                const emailData = await emailRes.json();
-                console.log('Email sent:', emailData.message);
+            // if (regData.success) {
+            //     // Step 2: Generate token and send magic link email using Resend
+            //     const verificationUrl = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/verify?token=${regData.token}`;
 
-                router.push('/login');
-            } else {
-                setError(data.message || 'Something went wrong');
-            }
+            //     const emailRes = await fetch('/api/send-email', {
+            //         method: 'POST',
+            //         headers: { 'Content-Type': 'application/json' },
+            //         body: JSON.stringify({
+            //             email: form.email,
+            //             subject: 'Verify your Coupon Stall account',
+            //             message: `
+            //                 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            //                     <div style="text-align: center; margin-bottom: 20px;">
+            //                         <h1 style="display: inline-block; margin: 0;">
+            //                             <span style="background-color: #f472b6; padding: 5px 10px; display: inline-block; transform: rotate(1deg);">Coupon</span>
+            //                             <span style="background-color: #22d3ee; padding: 5px 10px; display: inline-block; transform: rotate(-1deg); margin-left: 5px;">Stall</span>
+            //                         </h1>
+            //                     </div>
+
+            //                     <div style="border: 3px solid #000; padding: 20px; background-color: #fff;">
+            //                         <h2 style="margin-top: 0;">Verify Your Email Address</h2>
+            //                         <p>Hello ${form.fullname},</p>
+            //                         <p>Thank you for registering with Coupon Stall. To complete your registration and verify your account, please click the button below:</p>
+
+            //                         <div style="text-align: center; margin: 30px 0;">
+            //                             <a href="${verificationUrl}" style="background-color: #4ade80; color: #000; font-weight: bold; text-transform: uppercase; padding: 12px 24px; text-decoration: none; border: 3px solid #000; box-shadow: 4px 4px 0 0 #000; display: inline-block;">
+            //                                 Verify My Account
+            //                             </a>
+            //                         </div>
+
+            //                         <p>If the button doesn't work, you can also click on the link below or copy and paste it into your browser:</p>
+            //                         <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+
+            //                         <p>This verification link will expire in 24 hours.</p>
+
+            //                         <p>If you didn't create an account with Coupon Stall, please ignore this email.</p>
+            //                     </div>
+
+            //                     <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
+            //                         <p>&copy; ${new Date().getFullYear()} Coupon Stall. All rights reserved.</p>
+            //                     </div>
+            //                 </div>
+            //             `
+            //         })
+            //     });
+
+            //     const emailData = await emailRes.json();
+
+            //     if (emailData.message === 'Email sent successfully') {
+            //         setSuccessMessage('Registration successful! Please check your email to verify your account.');
+            //         // Clear form
+            //         setForm({ fullname: '', mobile_number: '', email: '', password: '', confirm: '' });
+
+            //         // Redirect to login after 5 seconds
+            //         setTimeout(() => {
+            //             router.push('/login');
+            //         }, 5000);
+            //     } else {
+            //         setError('Account created but failed to send verification email. Please contact support.');
+            //     }
+            // } else {
+            //     setError(regData.message || 'Registration failed');
+            // }
         } catch (err) {
             console.error(err);
-            setError('An error occurred');
+            setError('An error occurred during registration');
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-yellow-100 p-2 font-mono">
@@ -79,6 +127,12 @@ export default function RegisterPage() {
                 {error && (
                     <div className="bg-red-100 border-2 border-red-500 p-2 mb-3 text-red-600 text-sm font-medium">
                         {error}
+                    </div>
+                )}
+
+                {successMessage && (
+                    <div className="bg-green-100 border-2 border-green-500 p-2 mb-3 text-green-600 text-sm font-medium">
+                        {successMessage}
                     </div>
                 )}
 

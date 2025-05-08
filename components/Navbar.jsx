@@ -195,7 +195,7 @@ export default function Navbar() {
             <div className="px-4 py-3">
 
                 <div className="flex justify-between items-center">
-                
+
 
                     {/* Logo */}
                     <div className="flex items-center">
@@ -222,7 +222,7 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    
+
 
                     {/* Filters dropdown and Profile dropdown */}
                     <div className="flex items-center space-x-2">
@@ -245,21 +245,21 @@ export default function Navbar() {
                             {/* Filters dropdown menu */}
                             {filtersOpen && (
                                 <div className="absolute right-0 mt-2 w-72 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] py-1 z-50">
-                                  
-                                       <GlobalFilterSection />
-                                   
+
+                                    <GlobalFilterSection />
+
                                 </div>
                             )}
                         </div>
 
-                            {/* Mobile menu button */}
-                    <button
-                        aria-label="Toggle mobile menu"
-                        className="md:hidden p-2 bg-yellow-200 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
-                        onClick={toggleMobileMenu}
-                    >
-                        <MenuIcon size={20} />
-                    </button>
+                        {/* Mobile menu button */}
+                        <button
+                            aria-label="Toggle mobile menu"
+                            className="md:hidden p-2 bg-yellow-200 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
+                            onClick={toggleMobileMenu}
+                        >
+                            <MenuIcon size={20} />
+                        </button>
 
                         {/* Profile dropdown or Login buttons */}
                         {session && (
@@ -349,6 +349,14 @@ export default function Navbar() {
                                 >
                                     About
                                 </Link>
+
+                                <Link href="/v/onboard-form"
+                                    className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Become a Seller
+                                </Link>
+
                                 {session && (
                                     <Link href="/my-coupons"
                                         className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:rotate-1 transition-all"
@@ -358,7 +366,7 @@ export default function Navbar() {
                                     </Link>
                                 )}
 
-                               
+
 
                                 {/* User profile section in the mobile menu */}
                                 {session ? (
