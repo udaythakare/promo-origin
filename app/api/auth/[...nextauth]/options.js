@@ -255,8 +255,8 @@ export const options = {
 
 
     pages: {
-        signIn: '/auth/signin',
-        error: '/auth/error',
+        signIn: '/api/auth/signin',
+        error: '/api/auth/error',
     },
     debug: process.env.NODE_ENV !== 'production',
 };
