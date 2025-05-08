@@ -64,7 +64,7 @@ export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
                         <p className="text-gray-600 mb-2">{couponTitle}</p>
                         <p className="text-gray-500 text-sm mb-4">Show this QR code to the store staff</p>
 
-                        <button
+                        {/* <button
                             onClick={() => {
                                 const canvas = document.querySelector('canvas');
                                 const url = canvas.toDataURL('image/png');
@@ -76,7 +76,7 @@ export default function QRModal({ isOpen, onClose, qrValue, couponTitle }) {
                             className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors w-full md:w-auto"
                         >
                             Download QR Code
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>

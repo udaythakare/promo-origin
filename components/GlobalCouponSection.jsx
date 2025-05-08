@@ -10,6 +10,8 @@ import {
     saveCoupons,
     clearAllFilters
 } from '@/helpers/couponStateManager';
+import { joinAddress } from '@/utils/addressUtils';
+import QRModal from '@/app/u/profile/components/QRModal';
 
 const GlobalCouponSection = () => {
     const [coupons, setCoupons] = useState([]);
@@ -18,6 +20,8 @@ const GlobalCouponSection = () => {
     const [claimingCoupons, setClaimingCoupons] = useState({});
     const [selectedArea, setSelectedArea] = useState('');
     const [session, setSession] = useState(true); // Assuming user is logged in by default
+    const [isQROpen, setIsQROpen] = useState(false);
+    const [selectedCoupon, setSelectedCoupon] = useState(null);
 
     // Load data from localStorage and set up event listeners
     useEffect(() => {
@@ -171,9 +175,11 @@ const GlobalCouponSection = () => {
         }
     };
 
-    const showQrCode = (couponId) => {
+    const showQrCode = (coupon) => {
         // Implement QR code display functionality
-        alert(`Showing QR code for coupon ${couponId}`);
+        // alert(`Showing QR code for coupon ${couponId}`);
+        setIsQROpen(true);
+        setSelectedCoupon(coupon)
     };
 
     const toggleDetails = (couponId) => {
@@ -183,6 +189,9 @@ const GlobalCouponSection = () => {
     const getProgressBarWidth = (current, max) => {
         return `${Math.min((current / max) * 100, 100)}%`;
     };
+
+
+    console.log(coupons, 'this is coupons')
 
     return (
         <div className="container mx-auto py-6 px-4">
@@ -281,11 +290,13 @@ const GlobalCouponSection = () => {
                                         </p>
                                         <p className="text-sm text-black font-bold flex items-center gap-2">
                                             <span className="bg-black text-white px-2 py-1">LOCATION:</span>
-                                            <span>{coupon?.businesses?.address || 'Contact store for details'}</span>
+                                            <span>{joinAddress(coupon?.businesses?.business_locations[0]) || 'Contact store for details'}</span>
                                         </p>
                                     </div>
                                 </div>
                             )}
+
+
 
                             <div className="flex justify-between items-center mb-4">
                                 <button
@@ -318,7 +329,7 @@ const GlobalCouponSection = () => {
                                     </button>
 
                                     <button
-                                        onClick={() => showQrCode(coupon.id)}
+                                        onClick={() => showQrCode(coupon)}
                                         className="bg-white text-black font-black py-3 px-4 uppercase border-3 border-black 
                                                 hover:bg-gray-100 shadow-[3px_3px_0px_0px_rgba(0,0,0)] 
                                                 hover:shadow-none hover:translate-x-1 hover:translate-y-1 
@@ -358,6 +369,11 @@ const GlobalCouponSection = () => {
                     );
                 })}
             </div>
+
+            {isQROpen && (
+                <QRModal isOpen={isQROpen} onClose={() => setIsQROpen(false)} qrValue={JSON.stringify({ userId: selectedCoupon.user_id, couponId: selectedCoupon.id })} couponTitle={selectedCoupon.title} />
+            )}
+
         </div>
     )
 }

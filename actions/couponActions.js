@@ -58,12 +58,13 @@ export async function fetchAllCoupons() {
         // Fetch all coupons
         const { data: couponsData, error: couponsError } = await supabaseAdmin
             .from("coupons")
-            .select("*, businesses(name)");
+            .select("*, businesses(name, business_locations(*)) ");
 
         if (couponsError) {
             console.error("Error fetching coupons:", couponsError);
             return { success: false, error: couponsError };
         }
+
 
         console.log(couponsData, '************************')
 
