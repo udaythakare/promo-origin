@@ -13,7 +13,7 @@ export default async function LocationSection({ userData }) {
             // Forward the cookies from the incoming request to your API
             Cookie: cookies().toString()
         },
-        cache: 'no-store' // Ensure fresh data
+        cache: 'no-cache' // Ensure fresh data
     });
 
     // Parse the JSON response
@@ -28,7 +28,7 @@ export default async function LocationSection({ userData }) {
             // Forward the cookies from the incoming request to your API
             Cookie: cookies().toString()
         },
-        cache: 'no-store' // Ensure fresh data
+        cache: 'no-cache' // Ensure fresh data
     });
     const dropDownData = await response2.json();
 
