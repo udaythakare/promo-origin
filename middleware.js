@@ -1,7 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 
-// Define paths that should be accessible without authenticatio
+// Define paths that should be accessible without authenticati
 const publicPaths = [
     '/login',
     '/register',
