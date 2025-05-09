@@ -1,6 +1,5 @@
-// app/coupons/components/CouponActions.tsx (Client Component)
+// CouponActions.tsx - Neo-Brutalism style
 'use client';
-
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -12,27 +11,26 @@ export default function CouponActions({ couponId }) {
 
     return (
         <>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
                 <Link
                     href={`/business/dashboard/coupons/${couponId}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="bg-blue-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-blue-500 transition-colors"
                 >
-                    View
+                    VIEW
                 </Link>
                 <Link
                     href={`/business/dashboard/coupons/edit/${couponId}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="bg-yellow-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-yellow-500 transition-colors"
                 >
-                    Edit
+                    EDIT
                 </Link>
                 <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    className="bg-red-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-red-500 transition-colors"
                 >
-                    Delete
+                    DELETE
                 </button>
             </div>
-
             {showDeleteModal && (
                 <DeleteCouponModal
                     couponId={couponId}

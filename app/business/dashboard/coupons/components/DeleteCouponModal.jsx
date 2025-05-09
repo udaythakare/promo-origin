@@ -15,6 +15,7 @@ export default function DeleteCouponModal({
     const handleDelete = async () => {
         setIsDeleting(true);
         try {
+            console.log(couponId, 'this is coupon id delete modal')
             await deleteCoupon(couponId);
             router.refresh();
             onClose();

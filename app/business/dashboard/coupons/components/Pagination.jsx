@@ -1,5 +1,5 @@
+// Pagination.tsx - Neo-Brutalism style
 'use client';
-
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
 export default function Pagination({
@@ -24,7 +24,6 @@ export default function Pagination({
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxPagesToShow = 5;
-
         let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
         let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
@@ -35,46 +34,51 @@ export default function Pagination({
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
         return pageNumbers;
     };
 
     return (
         <div className="flex justify-center">
-            <nav className="inline-flex shadow-sm rounded-md">
+            <nav className="inline-flex">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className={`px-3 py-1 rounded-l-md border ${currentPage <= 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-blue-600 hover:bg-blue-50'
+                    className={`px-4 py-2 border-4 border-black font-bold ${currentPage <= 1
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-purple-400 text-black hover:bg-purple-500 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all'
                         }`}
                 >
-                    Previous
+                    PREV
                 </button>
 
-                {getPageNumbers().map((page) => (
-                    <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-1 border-t border-b ${currentPage === page
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-blue-600 hover:bg-blue-50'
-                            }`}
-                    >
-                        {page}
-                    </button>
-                ))}
+                <div className="hidden sm:flex">
+                    {getPageNumbers().map((page) => (
+                        <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-4 py-2 border-t-4 border-b-4 border-r-4 border-black font-bold ${currentPage === page
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-purple-200 text-black hover:bg-purple-300'
+                                }`}
+                        >
+                            {page}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex sm:hidden items-center px-4 py-2 border-t-4 border-b-4 border-r-4 border-black bg-purple-200 font-bold">
+                    {currentPage} / {totalPages}
+                </div>
 
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
-                    className={`px-3 py-1 rounded-r-md border ${currentPage >= totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-blue-600 hover:bg-blue-50'
+                    className={`px-4 py-2 border-4 border-black font-bold ${currentPage >= totalPages
+                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                            : 'bg-purple-400 text-black hover:bg-purple-500 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all'
                         }`}
                 >
-                    Next
+                    NEXT
                 </button>
             </nav>
         </div>

@@ -4,11 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import VendorInfoSection from './components/VendorInfoSection';
-import AddressSection from './components/AddressSection';
-import SubmitSection from './components/SubmitSection';
-import FormProgress from './components/FormProgress';
-import { insertVendorOnboardApplication } from './actions/onboardActions';
+import { getCategories, insertVendorOnboardApplication } from './actions/onboardActions';
 import { getAddressDropdowns } from '@/actions/addressActions';
 
 export default function VendorOnboardingPage() {
@@ -18,7 +14,8 @@ export default function VendorOnboardingPage() {
     const [areaData, setAreaData] = useState([]);
     const [cityData, setCityData] = useState([]);
     const [stateData, setStateData] = useState([]);
-    
+    const [categories, setCategories] = useState([]);
+
     useEffect(() => {
         const fetchDropDownData = async () => {
             const response = await getAddressDropdowns();
@@ -30,6 +27,15 @@ export default function VendorOnboardingPage() {
                 alert(response.message);
             }
         }
+
+        const fetchCategories = async () => {
+            const response = await getCategories();
+            console.log(response, 'this is categor')
+            if (response.success) {
+                setCategories(response.data || []);
+            }
+        }
+        fetchCategories();
         fetchDropDownData();
     }, [])
 
@@ -44,7 +50,8 @@ export default function VendorOnboardingPage() {
         city: '',
         state: '',
         postal_code: '',
-        country: ''
+        country: '',
+        area: ''
     });
 
     const handleInputChange = (e) => {
@@ -105,7 +112,7 @@ export default function VendorOnboardingPage() {
                 transition={{ duration: 0.5 }}
                 className="max-w-4xl mx-auto"
             >
-              
+
 
                 {/* Main Form Container */}
                 <motion.div
@@ -147,6 +154,7 @@ export default function VendorOnboardingPage() {
                                 <VendorInfoNeoBrutalist
                                     formData={formData}
                                     handleInputChange={handleInputChange}
+                                    categories={categories}
                                 />
                             </motion.div>
                         )}
@@ -185,7 +193,7 @@ export default function VendorOnboardingPage() {
 }
 
 // Neo-brutalist styled components
-function VendorInfoNeoBrutalist({ formData, handleInputChange }) {
+function VendorInfoNeoBrutalist({ formData, handleInputChange, categories }) {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
@@ -211,7 +219,7 @@ function VendorInfoNeoBrutalist({ formData, handleInputChange }) {
                     required
                 ></textarea>
             </div>
-            
+
             <div className="space-y-2">
                 <label className="block text-lg font-bold">Business Category</label>
                 <select
@@ -222,11 +230,9 @@ function VendorInfoNeoBrutalist({ formData, handleInputChange }) {
                     required
                 >
                     <option value="">Select a category</option>
-                    <option value="1">Food & Beverages</option>
-                    <option value="2">Retail</option>
-                    <option value="3">Fashion</option>
-                    <option value="4">Electronics</option>
-                    <option value="5">Services</option>
+                    {categories.map(category => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
                 </select>
             </div>
 
@@ -287,6 +293,22 @@ function AddressNeoBrutalist({ formData, handleInputChange, areaData, cityData, 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
+                    <label className="block text-lg font-bold">Area</label>
+                    <select
+                        name="area"
+                        value={formData.area}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border-4 border-black bg-white focus:ring-0 focus:outline-none focus:border-blue-500 shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
+                        required
+                    >
+                        <option value="">Select Area</option>
+                        {areaData.map(area => (
+                            <option key={area.id} value={area.name}>{area.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
                     <label className="block text-lg font-bold">City</label>
                     <select
                         name="city"
@@ -297,7 +319,7 @@ function AddressNeoBrutalist({ formData, handleInputChange, areaData, cityData, 
                     >
                         <option value="">Select City</option>
                         {cityData.map(city => (
-                            <option key={city.id} value={city.id}>{city.name}</option>
+                            <option key={city.id} value={city.name}>{city.name}</option>
                         ))}
                     </select>
                 </div>
@@ -313,7 +335,7 @@ function AddressNeoBrutalist({ formData, handleInputChange, areaData, cityData, 
                     >
                         <option value="">Select State</option>
                         {stateData.map(state => (
-                            <option key={state.id} value={state.id}>{state.name}</option>
+                            <option key={state.id} value={state.name}>{state.name}</option>
                         ))}
                     </select>
                 </div>
@@ -332,17 +354,7 @@ function AddressNeoBrutalist({ formData, handleInputChange, areaData, cityData, 
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="block text-lg font-bold">Country</label>
-                    <input
-                        type="text"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border-4 border-black bg-white focus:ring-0 focus:outline-none focus:border-blue-500 shadow-[4px_4px_0px_0px_rgba(0,0,0)]"
-                        required
-                    />
-                </div>
+
             </div>
         </div>
     );
@@ -350,7 +362,7 @@ function AddressNeoBrutalist({ formData, handleInputChange, areaData, cityData, 
 
 function SubmitNeoBrutalist({ currentStep, isSubmitting, prevStep, nextStep, totalSteps }) {
     const commonButtonClasses = "px-8 py-3 font-bold uppercase border-4 border-black transform transition hover:-translate-y-1";
-    
+
     return (
         <div className="flex justify-between mt-8">
             {currentStep > 1 ? (

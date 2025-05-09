@@ -257,3 +257,34 @@ export async function insertVendorOnboardApplication(formData) {
         };
     }
 }
+
+export async function getCategories() {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from("business_categories")
+            .select("*")
+            .order("name", { ascending: true });
+
+        if (error) {
+            console.error("Error fetching categories:", error);
+            return {
+                success: false,
+                message: "Failed to fetch categories. Please try again later.",
+                status: 500
+            };
+        }
+
+        return {
+            success: true,
+            data: data || [],
+            status: 200
+        };
+    } catch (error) {
+        console.error("Server action error:", error);
+        return {
+            success: false,
+            message: "An unexpected error occurred. Please try again later.",
+            status: 500
+        };
+    }
+}

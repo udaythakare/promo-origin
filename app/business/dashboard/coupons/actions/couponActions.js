@@ -37,13 +37,10 @@ export async function getUserBusinesses() {
 
 // Create a new coupon
 export async function createCoupon(formData) {
-    console.log('reached here')
     const session = await getServerSession(options);
-
     if (!session?.user?.id) {
         return { error: 'Unauthorized' };
     }
-
     try {
         // First verify that the user owns this business
         const { data: business, error: businessError } = await supabase
@@ -52,11 +49,9 @@ export async function createCoupon(formData) {
             .eq('id', formData.business_id)
             .eq('user_id', session.user.id)
             .single();
-
         if (businessError || !business) {
             return { error: 'Unauthorized access to this business' };
         }
-
         // Create the coupon
         const { data: coupon, error: couponError } = await supabase
             .from('coupons')
@@ -67,45 +62,17 @@ export async function createCoupon(formData) {
                 start_date: formData.start_date,
                 end_date: formData.end_date,
                 is_active: formData.is_active,
-                image_url: formData.image_url,
+                image_url: formData.image_url || null,
                 coupon_type: formData.coupon_type,
-                max_claims: formData.max_uses || null,
-                user_id: session?.user?.id
+                redeem_duration: formData.redeem_duration || null,
+                max_claims: formData.max_claims || null,
+                user_id: session.user.id
             })
             .select('id')
             .single();
-
         if (couponError) throw couponError;
 
-        // Handle location-specific coupons
-        if (!formData.applies_to_all_locations && formData.location_ids?.length > 0) {
-            const locationRecords = formData.location_ids.map(locationId => ({
-                coupon_id: coupon.id,
-                business_location_id: locationId
-            }));
-
-            const { error: locationsError } = await supabase
-                .from('coupon_locations')
-                .insert(locationRecords);
-
-            if (locationsError) throw locationsError;
-        }
-
-        // Handle tags if present
-        if (formData.tag_ids?.length > 0) {
-            const tagRecords = formData.tag_ids.map(tagId => ({
-                coupon_id: coupon.id,
-                tag_id: tagId
-            }));
-
-            const { error: tagsError } = await supabase
-                .from('coupon_tag_relations')
-                .insert(tagRecords);
-
-            if (tagsError) throw tagsError;
-        }
-
-        revalidatePath('/coupons');
+        revalidatePath('/business/dashboard/coupons');
         return { success: true, id: coupon.id };
     } catch (error) {
         console.error('Error creating coupon:', error);
@@ -113,10 +80,14 @@ export async function createCoupon(formData) {
     }
 }
 
-// Update an existing coupon
 export async function updateCoupon(id, formData) {
-    const session = await getServerSession(options);
+    console.log(id, 'this is coupon id');
+    console.log('Received date values:', {
+        start_date: formData.start_date,
+        end_date: formData.end_date
+    });
 
+    const session = await getServerSession(options);
     if (!session?.user?.id) {
         return { error: 'Unauthorized' };
     }
@@ -134,71 +105,40 @@ export async function updateCoupon(id, formData) {
             return { error: 'Unauthorized access to this coupon' };
         }
 
+        // Format dates properly before saving to database
+        // Ensure dates are in the correct format for PostgreSQL
+        let formattedData = {
+            ...formData,
+            start_date: formatDateForDatabase(formData.start_date),
+            end_date: formatDateForDatabase(formData.end_date)
+        };
+
+        console.log('Formatted for database:', {
+            start_date: formattedData.start_date,
+            end_date: formattedData.end_date
+        });
+
         // Update the coupon
         const { error: updateError } = await supabase
             .from('coupons')
             .update({
-                title: formData.title,
-                description: formData.description || null,
-                start_date: formData.start_date,
-                end_date: formData.end_date,
-                is_active: formData.is_active,
-                image_url: formData.image_url,
-                coupon_type: formData.coupon_type,
-                max_claims: formData.max_uses || null,
-                user_id: session?.user?.id
+                title: formattedData.title,
+                description: formattedData.description || null,
+                start_date: formattedData.start_date,
+                end_date: formattedData.end_date,
+                is_active: formattedData.is_active,
+                image_url: formattedData.image_url || null,
+                coupon_type: formattedData.coupon_type,
+                redeem_duration: formattedData.redeem_duration || null,
+                max_claims: formattedData.max_claims || null,
+                user_id: session.user.id
             })
             .eq('id', id);
 
         if (updateError) throw updateError;
 
-        // Handle location-specific coupons
-        // First, delete existing locations
-        // const { error: deleteLocationsError } = await supabase
-        //     .from('coupon_locations')
-        //     .delete()
-        //     .eq('coupon_id', id);
+        revalidatePath('/business/dashboard/coupons/edit/[id]', 'layout');
 
-        // if (deleteLocationsError) throw deleteLocationsError;
-
-        // // Then add new ones if needed
-        // if (!formData.applies_to_all_locations && formData.location_ids?.length > 0) {
-        //     const locationRecords = formData.location_ids.map(locationId => ({
-        //         coupon_id: id,
-        //         business_location_id: locationId
-        //     }));
-
-        //     const { error: insertLocationsError } = await supabase
-        //         .from('coupon_locations')
-        //         .insert(locationRecords);
-
-        //     if (insertLocationsError) throw insertLocationsError;
-        // }
-
-        // // Handle tags
-        // // First, delete existing tags
-        // const { error: deleteTagsError } = await supabase
-        //     .from('coupon_tag_relations')
-        //     .delete()
-        //     .eq('coupon_id', id);
-
-        // if (deleteTagsError) throw deleteTagsError;
-
-        // // Then add new ones if needed
-        // if (formData.tag_ids?.length > 0) {
-        //     const tagRecords = formData.tag_ids.map(tagId => ({
-        //         coupon_id: id,
-        //         tag_id: tagId
-        //     }));
-
-        //     const { error: insertTagsError } = await supabase
-        //         .from('coupon_tag_relations')
-        //         .insert(tagRecords);
-
-        //     if (insertTagsError) throw insertTagsError;
-        // }
-
-        revalidatePath('/coupons');
         return { success: true };
     } catch (error) {
         console.error('Error updating coupon:', error);
@@ -206,7 +146,52 @@ export async function updateCoupon(id, formData) {
     }
 }
 
-// Get locations for a business
+// Helper function to format dates for PostgreSQL
+function formatDateForDatabase(dateValue) {
+    if (!dateValue) return null;
+
+    // Handle various input formats
+    let dateObj;
+
+    if (typeof dateValue === 'string') {
+        // If it's an ISO string like "2025-05-09T21:00:00.000Z"
+        if (dateValue.endsWith('Z') || dateValue.includes('+')) {
+            dateObj = new Date(dateValue);
+        }
+        // If it's a format like "2025-05-09 21:00:00"
+        else if (dateValue.includes(' ')) {
+            dateObj = new Date(dateValue.replace(' ', 'T'));
+        }
+        // If it's a format like "2025-05-09T21:00:00"
+        else if (dateValue.includes('T')) {
+            dateObj = new Date(dateValue);
+        }
+        // Some other string format
+        else {
+            dateObj = new Date(dateValue);
+        }
+    } else {
+        // If it's already a Date object
+        dateObj = new Date(dateValue);
+    }
+
+    // Check if we have a valid date
+    if (isNaN(dateObj.getTime())) {
+        console.error('Invalid date encountered:', dateValue);
+        return null;
+    }
+
+    // Format for PostgreSQL: YYYY-MM-DD HH:MM:SS
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const hours = String(dateObj.getHours()).padStart(2, '0');
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export async function getBusinessLocations(businessId) {
     const session = await getServerSession(options);
 
@@ -394,8 +379,9 @@ export async function getAllCoupons(query = '', page = 1, limit = 10) {
         .from('coupons')
         .select('*', { count: 'exact' }) // select all fields + count
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
         .eq("user_id", userId)
+        .eq("is_active", true)
+        .range(offset, offset + limit - 1);
 
     if (query) {
         const lowerQuery = query.toLowerCase();
@@ -433,7 +419,7 @@ export async function getCouponById(id) {
 export async function deleteCoupon(id) {
     const { error } = await supabase
         .from('coupons')
-        .delete()
+        .update({ is_active: false })  // This should be an object, not two parameters
         .eq('id', id);
 
     if (error) {
