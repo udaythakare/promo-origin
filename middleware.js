@@ -42,7 +42,7 @@ export async function middleware(request) {
 
     // If no auth token found, redirect to login
     if (!authToken && !sessionToken) {
-        const loginUrl = new URL('/login', request.url);
+        const loginUrl = new URL('/auth/signin', request.url);
         // Add the original URL as a query parameter for redirect after login
         loginUrl.searchParams.set('callbackUrl', request.url);
         return NextResponse.redirect(loginUrl);
