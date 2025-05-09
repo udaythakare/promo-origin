@@ -138,3 +138,49 @@ export async function updateUserLocation(locationData) {
         return { success: false, error: error.message };
     }
 }
+
+export async function updateUserPersonalInfo(personalInfo) {
+    try {
+        const userId = await getUserId();
+        if (!userId) {
+            return { success: false, message: 'Login first' };
+        }
+
+        // Validate required fields
+        const requiredFields = ['username', 'full_name', 'mobile_number'];
+        const missingField = requiredFields.find(field => !personalInfo[field]);
+        if (missingField) {
+            return { success: false, error: `${missingField} is required` };
+        }
+
+        // Validate mobile number format
+        const mobileNumberPattern = /^\d{10}$/;
+        if (!mobileNumberPattern.test(personalInfo.mobile_number)) {
+            toast.error('Mobile number must be exactly 10 digits')
+            setIsSubmitting(false)
+            return
+        }
+
+        // Update user information in the database
+        const { error } = await supabaseAdmin
+            .from('users')
+            .update(
+                {
+                    id: userId,
+                    mobile_number: personalInfo.mobile_number,
+                    username: personalInfo.username,
+                    full_name: personalInfo.full_name,
+                },
+            )
+            .eq('id', userId);
+
+        if (error) {
+            throw new Error(`Database error: ${error.message}`);
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating user personal info:', error);
+        return { success: false, error: error.message };
+    }
+}

@@ -68,7 +68,8 @@ export const options = {
                     id: user.id,
                     email: user.email,
                     username: user.username,
-                    roles: roles
+                    roles: roles,
+                    mobile_number: user.mobile_number || "" // Add mobile_number here
                 };
             }
         })
@@ -156,6 +157,7 @@ export const options = {
 
                         // Update the NextAuth user object with our database ID
                         user.id = existingUser.id;
+                        user.mobile_number = existingUser.mobile_number || ""; // Ensure mobile_number is added
                     } else {
                         // If not found, create a new user
                         // Generate a unique username from email
@@ -170,7 +172,8 @@ export const options = {
                                 email: user.email,
                                 username: username,
                                 password: '', // OAuth users don't need passwords
-                                created_at: new Date().toISOString()
+                                created_at: new Date().toISOString(),
+                                mobile_number: "" // Initialize with empty mobile number
                             }])
                             .select('*')
                             .single();
@@ -200,6 +203,7 @@ export const options = {
 
                         // Update the NextAuth user object with our database ID
                         user.id = newUser.id;
+                        user.mobile_number = ""; // Set default empty mobile number
                     }
 
                     // Get user roles from the database
@@ -226,11 +230,11 @@ export const options = {
         },
 
         async jwt({ token, user, account, profile }) {
-            console.log(token, 'this is token')
             if (user) {
                 token.id = user.id;
                 token.username = user.username;
                 token.roles = user.roles || [];
+                token.mobile_number = user.mobile_number || ""; // Add mobile_number to token
 
                 if (account) {
                     token.provider = account.provider;
@@ -245,6 +249,7 @@ export const options = {
                 session.user.username = token.username;
                 session.user.roles = token.roles || [];
                 session.user.provider = token.provider;
+                session.user.mobile_number = token.mobile_number || ""; // Add mobile_number to session
 
                 // Set primary role for backward compatibility
                 session.user.primaryRole = session.user.roles.length > 0 ? session.user.roles[0] : null;

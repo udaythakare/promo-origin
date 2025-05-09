@@ -15,6 +15,7 @@ export default async function LocationSection({ userData }) {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
+                Cookie: cookies().toString()
             },
         });
 
@@ -36,6 +37,9 @@ export default async function LocationSection({ userData }) {
             cache: 'no-store' // Ensure fresh data
         });
         const dropDownData = await response2.json();
+
+        console.log(dropDownData, '*******************');
+        console.log(locationData, '*******************');
 
         return (
             <div className="max-w-xl mx-auto">

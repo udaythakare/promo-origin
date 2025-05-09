@@ -4,12 +4,14 @@ import React from 'react'
 import { fetchUserData } from './actions/userActions'
 import { getSessionData, getUser, getUserId } from '@/helpers/userHelper'
 import LocationSection from './components/LocationSection'
-import { ChevronRight, MapPin, Settings, User } from 'lucide-react'
+import { ChevronRight, IdCard, MapPin, Settings, User } from 'lucide-react'
 import LogoutButton from './components/LogoutButton'
+import PersonalInfoSection from './components/PersonalInfoSection'
 
 export default async function Page() {
     // const userResult = await fetchUserData()
     const user = await getUser();
+    console.log(user, ` '*******************');`)
     // let userId = await getUserId();
     // let userSessionData = await getSessionData();
 
@@ -67,6 +69,26 @@ export default async function Page() {
                             </Link>
                         </div>
                     )}
+
+                    <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
+                        <div className="p-4 border-b-4 border-black bg-green-300">
+                            <h2 className="text-xl font-black text-black flex items-center">
+                                <IdCard className="h-5 w-5 mr-2" />
+                                PERSONAL INFO
+                            </h2>
+                        </div>
+
+                        <div className=" bg-white border-b-4 border-black">
+                            <PersonalInfoSection userData={user} />
+                        </div>
+
+                        <div className="bg-green-200 p-4 text-sm">
+                            <p className="flex items-start font-bold">
+                                <span className="text-black mr-2 text-lg font-black">✓</span>
+                                <span>Your address is used to show you relevant deals and delivery options in your area.</span>
+                            </p>
+                        </div>
+                    </div>
 
                     {/* Delivery info section */}
                     <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
