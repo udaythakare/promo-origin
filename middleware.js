@@ -13,13 +13,16 @@ const publicPaths = [
     '/static',
     '/images',
     '/auth',
-    '/manfiest.json',
+    '/manifest.json',
+    '/sw.js',
+    '/workbox-',
+    '/icons',
 ];
 
 // Helper function to check if the current path is public
 function isPublicPath(path) {
     return publicPaths.some(publicPath =>
-        path === publicPath || path.startsWith(`${publicPath}/`)
+        path === publicPath || path.startsWith(`${publicPath}/`) || path.startsWith(publicPath)
     );
 }
 
@@ -61,7 +64,11 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
+         * - manifest.json (PWA manifest)
+         * - sw.js (service worker)
+         * - workbox- (workbox files)
+         * - icons (all icons)
          */
-        '/((?!api/auth|_next/static|_next/image|_next/webpack|favicon.ico).*)',
+        '/((?!api/auth|_next/static|_next/image|_next/webpack|favicon.ico|manifest.json|sw.js|icons|workbox-).*)',
     ],
 };
