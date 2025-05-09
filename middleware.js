@@ -12,7 +12,8 @@ const publicPaths = [
     '/favicon.ico',
     '/static',
     '/images',
-    '/auth'
+    '/auth',
+    '/manfiest.json',
 ];
 
 // Helper function to check if the current path is public
