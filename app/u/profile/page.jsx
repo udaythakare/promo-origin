@@ -34,7 +34,7 @@ export default async function Page() {
         <div className="min-h-screen py-6">
             <div className="max-w-5xl mx-auto px-3">
                 {/* Header with user info */}
-                <div className="bg-blue-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] p-4 mb-6">
+                <div className="bg-gray-100 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] p-4 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center space-x-3 mb-3 sm:mb-0">
                             <div className="bg-white rounded-full p-2 border-3 border-black">

@@ -11,10 +11,10 @@ export default async function CouponsPage({
     const currentPage = Number(searchParams?.page) || 1;
 
     return (
-        <div className="max-w-7xl mx-auto p-6 bg-yellow-50">
+        <div className="max-w-7xl mx-auto pb-40">
             {/* Header section with offset shadow */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                <h1 className="text-3xl font-black text-blue-900 mb-4 sm:mb-0 relative inline-block">
+                <h1 className="text-2xl font-black text-blue-900 mb-4 sm:mb-0 relative inline-block">
                     <span className="relative z-10">COUPON MANAGEMENT</span>
                     <div className="absolute bottom-0 left-0 w-full h-3 bg-pink-500 -z-10"></div>
                 </h1>
@@ -27,7 +27,7 @@ export default async function CouponsPage({
             </div>
 
             {/* Main content area */}
-            <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <div className="">
                 <Suspense fallback={<CouponsListSkeleton />}>
                     <CouponsList query={query} currentPage={currentPage} />
                 </Suspense>
