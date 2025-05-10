@@ -11,7 +11,7 @@ import PersonalInfoSection from './components/PersonalInfoSection'
 export default async function Page() {
     // const userResult = await fetchUserData()
     const user = await getUser();
-    console.log(user, ` '*******************');`)
+    // console.log(user, ` '*******************');`)
     // let userId = await getUserId();
     // let userSessionData = await getSessionData();
 

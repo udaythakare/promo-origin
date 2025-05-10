@@ -41,7 +41,7 @@ const vendorFormSchema = z.object({
 //         const userId = session?.user?.id;
 //         const userEmail = session?.user?.email;
 
-//         console.log(typeof formData.category_id, "category_id")
+//         // console.log(typeof formData.category_id, "category_id")
 
 //         // Validate form data
 //         const validationResult = vendorFormSchema.safeParse(formData);

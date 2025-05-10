@@ -124,7 +124,7 @@ export default function BusinessForm({ business, locations = [], categories, isE
 
     // Function to geocode a specific location
     const geocodeLocation = async (index) => {
-        console.log('entered in geocode location')
+        // // // console.log('entered in geocode location')
         const location = businessLocations[index];
 
         if (!location.address || !location.city || !location.state || !location.postal_code) {
@@ -144,7 +144,7 @@ export default function BusinessForm({ business, locations = [], categories, isE
                 location.country
             );
 
-            console.log(coordinates, 'this is coordinates')
+            // // console.log(coordinates, 'this is coordinates')
 
             if (coordinates) {
                 const updatedLocations = [...businessLocations];
@@ -155,7 +155,7 @@ export default function BusinessForm({ business, locations = [], categories, isE
                 };
                 setBusinessLocations(updatedLocations);
 
-                console.log(businessLocations, 'this is business location')
+                // // console.log(businessLocations, 'this is business location')
 
                 // Clear any geocoding errors
                 if (geocodingErrors[index]) {
@@ -236,7 +236,7 @@ export default function BusinessForm({ business, locations = [], categories, isE
             }
 
 
-            console.log('entered here')
+            // // console.log('entered here')
 
             // Geocode the locations if needed
             toast.loading('Geocoding addresses...', { id: 'geocoding' });

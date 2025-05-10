@@ -30,7 +30,7 @@ export default function VendorOnboardingPage() {
 
         const fetchCategories = async () => {
             const response = await getCategories();
-            console.log(response, 'this is categor')
+            // console.log(response, 'this is categor')
             if (response.success) {
                 setCategories(response.data || []);
             }

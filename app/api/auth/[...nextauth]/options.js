@@ -196,7 +196,7 @@ export const options = {
                             console.error('Error assigning role:', roleError);
                         }
 
-                        console.log('New user created:', newUser.id);
+                        // // console.log('New user created:', newUser.id);
 
                         await logLogin(newUser.id, 'success');
                         dbUserId = newUser.id;

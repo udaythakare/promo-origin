@@ -71,7 +71,7 @@ export default function CouponContainer({
                 const queryString = params.toString();
                 const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
-                console.log('**************************')
+                // console.log('**************************')
 
                 // Use router.replace to update the URL without a full page reload
                 // router.replace(newUrl);

@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 export async function GET() {
     try {
         const userId = await getUserId();
-        console.log(userId)
+        // // console.log(userId)
         if (!userId) {
             return NextResponse.json({ success: false, message: 'User not logged in' }, { status: 401 });
         }
@@ -17,7 +17,7 @@ export async function GET() {
             .eq('coupon_status', 'claimed');
 
 
-        console.log(data, '************')
+        // // console.log(data, '************')
 
         if (error) {
             console.error('Error fetching claimed coupons:', error);

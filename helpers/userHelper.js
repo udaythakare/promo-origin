@@ -47,6 +47,9 @@ export async function getUserData(userId) {
 }
 
 export async function getCouponStatus(couponId, userId) {
+
+    console.log(couponId, userId, "coupon id and user id in get coupon status");
+    // console.log('************************************************************')
     const { data, error } = await supabaseAdmin
         .from("user_coupons")
         .select("*")
@@ -54,9 +57,10 @@ export async function getCouponStatus(couponId, userId) {
         .eq("user_id", userId)
         .single();
 
+
     if (error) {
         console.error("Error fetching coupon status:", error);
-        return { success: false, error };
+        return { success: false, error }
     }
 
     return { success: true, couponStatus: data };

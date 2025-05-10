@@ -19,7 +19,7 @@ export default async function PersonalInfoSection({ userData }) {
         }
 
         const userData = await response1.json();
-        console.log(userData, '*******************');
+        // console.log(userData, '*******************');
         return (
             <div className="max-w-xl mx-auto">
                 <PersonalInfoForm

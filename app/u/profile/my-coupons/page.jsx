@@ -36,7 +36,7 @@ const page = async () => {
     const claimedJson = await claimedRes.json()
     const redeemedJson = await redeemedRes.json()
 
-    console.log(claimedJson, 'claimedJson')
+    // console.log(claimedJson, 'claimedJson')
 
     // 4️⃣ Render components
     return (

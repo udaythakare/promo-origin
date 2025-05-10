@@ -17,7 +17,7 @@ export const handleLogout = async ({
     try {
         if (showFeedback) {
             // You can implement your UI feedback here (loading state, toast notification, etc.)
-            console.log("Logging out...");
+            // console.log("Logging out...");
         }
 
         // Sign out the user using NextAuth/Auth.js
@@ -33,7 +33,7 @@ export const handleLogout = async ({
         window.location.href = redirectUrl;
 
         if (showFeedback) {
-            console.log("Logout successful");
+            // console.log("Logout successful");
         }
     } catch (error) {
         console.error("Logout failed:", error);

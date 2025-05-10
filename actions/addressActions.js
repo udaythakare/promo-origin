@@ -19,7 +19,7 @@ export async function getAddressDropdowns() {
         return { success: false, error: stateError };
     }
 
-    console.log(areaData, cityData, stateData, "Address Dropdowns Data")
+    // // console.log(areaData, cityData, stateData, "Address Dropdowns Data")
 
     return {
         success: true,
@@ -51,7 +51,7 @@ export async function getUserLocationData() {
 // export async function getUserLocationData() {
 //     const res = await fetch('http://localhost:3000/api/profile/location-data',)
 //     const data = await res.json()
-//     console.log(data)
+//     // console.log(data)
 //     return {
 //         data
 //     };

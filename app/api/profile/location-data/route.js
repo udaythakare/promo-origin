@@ -25,7 +25,7 @@ export async function GET(request) {
 
         // Use the actual user ID from the session
         const userId = session.user.id;
-        console.log(userId, 'this is userid');
+        // // console.log(userId, 'this is userid');
 
         const { data, error } = await supabaseAdmin
             .from("user_locations")

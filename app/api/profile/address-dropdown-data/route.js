@@ -24,7 +24,7 @@ export async function GET(request) {
             return NextResponse.json({ success: false, error: stateError.message }, { status: 500 });
         }
 
-        console.log(areaData, cityData, stateData, "Address Dropdowns Data");
+        // // console.log(areaData, cityData, stateData, "Address Dropdowns Data");
 
         // Return successful response with all data
         return NextResponse.json({

@@ -29,8 +29,8 @@ import { revalidatePath } from 'next/cache';
 //             .select("*")
 //             .eq("user_id", userId)
 
-//         console.log(userCoupons)
-//         console.log(data)
+//         // console.log(userCoupons)
+//         // console.log(data)
 
 //         return {
 //             success: true,
@@ -66,7 +66,7 @@ export async function fetchAllCoupons() {
         }
 
 
-        console.log(couponsData, '************************')
+        // // console.log(couponsData, '************************')
 
         // Fetch user's claimed coupons
         const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
@@ -105,7 +105,7 @@ export async function fetchAreaCoupons(areaName) {
         .select("business_id")
         .eq("area", areaName);
 
-    console.log(businessLocations)
+    // // console.log(businessLocations)
 
     if (locationsError) {
         console.error("Error fetching business locations:", locationsError);
@@ -145,7 +145,7 @@ export async function fetchAreaCoupons(areaName) {
             .from("coupons")
             .select("*, businesses(name)")
             .in("business_id", businessIds);
-        console.log(couponsData)
+        // // console.log(couponsData)
 
         if (couponsError) {
             console.error("Error fetching area coupons:", couponsError);
@@ -179,24 +179,120 @@ export async function fetchAreaCoupons(areaName) {
     }
 }
 
-export async function claimCoupon(couponId) {
+// export async function claimCoupon(couponId) {
+//     const userId = await getUserId();
+//     if (!userId) {
+//         return { success: false, message: "User not logged in" };
+//     }
+
+
+//     const { data: couponOwnerData, error: couponOwnerError } = await supabaseAdmin
+//         .from("coupons")
+//         .select("user_id")
+//         .eq("id", couponId)
+//         .single();
+
+//     if (couponOwnerError) {
+//         console.error("Error fetching coupon owner data:", couponOwnerError);
+//         return { success: false, error: couponOwnerError };
+//     }
+//     if (couponOwnerData.user_id === userId) {
+//         return { success: false, message: "You cannot claim your own coupon" };
+//     }
+
+//     // Check if user has already claimed this coupon
+//     const { data: existingCoupon, error: checkError } = await supabaseAdmin
+//         .from("user_coupons")
+//         .select("*")
+//         .eq("user_id", userId)
+//         .eq("coupon_id", couponId)
+//         .single();
+
+//     // If there was no error, it means the coupon was found
+//     if (existingCoupon) {
+//         return {
+//             success: false,
+//             message: "Coupon already claimed by this user",
+//             coupon: existingCoupon
+//         };
+//     }
+
+//     // If there was an error other than "not found", return it
+//     if (checkError && checkError.code !== "PGRST116") {
+//         console.error("Error checking existing coupon:", checkError);
+//         return { success: false, error: checkError };
+//     }
+
+//     // If we get here, the user hasn't claimed the coupon yet
+//     const { data, error } = await supabaseAdmin
+//         .from("user_coupons")
+//         .insert([{ user_id: userId, coupon_id: couponId, coupon_status: "claimed" }])
+//         .select("*")
+//         .single();
+
+//     if (error) {
+//         console.error("Error claiming coupon:", error);
+//         return { success: false, error };
+//     }
+
+
+//     // 2) fetch the current counter
+//     const { data: couponRow, error: fetchError } = await supabaseAdmin
+//         .from("coupons")
+//         .select("current_claims")
+//         .eq("id", couponId)
+//         .single();
+
+//     if (fetchError) {
+//         console.error("Error fetching coupon:", fetchError);
+//         return { success: false, error: fetchError };
+//     }
+
+//     // 3) write it back +1
+//     const { data: updatedCoupon, error: updError } = await supabaseAdmin
+//         .from("coupons")
+//         .update({
+//             current_claims: couponRow.current_claims + 1
+//         })
+//         .match({ id: couponId })
+//         .select("*")
+//         .single();
+
+//     if (updError) {
+//         console.error("Error updating coupon count:", updError);
+//         return { success: false, error: updError };
+//     }
+
+
+//     revalidatePath("/u/profile");
+//     revalidatePath("/coupons");
+
+
+
+//     return {
+//         success: true,
+//         coupon: data,
+//     };
+// }
+export async function claimCoupon(couponId, redeemMinutes = 0) {
     const userId = await getUserId();
     if (!userId) {
         return { success: false, message: "User not logged in" };
     }
 
-
-    const { data: couponOwnerData, error: couponOwnerError } = await supabaseAdmin
+    // Fetch coupon details including type and end_date
+    const { data: couponData, error: couponError } = await supabaseAdmin
         .from("coupons")
-        .select("user_id")
+        .select("user_id, coupon_type, end_date")
         .eq("id", couponId)
         .single();
 
-    if (couponOwnerError) {
-        console.error("Error fetching coupon owner data:", couponOwnerError);
-        return { success: false, error: couponOwnerError };
+    if (couponError) {
+        console.error("Error fetching coupon data:", couponError);
+        return { success: false, error: couponError };
     }
-    if (couponOwnerData.user_id === userId) {
+
+    if (couponData.user_id === userId) {
         return { success: false, message: "You cannot claim your own coupon" };
     }
 
@@ -223,10 +319,27 @@ export async function claimCoupon(couponId) {
         return { success: false, error: checkError };
     }
 
-    // If we get here, the user hasn't claimed the coupon yet
+    // Calculate expiration time based on coupon type
+    let remaining_claim_time = null;
+    let coupon_status = "claimed";
+
+    if (couponData.coupon_type === 'redeem_at_store' && redeemMinutes > 0) {
+        // For store redemption: Set short expiration time (current time + specified minutes)
+        remaining_claim_time = new Date(Date.now() + redeemMinutes * 60 * 1000).toISOString();
+    } else if (couponData.coupon_type === 'redeem_online' && couponData.end_date) {
+        // For online redemption: Valid until the coupon's end_date
+        remaining_claim_time = new Date(couponData.end_date).toISOString();
+    }
+
+    // Insert the new user_coupon with remaining claim time if applicable
     const { data, error } = await supabaseAdmin
         .from("user_coupons")
-        .insert([{ user_id: userId, coupon_id: couponId, coupon_status: "claimed" }])
+        .insert([{
+            user_id: userId,
+            coupon_id: couponId,
+            coupon_status: coupon_status,
+            remaining_claim_time: remaining_claim_time
+        }])
         .select("*")
         .single();
 
@@ -235,8 +348,7 @@ export async function claimCoupon(couponId) {
         return { success: false, error };
     }
 
-
-    // 2) fetch the current counter
+    // Update the claim counter
     const { data: couponRow, error: fetchError } = await supabaseAdmin
         .from("coupons")
         .select("current_claims")
@@ -248,7 +360,7 @@ export async function claimCoupon(couponId) {
         return { success: false, error: fetchError };
     }
 
-    // 3) write it back +1
+    // Increment the claims counter
     const { data: updatedCoupon, error: updError } = await supabaseAdmin
         .from("coupons")
         .update({
@@ -263,11 +375,8 @@ export async function claimCoupon(couponId) {
         return { success: false, error: updError };
     }
 
-
     revalidatePath("/u/profile");
     revalidatePath("/coupons");
-
-
 
     return {
         success: true,

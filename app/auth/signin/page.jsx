@@ -64,7 +64,7 @@ export default function SignInPage() {
             });
 
             if (result?.error) {
-                console.log(result?.error)
+                // // console.log(result?.error)
                 setError(result.error);
             } else if (result?.url) {
                 router.push(result.url);
@@ -81,18 +81,18 @@ export default function SignInPage() {
                     <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">CouponStall</h1>
                     <p className="text-xl font-bold text-gray-800">Your Ultimate Savings Destination</p>
                 </div>
-                
+
                 <div className="transform mb-6">
                     <div className="bg-yellow-400 border-4 border-black rounded-none p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
                         <h2 className="font-bold text-2xl uppercase text-center">SIGN IN</h2>
                         <p className="font-medium mb-4 text-center">Access your savings account</p>
-                        
+
                         {error && (
                             <div className="mb-4 p-3 bg-red-500 border-2 border-black text-white font-bold rounded-none text-sm transform -rotate-1">
                                 {error}
                             </div>
                         )}
-                        
+
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
                                 <div className="relative">
@@ -111,7 +111,7 @@ export default function SignInPage() {
                                     />
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -136,13 +136,13 @@ export default function SignInPage() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div className="flex justify-end">
                                 <a href="#" className="text-sm font-bold text-black underline hover:no-underline transform hover:-translate-y-1 transition-transform duration-200">
                                     Forgot your password?
                                 </a>
                             </div>
-                            
+
                             <button
                                 type="submit"
                                 disabled={isLoading}
@@ -151,13 +151,13 @@ export default function SignInPage() {
                                 {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
                             </button>
                         </form>
-                        
+
                         <div className="relative flex items-center mt-6">
                             <div className="flex-grow border-t-4 border-black"></div>
                             <span className="flex-shrink mx-4 text-black font-bold">OR</span>
                             <div className="flex-grow border-t-4 border-black"></div>
                         </div>
-                        
+
                         <button
                             type="button"
                             onClick={handleGoogleSignIn}
@@ -170,7 +170,7 @@ export default function SignInPage() {
                         </button>
                     </div>
                 </div>
-                
+
                 <div className="text-center">
                     <div className="font-bold uppercase inline-block bg-blue-200 px-4 py-2 transform -rotate-2 border-2 border-black">
                         Don't have an account?{' '}
@@ -179,13 +179,13 @@ export default function SignInPage() {
                         </a>
                     </div>
                 </div>
-                
+
                 <div className="mt-8 text-center">
                     <p className="font-bold uppercase inline-block bg-blue-400 px-4 py-2 transform rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
                         SAVE BIG TODAY!
                     </p>
                 </div>
-                
+
                 <div className="mt-8 text-center text-sm font-bold">
                     <p>© {new Date().getFullYear()} CouponStall. All rights reserved.</p>
                 </div>

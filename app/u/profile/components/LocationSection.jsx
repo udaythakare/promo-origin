@@ -24,7 +24,7 @@ export default async function LocationSection({ userData }) {
         }
 
         const locationData = await response1.json();
-        console.log(locationData, '*******************');
+        // console.log(locationData, '*******************');
 
         // Get dropdown data
         const response2 = await fetch(`${baseUrl}/api/profile/address-dropdown-data`, {
@@ -38,8 +38,8 @@ export default async function LocationSection({ userData }) {
         });
         const dropDownData = await response2.json();
 
-        console.log(dropDownData, '*******************');
-        console.log(locationData, '*******************');
+        // console.log(dropDownData, '*******************');
+        // console.log(locationData, '*******************');
 
         return (
             <div className="max-w-xl mx-auto">

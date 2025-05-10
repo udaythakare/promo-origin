@@ -81,11 +81,7 @@ export async function createCoupon(formData) {
 }
 
 export async function updateCoupon(id, formData) {
-    console.log(id, 'this is coupon id');
-    console.log('Received date values:', {
-        start_date: formData.start_date,
-        end_date: formData.end_date
-    });
+
 
     const session = await getServerSession(options);
     if (!session?.user?.id) {

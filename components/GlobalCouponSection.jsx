@@ -2,7 +2,7 @@
 
 import { claimCoupon, fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
 import { Check, ChevronDown, ChevronUp, Gift, QrCode, Scissors, Timer, X, RefreshCw } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     getCoupons,
     getSelectedArea,
@@ -14,6 +14,7 @@ import {
 } from '@/helpers/couponStateManager';
 import { joinAddress } from '@/utils/addressUtils';
 import QRModal from '@/app/u/profile/components/QRModal';
+import { getUserId } from '@/helpers/userHelper';
 
 const GlobalCouponSection = () => {
     const [coupons, setCoupons] = useState([]);
@@ -25,81 +26,28 @@ const GlobalCouponSection = () => {
     const [isQROpen, setIsQROpen] = useState(false);
     const [selectedCoupon, setSelectedCoupon] = useState(null);
     const [lastRefreshed, setLastRefreshed] = useState(null);
+    const [qrData, setQrData] = useState(''); // Added state for QR data
 
-    // Load data from localStorage and set up event listeners
-    useEffect(() => {
-        // Initial load from localStorage
+    // Handler functions defined once using useCallback
+    const handleCouponsUpdated = useCallback(() => {
         setCoupons(getCoupons());
-        setLoading(getLoadingState());
-        setSelectedArea(getSelectedArea());
-
-        // Set up event listeners for state changes
-        const handleCouponsUpdated = () => {
-            setCoupons(getCoupons());
-            setLastRefreshed(new Date());
-        };
-
-        const handleAreaUpdated = () => {
-            setSelectedArea(getSelectedArea());
-        };
-
-        const handleLoadingUpdated = () => {
-            setLoading(getLoadingState());
-        };
-
-        // Listen for state changes
-        window.addEventListener('coupons-updated', handleCouponsUpdated);
-        window.addEventListener('area-updated', handleAreaUpdated);
-        window.addEventListener('loading-updated', handleLoadingUpdated);
-        window.addEventListener('filters-cleared', () => setSelectedArea(''));
-
-        // Check if we need to fetch fresh data
-        if (getCoupons().length === 0 || areCouponsStale()) {
-            fetchInitialData();
-        } else {
-            setLastRefreshed(new Date());
-        }
-
-        // Set up periodic refresh
-        const refreshInterval = setInterval(() => {
-            if (shouldRefreshData()) {
-                refreshCouponData();
-            }
-        }, 60000); // Check every minute
-
-        // Clean up event listeners and interval
-        return () => {
-            window.removeEventListener('coupons-updated', handleCouponsUpdated);
-            window.removeEventListener('area-updated', handleAreaUpdated);
-            window.removeEventListener('loading-updated', handleLoadingUpdated);
-            window.removeEventListener('filters-cleared', () => setSelectedArea(''));
-            clearInterval(refreshInterval);
-        };
+        setLastRefreshed(new Date());
     }, []);
 
-    const fetchInitialData = async () => {
-        try {
-            setLoading(true);
-            const area = getSelectedArea();
+    const handleAreaUpdated = useCallback(() => {
+        setSelectedArea(getSelectedArea());
+    }, []);
 
-            // Fetch coupons based on selected area or fetch all
-            const response = area
-                ? await fetchAreaCoupons(area)
-                : await fetchAllCoupons();
+    const handleLoadingUpdated = useCallback(() => {
+        setLoading(getLoadingState());
+    }, []);
 
-            if (response?.coupons) {
-                setCoupons(response.coupons);
-                saveCoupons(response.coupons);
-                setLastRefreshed(new Date());
-            }
-        } catch (error) {
-            console.error('Error fetching initial coupon data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const handleFilterCleared = useCallback(() => {
+        setSelectedArea('');
+    }, []);
 
-    const refreshCouponData = async () => {
+    // Fetch fresh data
+    const refreshCouponData = useCallback(async () => {
         try {
             setLoading(true);
             const area = getSelectedArea();
@@ -116,14 +64,48 @@ const GlobalCouponSection = () => {
             }
         } catch (error) {
             console.error('Error refreshing coupon data:', error);
+            // Add user-facing error notification here if needed
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const manualRefresh = async () => {
-        await refreshCouponData();
-    };
+    // Load data from localStorage and set up event listeners
+    useEffect(() => {
+        // Initial load from localStorage
+        setCoupons(getCoupons());
+        setLoading(getLoadingState());
+        setSelectedArea(getSelectedArea());
+
+        // Set up event listeners for state changes
+        window.addEventListener('coupons-updated', handleCouponsUpdated);
+        window.addEventListener('area-updated', handleAreaUpdated);
+        window.addEventListener('loading-updated', handleLoadingUpdated);
+        window.addEventListener('filters-cleared', handleFilterCleared);
+
+        // Check if we need to fetch fresh data
+        if (getCoupons().length === 0 || areCouponsStale()) {
+            refreshCouponData();
+        } else {
+            setLastRefreshed(new Date());
+        }
+
+        // Set up periodic refresh
+        const refreshInterval = setInterval(() => {
+            if (shouldRefreshData()) {
+                refreshCouponData();
+            }
+        }, 60000); // Check every minute
+
+        // Clean up event listeners and interval
+        return () => {
+            window.removeEventListener('coupons-updated', handleCouponsUpdated);
+            window.removeEventListener('area-updated', handleAreaUpdated);
+            window.removeEventListener('loading-updated', handleLoadingUpdated);
+            window.removeEventListener('filters-cleared', handleFilterCleared);
+            clearInterval(refreshInterval);
+        };
+    }, [handleCouponsUpdated, handleAreaUpdated, handleLoadingUpdated, handleFilterCleared, refreshCouponData]);
 
     const clearFilters = async () => {
         setLoading(true);
@@ -164,12 +146,22 @@ const GlobalCouponSection = () => {
     };
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        if (!dateString) return 'N/A';
+
+        try {
+            const date = new Date(dateString);
+            // Check if date is valid
+            if (isNaN(date.getTime())) return 'Invalid Date';
+
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'Invalid Date';
+        }
     };
 
     const formatRefreshTime = (date) => {
@@ -180,11 +172,32 @@ const GlobalCouponSection = () => {
         });
     };
 
-    const handleClaimCoupon = async (id) => {
+    const handleClaimCoupon = async (id, coupon_type, redeem_duration, end_date) => {
+        // Calculate the redeem duration in minutes based on the coupon type
+        let redeemMinutes = 0;
+        let message = '';
+
+        if (coupon_type === 'redeem_at_store') {
+            // Parse the redeem_duration or use provided value (5 or 10 minutes)
+            redeemMinutes = redeem_duration === "5 minutes" ? 5 : 10;
+            message = `This coupon is for in-store redemption only. You have ${redeemMinutes} minutes to redeem this coupon.`;
+        } else if (coupon_type === 'redeem_online') {
+            // For online redemption, show end date information
+            const endDateObj = end_date ? new Date(end_date) : null;
+            if (endDateObj && !isNaN(endDateObj.getTime())) {
+                const formattedDate = endDateObj.toLocaleDateString();
+                message = `You can redeem this online coupon anytime until ${formattedDate}.`;
+            } else {
+                message = "You can redeem this online coupon.";
+            }
+        }
+
+        if (message) alert(message);
         setClaimingCoupons(prev => ({ ...prev, [id]: 'claiming' }));
 
         try {
-            const response = await claimCoupon(id);
+            // Pass the redeemMinutes to the claimCoupon function
+            const response = await claimCoupon(id, redeemMinutes);
 
             if (!response.success) {
                 alert(response.message || "Error claiming coupon");
@@ -197,6 +210,12 @@ const GlobalCouponSection = () => {
 
             // Refresh coupons after claiming
             await refreshCouponData();
+
+            // If it's a store redemption coupon, start a countdown timer
+            if (coupon_type === 'redeem_at_store' && response.coupon?.remaining_claim_time) {
+                // You could implement a countdown timer here if needed
+                // For example, adding state to track expiring coupons
+            }
         } catch (error) {
             console.error('Error claiming coupon:', error);
             alert("Error claiming coupon");
@@ -212,9 +231,18 @@ const GlobalCouponSection = () => {
         }
     };
 
-    const showQrCode = (coupon) => {
-        setIsQROpen(true);
-        setSelectedCoupon(coupon);
+    const showQrCode = async (coupon) => {
+        try {
+            // Get user ID before opening modal
+            const userId = await getUserId();
+            const data = JSON.stringify({ userId, couponId: coupon.id });
+            setQrData(data);
+            setSelectedCoupon(coupon);
+            setIsQROpen(true);
+        } catch (error) {
+            console.error('Error preparing QR code:', error);
+            alert('Unable to generate QR code. Please try again.');
+        }
     };
 
     const toggleDetails = (couponId) => {
@@ -222,6 +250,7 @@ const GlobalCouponSection = () => {
     };
 
     const getProgressBarWidth = (current, max) => {
+        if (!current || !max || max <= 0) return '0%';
         return `${Math.min((current / max) * 100, 100)}%`;
     };
 
@@ -234,7 +263,7 @@ const GlobalCouponSection = () => {
                     )}
                 </div>
                 <button
-                    onClick={manualRefresh}
+                    onClick={refreshCouponData}
                     disabled={loading}
                     className="flex items-center gap-2 text-sm bg-white px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
                 >
@@ -300,9 +329,9 @@ const GlobalCouponSection = () => {
                             </div>
 
                             <p className="font-medium mb-4 bg-white/90 p-3 border-l-4 border-black text-sm sm:text-base shadow-[3px_3px_0px_0px_rgba(0,0,0)]">
-                                {coupon.description.length > 100 && !isDetailsOpen
+                                {coupon.description && coupon.description.length > 100 && !isDetailsOpen
                                     ? `${coupon.description.substring(0, 100)}...`
-                                    : coupon.description}
+                                    : coupon.description || 'No description available'}
                             </p>
 
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
@@ -316,7 +345,7 @@ const GlobalCouponSection = () => {
                                 <div className="w-full sm:w-auto">
                                     <div className="bg-white border-3 border-black px-3 py-1 font-bold text-xs shadow-[3px_3px_0px_0px_rgba(0,0,0)]">
                                         <div className="flex justify-between items-center gap-2">
-                                            <span>{coupon.current_claims}/{coupon.max_claims} CLAIMED</span>
+                                            <span>{coupon.current_claims || 0}/{coupon.max_claims || 0} CLAIMED</span>
                                         </div>
                                         <div className="w-full bg-gray-200 h-2 mt-1 overflow-hidden">
                                             <div
@@ -331,14 +360,16 @@ const GlobalCouponSection = () => {
                             {isDetailsOpen && (
                                 <div className="mt-3 pt-3 border-t-2 border-black mb-4">
                                     <div className="bg-white p-3 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
-                                        <p className="text-black font-medium mb-3">{coupon.description}</p>
+                                        <p className="text-black font-medium mb-3">{coupon.description || 'No description available'}</p>
                                         <p className="text-sm text-black mb-3 font-bold flex items-center gap-2">
                                             <span className="bg-black text-white px-2 py-1">REDEMPTION:</span>
                                             <span>{coupon.coupon_type === 'redeem_at_store' ? 'IN-STORE' : 'ONLINE'}</span>
                                         </p>
                                         <p className="text-sm text-black font-bold flex items-center gap-2">
                                             <span className="bg-black text-white px-2 py-1">LOCATION:</span>
-                                            <span>{joinAddress(coupon?.businesses?.business_locations[0]) || 'Contact store for details'}</span>
+                                            <span>{coupon?.businesses?.business_locations && coupon.businesses.business_locations[0] ?
+                                                joinAddress(coupon.businesses.business_locations[0]) :
+                                                'Contact store for details'}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -401,7 +432,7 @@ const GlobalCouponSection = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => handleClaimCoupon(coupon.id)}
+                                    onClick={() => handleClaimCoupon(coupon.id, coupon.coupon_type, coupon.redeem_duration, coupon.end_date)}
                                     disabled={!session}
                                     className={`w-full ${!session ? 'bg-gray-200 cursor-not-allowed' : 'bg-white hover:bg-gray-100'} 
                                             text-black font-black py-3 px-4 uppercase border-3 border-black transition-all 
@@ -417,11 +448,15 @@ const GlobalCouponSection = () => {
             </div>
 
             {isQROpen && (
-                <QRModal isOpen={isQROpen} onClose={() => setIsQROpen(false)} qrValue={JSON.stringify({ userId: selectedCoupon.user_id, couponId: selectedCoupon.id })} couponTitle={selectedCoupon.title} />
+                <QRModal
+                    isOpen={isQROpen}
+                    onClose={() => setIsQROpen(false)}
+                    qrValue={qrData}
+                    couponTitle={selectedCoupon?.title || 'Coupon'}
+                />
             )}
-
         </div>
-    )
-}
+    );
+};
 
 export default GlobalCouponSection;

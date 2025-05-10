@@ -99,7 +99,7 @@ export async function POST(request) {
             });
 
             const emailData = await emailResponse.json();
-            console.log('Email sending response:', emailData);
+            // // console.log('Email sending response:', emailData);
 
             // We don't throw an error here so registration can still succeed even if email fails
             // Instead, we'll provide information about the email status in the response

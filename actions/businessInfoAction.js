@@ -36,7 +36,7 @@ export async function getBusinessInfo() {
 }
 
 export async function updateBusinessInfo(formData) {
-    console.log(formData, "Form Data in updateBusinessInfo action");
+    // // console.log(formData, "Form Data in updateBusinessInfo action");
     try {
         const userId = await getUserId();
         if (!userId) {

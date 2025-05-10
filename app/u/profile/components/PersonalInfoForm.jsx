@@ -84,105 +84,111 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
     }
 
     return (
-        <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Personal Information</h2>
+        <div className="bg-yellow-100 p-5 md:p-7 rounded-none border-3 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-2xl mx-auto">
 
             {/* General error message area */}
             {errors.general && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded-md">
+                <div className="mb-5 p-3 bg-red-300 border-3 border-black text-black font-bold rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     {errors.general}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                    {/* Full Name Field */}
-                    <div>
-                        <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            id="full_name"
-                            name="full_name"
-                            value={formData.full_name}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${errors.full_name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                            required
-                        />
-                        {errors.full_name && (
-                            <p className="mt-1 text-xs text-red-500">{errors.full_name}</p>
-                        )}
-                    </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Full Name Field */}
+                <div>
+                    <label htmlFor="full_name" className="block text-base font-bold text-black mb-1">
+                        Full Name
+                    </label>
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        value={formData.full_name}
+                        onChange={handleChange}
+                        className={`w-full px-3 py-2 border-3 ${errors.full_name ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
+                        required
+                    />
+                    {errors.full_name && (
+                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
+                            {errors.full_name}
+                        </p>
+                    )}
+                </div>
 
-                    {/* Username Field */}
-                    <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                            Username
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                            required
-                        />
-                        {errors.username && (
-                            <p className="mt-1 text-xs text-red-500">{errors.username}</p>
-                        )}
-                    </div>
+                {/* Username Field */}
+                <div>
+                    <label htmlFor="username" className="block text-base font-bold text-black mb-1">
+                        Username
+                    </label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className={`w-full px-3 py-2 border-3 ${errors.username ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
+                        required
+                    />
+                    {errors.username && (
+                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
+                            {errors.username}
+                        </p>
+                    )}
+                </div>
 
-                    {/* Email Field */}
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
-                            disabled
-                            title="Email cannot be changed"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
-                    </div>
+                {/* Email Field */}
+                <div>
+                    <label htmlFor="email" className="block text-base font-bold text-black mb-1">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border-3 border-black rounded-none bg-gray-200 text-gray-600 font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                        disabled
+                        title="Email cannot be changed"
+                    />
+                    <p className="mt-1 text-xs font-bold text-black bg-gray-200 p-1 border-2 border-black inline-block rotate-1">
+                        Email cannot be changed
+                    </p>
+                </div>
 
-                    {/* Mobile Number Field */}
-                    <div>
-                        <label htmlFor="mobile_number" className="block text-sm font-medium text-gray-700 mb-1">
-                            Mobile Number
-                        </label>
-                        <input
-                            type="tel"
-                            id="mobile_number"
-                            name="mobile_number"
-                            value={formData.mobile_number}
-                            onChange={handleChange}
-                            className={`w-full px-4 py-2 border ${errors.mobile_number ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                            required
-                        />
-                        {errors.mobile_number && (
-                            <p className="mt-1 text-xs text-red-500">{errors.mobile_number}</p>
-                        )}
-                    </div>
+                {/* Mobile Number Field */}
+                <div>
+                    <label htmlFor="mobile_number" className="block text-base font-bold text-black mb-1">
+                        Mobile Number
+                    </label>
+                    <input
+                        type="tel"
+                        id="mobile_number"
+                        name="mobile_number"
+                        value={formData.mobile_number}
+                        onChange={handleChange}
+                        className={`w-full px-3 py-2 border-3 ${errors.mobile_number ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
+                        required
+                    />
+                    {errors.mobile_number && (
+                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
+                            {errors.mobile_number}
+                        </p>
+                    )}
+                </div>
 
-                    {/* Submit Button */}
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`w-full py-2 px-4 rounded-md text-white font-medium 
-                ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} 
-                transition duration-200 ease-in-out`}
-                        >
-                            {isSubmitting ? 'Updating...' : 'Update Information'}
-                        </button>
-                    </div>
+                {/* Submit Button */}
+                <div className="pt-5">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`w-full py-3 px-5 rounded-none text-black font-black text-lg 
+                            ${isSubmitting ? 'bg-blue-300 border-black' : 'bg-green-400 hover:bg-green-500 hover:-translate-y-1'} 
+                            border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+                            transition-all duration-200 ease-in-out transform hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+                    >
+                        {isSubmitting ? 'UPDATING...' : 'UPDATE INFO'}
+                    </button>
                 </div>
             </form>
         </div>

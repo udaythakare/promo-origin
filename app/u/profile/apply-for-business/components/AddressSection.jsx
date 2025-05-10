@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 
 export default function AddressSection({ formData, handleInputChange, areaData, cityData, stateData }) {
-    console.log(areaData, cityData, stateData, "AddressSection Dropdown Data");
+    // console.log(og(areaData, cityData, stateData, "AddressSection Dropdown Data");
 
     const inputVariants = {
         focus: { scale: 1.02, borderColor: '#2563eb', transition: { duration: 0.2 } },

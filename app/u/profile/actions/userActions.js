@@ -103,7 +103,7 @@ export async function updateUserLocation(locationData) {
             return { success: false, message: 'Login first' };
         }
 
-        console.log(userId, 'this is userId in updateUserLocation');
+        // console.log(userId, 'this is userId in updateUserLocation');
 
         // Validate in one step with early return
         const requiredFields = ['address', 'city', 'state', 'postal_code'];

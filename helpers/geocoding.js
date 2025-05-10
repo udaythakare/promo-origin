@@ -33,7 +33,7 @@ export async function geocodeAddress(address, city, state, postalCode, country) 
         }
 
         const data = await response.json();
-        console.log('Raw API response:', data);
+        // console.log('Raw API response:', data);
 
         if (data && data.length > 0) {
             const result = data[0];
@@ -63,4 +63,4 @@ export async function geocodeAddress(address, city, state, postalCode, country) 
 
 // Example usage:
 // const location = await geocodeAddress('135 Pilkington Avenue', 'Birmingham', 'England', 'B72 1LH', 'United Kingdom');
-// console.log(location);
+// // console.log(location);

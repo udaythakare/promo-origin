@@ -105,14 +105,14 @@ const RedeemedCoupons = ({ data }) => {
                                             </div>
                                         </div>
 
-                                        <div className="mt-2 pt-2 border-t-2 border-dashed border-gray-300 flex justify-between items-center">
+                                        {/* <div className="mt-2 pt-2 border-t-2 border-dashed border-gray-300 flex justify-between items-center">
                                             <div className="text-xs">
                                                 <span className="font-bold">{coupon.coupons.current_claims}/{coupon.coupons.max_claims}</span> claimed
                                             </div>
                                             <button className="bg-black text-white text-sm font-bold px-3 py-1 hover:bg-gray-800 transition">
                                                 USE COUPON
                                             </button>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             ))}

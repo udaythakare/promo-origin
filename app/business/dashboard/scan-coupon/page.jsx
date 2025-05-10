@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import QRScanner from './components/QRScanner';
 import { getCouponById } from '../coupons/actions/couponActions';
 import { getCouponStatus, getUserData } from '@/helpers/userHelper';
@@ -12,11 +12,11 @@ export default function ScanPage() {
     const [loading, setLoading] = useState(false);
     const [showCouponCard, setShowCouponCard] = useState(false);
     const [isRedeemed, setIsRedeemed] = useState(false);
+    const [validUntilDate, setValidUntilDate] = useState(null);
 
     const handleQRDetected = async (value) => {
         try {
             setLoading(true);
-            console.log(value, "value in scan page");
 
             // Add the scanned QR to history
             setScanHistory(prev => [
@@ -33,12 +33,11 @@ export default function ScanPage() {
             const fetchedCouponData = await getCouponById(couponId);
             const fetchedUserData = await getUserData(userId);
             const fetchCouponStatus = await getCouponStatus(couponId, userId);
-            console.log(fetchCouponStatus, "fetch coupon status in scan page");
+
+            // Set remaining claim time as valid until date
+            setValidUntilDate(fetchCouponStatus.couponStatus.remaining_claim_time);
 
             setIsRedeemed(fetchCouponStatus.couponStatus.coupon_status === "redeemed");
-
-            console.log(fetchedCouponData, "coupon data in scan page");
-            console.log(fetchedUserData, "user data in scan page");
 
             setCouponData(fetchedCouponData);
             setUserData(fetchedUserData.user);
@@ -51,18 +50,14 @@ export default function ScanPage() {
     };
 
     const handleAccept = async () => {
-        console.log("Coupon accepted:", couponData?.id);
-        // Add your logic for accepting the coupon here
         const response = await acceptCoupon(couponData.id, userData.id);
         if (!response.success) {
-            console.error("Error accepting coupon:", response.error);
-            alert("Error accepting coupon. Please try again.");
-            return
+            alert("Error accepting coupon: " + response.error);
+            return;
         }
         alert("Coupon accepted successfully!");
         setShowCouponCard(false);
     };
-
 
     return (
         <main className="flex min-h-screen flex-col items-center p-6 bg-pink-200">
@@ -78,20 +73,6 @@ export default function ScanPage() {
 
             {showCouponCard && couponData && userData && (
                 <div className="mt-8 w-full max-w-md bg-cyan-300 rounded-none border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden transform rotate-1">
-                    <div className="relative w-full h-48 bg-gray-300 border-b-4 border-black">
-                        {couponData.image_url && (
-                            <img
-                                src={couponData.image_url}
-                                alt={couponData.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "/api/placeholder/400/200";
-                                }}
-                            />
-                        )}
-                    </div>
-
                     <div className="p-6">
                         <h2 className="text-3xl font-black text-black transform -rotate-1">{couponData.title}</h2>
                         <p className="text-black font-bold mt-2">{couponData.description}</p>
@@ -100,7 +81,7 @@ export default function ScanPage() {
                             <div className="flex justify-between font-bold">
                                 <span className="text-black">Valid Until:</span>
                                 <span className="font-black bg-white px-2 py-1 border-2 border-black transform rotate-1">
-                                    {new Date(couponData.end_date).toLocaleDateString()}
+                                    {validUntilDate ? new Date(validUntilDate).toLocaleString() : 'Processing...'}
                                 </span>
                             </div>
 
@@ -108,13 +89,6 @@ export default function ScanPage() {
                                 <span className="text-black">Coupon Type:</span>
                                 <span className="font-black bg-white px-2 py-1 border-2 border-black transform -rotate-1 capitalize">
                                     {couponData.coupon_type.replace(/_/g, ' ')}
-                                </span>
-                            </div>
-
-                            <div className="flex justify-between font-bold">
-                                <span className="text-black">Available Claims:</span>
-                                <span className="font-black bg-white px-2 py-1 border-2 border-black transform rotate-1">
-                                    {couponData.max_claims - couponData.current_claims} of {couponData.max_claims}
                                 </span>
                             </div>
 

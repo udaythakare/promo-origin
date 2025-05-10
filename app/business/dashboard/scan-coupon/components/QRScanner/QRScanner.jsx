@@ -88,6 +88,7 @@ const QRScanner = ({ onDetected }) => {
 
         // Set the result
         setResult(decodedText);
+        // console.log(decodedText, decodedResult);
 
         // Call onDetected callback if provided
         if (typeof onDetected === 'function') {
