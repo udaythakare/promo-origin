@@ -132,6 +132,8 @@ export async function updateUserLocation(locationData) {
             throw new Error(`Database error: ${error.message}`);
         }
 
+        revalidatePath('/u/profile');
+
         return { success: true };
     } catch (error) {
         console.error('Error updating user location:', error);

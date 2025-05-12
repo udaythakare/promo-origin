@@ -1,62 +1,89 @@
-import React from 'react'
+import { cookies } from 'next/headers'
 import LocationForm from './LocationForm'
 import { updateUserLocation } from '../actions/userActions'
-import { getAddressDropdowns } from '@/actions/addressActions'
-import { cookies } from 'next/headers'
 
-export default async function LocationSection({ userData }) {
-    // Get user's existing location data from API
+// Fetch location data with caching
+export async function fetchLocationData() {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
     const apiUrl = `${baseUrl}/api/profile/location-data`;
 
     try {
-        const response1 = await fetch(apiUrl, {
+        const response = await fetch(apiUrl, {
             method: 'GET',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 Cookie: cookies().toString()
             },
+            cache: 'force-cache', // Enable caching
+            next: {
+                revalidate: 3600 // Revalidate every hour
+            }
         });
 
-        if (!response1.ok) {
+        if (!response.ok) {
             throw new Error('Failed to fetch location data');
         }
 
-        const locationData = await response1.json();
-        // console.log(locationData, '*******************');
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching location data:', error);
+        return null;
+    }
+}
 
-        // Get dropdown data
-        const response2 = await fetch(`${baseUrl}/api/profile/address-dropdown-data`, {
+// Fetch dropdown data (can be cached differently)
+export async function fetchDropdownData() {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
+
+    try {
+        const response = await fetch(`${baseUrl}/api/profile/address-dropdown-data`, {
             method: 'GET',
             credentials: 'include',
             headers: {
-                // Forward the cookies from the incoming request to your API
                 Cookie: cookies().toString()
             },
-            cache: 'no-store' // Ensure fresh data
+            // Less frequent revalidation as dropdown data might change less often
+            cache: 'force-cache',
+            next: {
+                revalidate: 86400 // Revalidate daily
+            }
         });
-        const dropDownData = await response2.json();
 
-        // console.log(dropDownData, '*******************');
-        // console.log(locationData, '*******************');
+        if (!response.ok) {
+            throw new Error('Failed to fetch dropdown data');
+        }
 
-        return (
-            <div className="max-w-xl mx-auto">
-                <LocationForm
-                    initialData={locationData.data}
-                    onSubmit={updateUserLocation}
-                    dropDownData={dropDownData}
-                />
-            </div>
-        )
+        return response.json();
     } catch (error) {
-        console.error('Error fetching location data:', error);
-        // Handle the error appropriately
+        console.error('Error fetching dropdown data:', error);
+        return null;
+    }
+}
+
+export default async function LocationSection() {
+    // Fetch both location and dropdown data concurrently
+    const [locationDataResponse, dropdownDataResponse] = await Promise.all([
+        fetchLocationData(),
+        fetchDropdownData()
+    ]);
+
+    // Handle errors if either fetch fails
+    if (!locationDataResponse || !dropdownDataResponse) {
         return (
             <div className="p-4 border-2 border-red-500 bg-red-50">
                 <p className="text-red-700">Failed to load location data. Please try again later.</p>
             </div>
         );
     }
+
+    return (
+        <div className="max-w-xl mx-auto">
+            <LocationForm
+                initialData={locationDataResponse.data}
+                onSubmit={updateUserLocation}
+                dropDownData={dropdownDataResponse}
+            />
+        </div>
+    );
 }
