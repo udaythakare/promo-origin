@@ -4,6 +4,23 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import bcrypt from 'bcrypt';
 import { logLogin } from '@/helpers/loginHelper';
 
+// Helper function to create default user location
+async function createDefaultUserLocation(userId) {
+    const { error } = await supabaseAdmin
+        .from('user_locations')
+        .upsert({
+            user_id: userId,
+            is_primary: true,
+            // All other fields remain null by default
+        }, {
+            onConflict: 'user_id'
+        });
+
+    if (error) {
+        console.error('Error creating default user location:', error);
+    }
+}
+
 export const options = {
     providers: [
         GoogleProvider({
@@ -36,6 +53,17 @@ export const options = {
                 if (!isValidPassword) {
                     await logLogin(user.id, 'failed', 'Invalid password');
                     throw new Error('Invalid password');
+                }
+
+                // Check if user location exists, if not create default
+                const { data: userLocation, error: locationError } = await supabaseAdmin
+                    .from('user_locations')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (locationError || !userLocation) {
+                    await createDefaultUserLocation(user.id);
                 }
 
                 // Get user roles from the user_roles table
@@ -196,14 +224,23 @@ export const options = {
                             console.error('Error assigning role:', roleError);
                         }
 
-                        // // console.log('New user created:', newUser.id);
-
                         await logLogin(newUser.id, 'success');
                         dbUserId = newUser.id;
 
                         // Update the NextAuth user object with our database ID
                         user.id = newUser.id;
                         user.mobile_number = ""; // Set default empty mobile number
+                    }
+
+                    // Check if user location exists, if not create default
+                    const { data: userLocation, error: locationError } = await supabaseAdmin
+                        .from('user_locations')
+                        .select('id')
+                        .eq('user_id', dbUserId)
+                        .single();
+
+                    if (locationError || !userLocation) {
+                        await createDefaultUserLocation(dbUserId);
                     }
 
                     // Get user roles from the database
@@ -257,7 +294,6 @@ export const options = {
             return session;
         }
     },
-
 
     pages: {
         signIn: '/api/auth/signin',
