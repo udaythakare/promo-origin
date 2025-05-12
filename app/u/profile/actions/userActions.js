@@ -139,6 +139,9 @@ export async function updateUserLocation(locationData) {
     }
 }
 
+import { revalidatePath } from 'next/cache'
+import { toast } from 'react-hot-toast'
+
 export async function updateUserPersonalInfo(personalInfo) {
     try {
         const userId = await getUserId();
@@ -150,37 +153,47 @@ export async function updateUserPersonalInfo(personalInfo) {
         const requiredFields = ['username', 'full_name', 'mobile_number'];
         const missingField = requiredFields.find(field => !personalInfo[field]);
         if (missingField) {
-            return { success: false, error: `${missingField} is required` };
+            return {
+                success: false,
+                error: `${missingField} is required`,
+                fieldErrors: { [missingField]: `${missingField} is required` }
+            };
         }
 
         // Validate mobile number format
         const mobileNumberPattern = /^\d{10}$/;
         if (!mobileNumberPattern.test(personalInfo.mobile_number)) {
-            toast.error('Mobile number must be exactly 10 digits')
-            setIsSubmitting(false)
-            return
+            return {
+                success: false,
+                error: 'Mobile number must be exactly 10 digits',
+                fieldErrors: { mobile_number: 'Mobile number must be exactly 10 digits' }
+            };
         }
 
         // Update user information in the database
         const { error } = await supabaseAdmin
             .from('users')
-            .update(
-                {
-                    id: userId,
-                    mobile_number: personalInfo.mobile_number,
-                    username: personalInfo.username,
-                    full_name: personalInfo.full_name,
-                },
-            )
+            .update({
+                mobile_number: personalInfo.mobile_number,
+                username: personalInfo.username,
+                full_name: personalInfo.full_name,
+            })
             .eq('id', userId);
 
         if (error) {
             throw new Error(`Database error: ${error.message}`);
         }
 
+        // Revalidate the profile page to clear cached data
+        revalidatePath('/u/profile');
+
         return { success: true };
     } catch (error) {
         console.error('Error updating user personal info:', error);
-        return { success: false, error: error.message };
+        return {
+            success: false,
+            error: error.message,
+            fieldErrors: error.fieldErrors || {}
+        };
     }
 }

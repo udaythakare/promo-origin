@@ -1,20 +1,12 @@
 import React from 'react'
+import { cookies } from 'next/headers'
 import { updateUserPersonalInfo } from '../actions/userActions'
 import PersonalInfoForm from './PersonalInfoForm'
-import { cookies } from 'next/headers';
 
-export default async function PersonalInfoSection({ userData }) {
+// Use Next.js 14 data caching with fetch
+export async function fetchUserData() {
     try {
-        // const response1 = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-data`, {
-        //     method: 'GET',
-        //     credentials: 'include',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         Cookie: cookies().toString()
-        //     },
-        // });
-
-        const response1 = await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-data`,
             {
                 method: 'GET',
@@ -22,31 +14,54 @@ export default async function PersonalInfoSection({ userData }) {
                 headers: {
                     'Content-Type': 'application/json',
                     Cookie: cookies().toString()
+                },
+                // Configure caching directly in fetch options
+                cache: 'force-cache', // Enables caching
+                next: {
+                    revalidate: 3600 // Revalidate every hour
                 }
             }
         );
 
-
-        if (!response1.ok) {
-            throw new Error('Failed to fetch location data');
+        if (!response.ok) {
+            throw new Error('Failed to fetch user data');
         }
 
-        const userData = await response1.json();
-        // console.log(userData, '*******************');
-        return (
-            <div className="max-w-xl mx-auto">
-                <PersonalInfoForm
-                    initialData={userData.userInfo}
-                    onSubmit={updateUserPersonalInfo}
-                />
-            </div>
-        )
+        return response.json();
     } catch (error) {
-        console.error('Error in PersonalInfoSection:', error);
+        console.error('Error fetching user data:', error);
+        return null;
+    }
+}
+
+export default async function PersonalInfoSection() {
+    // Fetch user data from the cached function
+    const userData = await fetchUserData();
+
+    // Handle case where user data couldn't be fetched
+    if (!userData) {
         return (
             <div className="p-4 border-2 border-red-500 bg-red-50 rounded-md">
                 <p className="text-red-700">Failed to load user data. Please try again later.</p>
             </div>
         );
     }
+
+    return (
+        <div className="max-w-xl mx-auto">
+            <PersonalInfoForm
+                initialData={userData.userInfo}
+                onSubmit={updateUserPersonalInfo}
+            />
+        </div>
+    );
+}
+
+// Server Action to revalidate user data after update
+export async function revalidateUserData() {
+    'use server'
+
+    // This will clear the cache for getUserData
+    // Forcing a fresh fetch on next request
+    revalidatePath('/u/profile')
 }
