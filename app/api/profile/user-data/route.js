@@ -17,7 +17,7 @@ export async function GET() {
 
         const { data, error } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('full_name, username, email, mobile_number')
             .eq('id', userId)
             .single(); // Fetch single user data
 
@@ -38,4 +38,3 @@ export async function GET() {
         return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
 }
-

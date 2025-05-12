@@ -5,14 +5,27 @@ import { cookies } from 'next/headers';
 
 export default async function PersonalInfoSection({ userData }) {
     try {
-        const response1 = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-data`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                Cookie: cookies().toString()
-            },
-        });
+        // const response1 = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-data`, {
+        //     method: 'GET',
+        //     credentials: 'include',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         Cookie: cookies().toString()
+        //     },
+        // });
+
+        const response1 = await fetch(
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-data`,
+            {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Cookie: cookies().toString()
+                }
+            }
+        );
+
 
         if (!response1.ok) {
             throw new Error('Failed to fetch location data');
