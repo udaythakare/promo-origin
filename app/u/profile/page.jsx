@@ -70,7 +70,7 @@ export default async function Page() {
                         </div>
                     )}
 
-                    {/* <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
+                    <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
                         <div className="p-4 border-b-4 border-black bg-green-300">
                             <h2 className="text-xl font-black text-black flex items-center">
                                 <IdCard className="h-5 w-5 mr-2" />
@@ -88,7 +88,7 @@ export default async function Page() {
                                 <span>Your address is used to show you relevant deals and delivery options in your area.</span>
                             </p>
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* Delivery info section */}
                     {/* <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden">
