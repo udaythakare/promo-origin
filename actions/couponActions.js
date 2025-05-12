@@ -375,8 +375,9 @@ export async function claimCoupon(couponId, redeemMinutes = 0) {
         return { success: false, error: updError };
     }
 
-    revalidatePath("/u/profile");
+    // revalidatePath("/u/profile");
     revalidatePath("/coupons");
+    revalidatePath("/u/profile/my-coupons");
 
     return {
         success: true,

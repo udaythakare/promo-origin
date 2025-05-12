@@ -14,18 +14,24 @@ const page = async () => {
         fetch(
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-claimed-coupon`,
             {
-                cache: 'no-store',
+                cache: 'force-cache',
+                next: {
+                    revalidate: 3600,
+                },
                 headers: {
                     // forward auth cookies/session
                     cookie: cookieHeader,
                 },
-                credentials: "include"
+                credentials: "include",
             }
         ),
         fetch(
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-redeemed-coupon`,
             {
-                cache: 'no-store',
+                cache: 'force-cache',
+                next: {
+                    revalidate: 3600,
+                },
                 headers: { cookie: cookieHeader },
                 credentials: "include"
             },
