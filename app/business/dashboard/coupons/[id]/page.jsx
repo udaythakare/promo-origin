@@ -5,7 +5,8 @@ import { getCouponById } from '../actions/couponActions';
 import CouponActions from '../components/CouponActions';
 import { formatDate } from '@/helpers/dateHelpers';
 
-export default async function CouponDetailsPage({ params }) {
+export default async function CouponDetailsPage(props) {
+    const params = await props.params;
     const coupon = await getCouponById(params.id);
 
     if (!coupon) {

@@ -13,7 +13,7 @@ export async function fetchLocationData() {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Cookie: cookies().toString()
+                Cookie: (await cookies()).toString()
             },
             cache: 'force-cache', // Enable caching
             next: {
@@ -41,7 +41,7 @@ export async function fetchDropdownData() {
             method: 'GET',
             credentials: 'include',
             headers: {
-                Cookie: cookies().toString()
+                Cookie: (await cookies()).toString()
             },
             // Less frequent revalidation as dropdown data might change less often
             cache: 'force-cache',

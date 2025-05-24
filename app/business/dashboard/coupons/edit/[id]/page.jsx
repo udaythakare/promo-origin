@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import CouponForm from '../../components/CouponForm';
 import { getCouponById } from '../../actions/couponActions';
 
-export default async function EditCouponPage({ params }) {
+export default async function EditCouponPage(props) {
+    const params = await props.params;
     const coupon = await getCouponById(params.id);
 
     if (!coupon) {

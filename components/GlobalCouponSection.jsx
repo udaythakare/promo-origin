@@ -15,6 +15,7 @@ import {
 import { joinAddress } from '@/utils/addressUtils';
 import QRModal from '@/app/u/profile/components/QRModal';
 import { getUserId } from '@/helpers/userHelper';
+import { ConfirmationModal } from './ConfirmationModal';
 
 const GlobalCouponSection = () => {
     const [coupons, setCoupons] = useState([]);
@@ -27,6 +28,46 @@ const GlobalCouponSection = () => {
     const [selectedCoupon, setSelectedCoupon] = useState(null);
     const [lastRefreshed, setLastRefreshed] = useState(null);
     const [qrData, setQrData] = useState(''); // Added state for QR data
+    const [showModal, setShowModal] = useState(false);
+
+    // State for confirmation modal data
+    const [pendingClaim, setPendingClaim] = useState({
+        couponId: null,
+        couponType: null,
+        redeemDuration: null,
+        endDate: null
+    });
+    const [error, setError] = useState(null);
+
+    const handleConfirmClaim = async () => {
+        setShowModal(false);
+        setError(null);
+
+        if (!pendingClaim.couponId) {
+            setError("No coupon selected for claiming");
+            return;
+        }
+
+        try {
+            await handleClaimCoupon(
+                pendingClaim.couponId,
+                pendingClaim.couponType,
+                pendingClaim.redeemDuration,
+                pendingClaim.endDate
+            );
+        } catch (error) {
+            console.error('Error in handleConfirmClaim:', error);
+            setError(error.message || "Failed to claim coupon");
+        } finally {
+            // Clear pending claim data
+            setPendingClaim({
+                couponId: null,
+                couponType: null,
+                redeemDuration: null,
+                endDate: null
+            });
+        }
+    };
 
     // Handler functions defined once using useCallback
     const handleCouponsUpdated = useCallback(() => {
@@ -50,6 +91,7 @@ const GlobalCouponSection = () => {
     const refreshCouponData = useCallback(async () => {
         try {
             setLoading(true);
+            setError(null);
             const area = getSelectedArea();
 
             // Fetch fresh data based on current area selection
@@ -61,10 +103,12 @@ const GlobalCouponSection = () => {
                 setCoupons(response.coupons);
                 saveCoupons(response.coupons);
                 setLastRefreshed(new Date());
+            } else {
+                throw new Error('No coupons data received');
             }
         } catch (error) {
             console.error('Error refreshing coupon data:', error);
-            // Add user-facing error notification here if needed
+            setError(`Failed to refresh coupons: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -109,6 +153,7 @@ const GlobalCouponSection = () => {
 
     const clearFilters = async () => {
         setLoading(true);
+        setError(null);
         clearAllFilters();
         setSelectedArea('');
 
@@ -118,9 +163,12 @@ const GlobalCouponSection = () => {
                 setCoupons(response.coupons);
                 saveCoupons(response.coupons);
                 setLastRefreshed(new Date());
+            } else {
+                throw new Error('No coupons data received');
             }
         } catch (error) {
             console.error('Error clearing filters:', error);
+            setError(`Failed to clear filters: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -172,6 +220,25 @@ const GlobalCouponSection = () => {
         });
     };
 
+    // Modified to show confirmation modal instead of direct claim
+    const handleClaimCouponClick = (coupon) => {
+        // Calculate end date for online coupons (7 days from now)
+        const endDate = coupon.coupon_type === 'redeem_online'
+            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            : null;
+
+        // Set pending claim data
+        setPendingClaim({
+            couponId: coupon.id,
+            couponType: coupon.coupon_type,
+            redeemDuration: coupon.redeem_duration || (coupon.coupon_type === 'redeem_at_store' ? '10 minutes' : null),
+            endDate: endDate
+        });
+
+        // Show confirmation modal
+        setShowModal(true);
+    };
+
     const handleClaimCoupon = async (id, coupon_type, redeem_duration, end_date) => {
         // Calculate the redeem duration in minutes based on the coupon type
         let redeemMinutes = 0;
@@ -192,20 +259,19 @@ const GlobalCouponSection = () => {
             }
         }
 
-        if (message) alert(message);
         setClaimingCoupons(prev => ({ ...prev, [id]: 'claiming' }));
+        setError(null);
 
         try {
             // Pass the redeemMinutes to the claimCoupon function
             const response = await claimCoupon(id, redeemMinutes);
 
-            if (!response.success) {
-                alert(response.message || "Error claiming coupon");
-                setClaimingCoupons(prev => ({ ...prev, [id]: 'error' }));
-                return;
+            if (!response || !response.success) {
+                throw new Error(response?.message || "Error claiming coupon");
             }
 
-            alert("Coupon claimed successfully!");
+            // Show success message
+            alert(`Coupon claimed successfully! ${message}`);
             setClaimingCoupons(prev => ({ ...prev, [id]: 'claimed' }));
 
             // Refresh coupons after claiming
@@ -218,8 +284,11 @@ const GlobalCouponSection = () => {
             }
         } catch (error) {
             console.error('Error claiming coupon:', error);
-            alert("Error claiming coupon");
+            const errorMessage = error.message || "Error claiming coupon";
+            setError(errorMessage);
+            alert(errorMessage);
             setClaimingCoupons(prev => ({ ...prev, [id]: 'error' }));
+            throw error; // Re-throw for handleConfirmClaim to catch
         } finally {
             setTimeout(() => {
                 setClaimingCoupons(prev => {
@@ -233,15 +302,21 @@ const GlobalCouponSection = () => {
 
     const showQrCode = async (coupon) => {
         try {
+            setError(null);
             // Get user ID before opening modal
             const userId = await getUserId();
+            if (!userId) {
+                throw new Error('Unable to get user ID');
+            }
             const data = JSON.stringify({ userId, couponId: coupon.id });
             setQrData(data);
             setSelectedCoupon(coupon);
             setIsQROpen(true);
         } catch (error) {
             console.error('Error preparing QR code:', error);
-            alert('Unable to generate QR code. Please try again.');
+            const errorMessage = 'Unable to generate QR code. Please try again.';
+            setError(errorMessage);
+            alert(errorMessage);
         }
     };
 
@@ -256,6 +331,21 @@ const GlobalCouponSection = () => {
 
     return (
         <div className="container mx-auto py-6 px-4">
+            {/* Error display */}
+            {error && (
+                <div className="mb-4 p-4 bg-red-100 border-2 border-red-500 text-red-700 font-bold">
+                    <div className="flex justify-between items-center">
+                        <span>{error}</span>
+                        <button
+                            onClick={() => setError(null)}
+                            className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-6">
                 <div className="text-sm text-gray-600">
                     {lastRefreshed && (
@@ -265,7 +355,7 @@ const GlobalCouponSection = () => {
                 <button
                     onClick={refreshCouponData}
                     disabled={loading}
-                    className="flex items-center gap-2 text-sm bg-white px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
+                    className="flex items-center gap-2 text-sm bg-white px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
                     Refresh Coupons
@@ -432,7 +522,7 @@ const GlobalCouponSection = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => handleClaimCoupon(coupon.id, coupon.coupon_type, coupon.redeem_duration, coupon.end_date)}
+                                    onClick={() => handleClaimCouponClick(coupon)}
                                     disabled={!session}
                                     className={`w-full ${!session ? 'bg-gray-200 cursor-not-allowed' : 'bg-white hover:bg-gray-100'} 
                                             text-black font-black py-3 px-4 uppercase border-3 border-black transition-all 
@@ -455,6 +545,15 @@ const GlobalCouponSection = () => {
                     couponTitle={selectedCoupon?.title || 'Coupon'}
                 />
             )}
+
+            <ConfirmationModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onConfirm={handleConfirmClaim}
+                couponType={pendingClaim.couponType}
+                redeemDuration={pendingClaim.redeemDuration}
+                endDate={pendingClaim.endDate}
+            />
         </div>
     );
 };

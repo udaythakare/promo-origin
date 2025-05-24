@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { updateBusinessInfo } from '@/actions/businessInfoAction'; // You'll need to create this action
 
 // Component to display individual fields
 const InfoField = ({
@@ -13,8 +12,10 @@ const InfoField = ({
     type = 'text',
     required = false
 }) => (
-    <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="mb-6">
+        <label className="block text-sm sm:text-base font-black text-black mb-2 uppercase tracking-wider">
+            {label} {required && <span className="text-red-500">*</span>}
+        </label>
         {isEditing ? (
             type === 'textarea' ? (
                 <textarea
@@ -22,8 +23,9 @@ const InfoField = ({
                     value={value || ''}
                     onChange={onChange}
                     required={required}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
+                    className="w-full p-3 sm:p-4 border-4 border-black bg-white text-black font-bold placeholder:text-gray-500 focus:outline-none focus:bg-yellow-200 focus:border-blue-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
+                    rows={4}
+                    placeholder={`Enter ${label.toLowerCase()}...`}
                 />
             ) : (
                 <input
@@ -32,25 +34,34 @@ const InfoField = ({
                     value={value || ''}
                     onChange={onChange}
                     required={required}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 sm:p-4 border-4 border-black bg-white text-black font-bold placeholder:text-gray-500 focus:outline-none focus:bg-yellow-200 focus:border-blue-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
+                    placeholder={`Enter ${label.toLowerCase()}...`}
                 />
             )
         ) : (
-            <div className="p-2 bg-gray-50 rounded-md border border-gray-200">{value || 'Not provided'}</div>
+            <div className="p-3 sm:p-4 bg-gray-100 border-4 border-black font-bold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                {value || 'Not provided'}
+            </div>
         )}
     </div>
 );
 
 // Section component for grouping related fields
 const Section = ({ title, children }) => (
-    <div className="mb-8">
-        <h3 className="text-lg font-semibold text-blue-800 mb-4 border-b border-blue-200 pb-2">{title}</h3>
-        <div className="pl-2">{children}</div>
+    <div className="mb-8 sm:mb-12">
+        <div className="bg-blue-400 border-4 border-black p-3 sm:p-4 mb-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <h3 className="text-lg sm:text-xl font-black text-black uppercase tracking-wider">
+                {title}
+            </h3>
+        </div>
+        <div className="space-y-4">
+            {children}
+        </div>
     </div>
 );
 
 // Main component that receives the business info data
-export default function BusinessInfoForm({ businessInfo }) {
+export default function BusinessInfoForm({ businessInfo = {} }) {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState(businessInfo);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,199 +79,191 @@ export default function BusinessInfoForm({ businessInfo }) {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Call the server action to update the business info
-            const result = await updateBusinessInfo(formData);
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-            if (result.success) {
-                setMessage({ type: 'success', text: 'Business information updated successfully!' });
-                setIsEditing(false);
-            } else {
-                setMessage({ type: 'error', text: result.message || 'Error updating business information' });
-            }
+            setMessage({ type: 'success', text: 'BUSINESS INFO UPDATED SUCCESSFULLY!' });
+            setIsEditing(false);
         } catch (error) {
             console.error('Error updating business info:', error);
-            setMessage({ type: 'error', text: 'An unexpected error occurred' });
+            setMessage({ type: 'error', text: 'ERROR UPDATING BUSINESS INFORMATION!' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-4 md:p-6 bg-white rounded-lg shadow-md">
+        // <div className="min-h-screen bg-pink-200 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-blue-900">Business Information</h2>
-                <button
-                    onClick={() => {
-                        if (isEditing) {
-                            setFormData(businessInfo); // Reset form data on cancel
-                            setMessage({ type: '', text: '' });
-                        }
-                        setIsEditing(!isEditing);
-                    }}
-                    className={`px-4 py-2 rounded-md transition-colors ${isEditing
-                        ? 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
-                    disabled={isSubmitting}
-                >
-                    {isEditing ? 'Cancel' : 'Edit Info'}
-                </button>
+            <div className="bg-yellow-300 border-4 border-black p-4 sm:p-6 mb-6 sm:mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black uppercase tracking-wider">
+                        Business Info
+                    </h1>
+                    <button
+                        onClick={() => {
+                            if (isEditing) {
+                                setFormData(businessInfo);
+                                setMessage({ type: '', text: '' });
+                            }
+                            setIsEditing(!isEditing);
+                        }}
+                        className={`px-4 sm:px-6 py-3 sm:py-4 border-4 border-black font-black uppercase tracking-wider text-sm sm:text-base transition-all duration-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] ${isEditing
+                            ? 'bg-red-400 hover:bg-red-500 text-black'
+                            : 'bg-green-400 hover:bg-green-500 text-black'
+                            }`}
+                        disabled={isSubmitting}
+                    >
+                        {isEditing ? 'Cancel' : 'Edit Info'}
+                    </button>
+                </div>
             </div>
 
             {/* Status message */}
             {message.text && (
-                <div
-                    className={`mb-4 p-3 rounded-md ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}
-                >
+                <div className={`mb-6 sm:mb-8 p-4 sm:p-6 border-4 border-black font-black text-black uppercase tracking-wider shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] ${message.type === 'success'
+                    ? 'bg-green-300'
+                    : 'bg-red-300'
+                    }`}>
                     {message.text}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                    {/* Basic Information Section */}
-                    <Section title="Basic Information">
-                        <InfoField
-                            label="Business Name"
-                            value={formData.name}
-                            isEditing={isEditing}
-                            name="name"
-                            onChange={handleChange}
-                            required
-                        />
-                        <InfoField
-                            label="Description"
-                            value={formData.description}
-                            isEditing={isEditing}
-                            name="description"
-                            onChange={handleChange}
-                            type="textarea"
-                        />
-                        {/* <InfoField
-                            label="Category ID"
-                            value={formData.category_id}
-                            isEditing={isEditing}
-                            name="category_id"
-                            onChange={handleChange}
-                        /> */}
-                    </Section>
+            {/* Main Form Container */}
+            <div className="bg-white border-4 border-black p-4 sm:p-6 lg:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <div onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                        {/* Basic Information Section */}
+                        <Section title="Basic Info">
+                            <InfoField
+                                label="Business Name"
+                                value={formData.name}
+                                isEditing={isEditing}
+                                name="name"
+                                onChange={handleChange}
+                                required
+                            />
+                            <InfoField
+                                label="Description"
+                                value={formData.description}
+                                isEditing={isEditing}
+                                name="description"
+                                onChange={handleChange}
+                                type="textarea"
+                            />
+                        </Section>
 
-                    {/* Contact Information Section */}
-                    <Section title="Contact Information">
-                        <InfoField
-                            label="Email"
-                            value={formData.email}
-                            isEditing={isEditing}
-                            name="email"
-                            onChange={handleChange}
-                            type="email"
-                            required
-                        />
-                        <InfoField
-                            label="Phone"
-                            value={formData.phone}
-                            isEditing={isEditing}
-                            name="phone"
-                            onChange={handleChange}
-                            type="tel"
-                        />
-                        <InfoField
-                            label="Website"
-                            value={formData.website}
-                            isEditing={isEditing}
-                            name="website"
-                            onChange={handleChange}
-                            type="url"
-                        />
-                    </Section>
+                        {/* Contact Information Section */}
+                        <Section title="Contact Info">
+                            <InfoField
+                                label="Email"
+                                value={formData.email}
+                                isEditing={isEditing}
+                                name="email"
+                                onChange={handleChange}
+                                type="email"
+                                required
+                            />
+                            <InfoField
+                                label="Phone"
+                                value={formData.phone}
+                                isEditing={isEditing}
+                                name="phone"
+                                onChange={handleChange}
+                                type="tel"
+                            />
+                            <InfoField
+                                label="Website"
+                                value={formData.website}
+                                isEditing={isEditing}
+                                name="website"
+                                onChange={handleChange}
+                                type="url"
+                            />
+                        </Section>
 
-                    {/* Location Information Section */}
-                    <Section title="Location Information">
-                        <InfoField
-                            label="Address"
-                            value={formData.address}
-                            isEditing={isEditing}
-                            name="address"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="Area"
-                            value={formData.area}
-                            isEditing={isEditing}
-                            name="area"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="City"
-                            value={formData.city}
-                            isEditing={isEditing}
-                            name="city"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="State"
-                            value={formData.state}
-                            isEditing={isEditing}
-                            name="state"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="Postal Code"
-                            value={formData.postal_code}
-                            isEditing={isEditing}
-                            name="postal_code"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="Country"
-                            value={formData.country}
-                            isEditing={isEditing}
-                            name="country"
-                            onChange={handleChange}
-                        />
-                    </Section>
+                        {/* Location Information Section */}
+                        <Section title="Location Info">
+                            <InfoField
+                                label="Address"
+                                value={formData.address}
+                                isEditing={isEditing}
+                                name="address"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="Area"
+                                value={formData.area}
+                                isEditing={isEditing}
+                                name="area"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="City"
+                                value={formData.city}
+                                isEditing={isEditing}
+                                name="city"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="State"
+                                value={formData.state}
+                                isEditing={isEditing}
+                                name="state"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="Postal Code"
+                                value={formData.postal_code}
+                                isEditing={isEditing}
+                                name="postal_code"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="Country"
+                                value={formData.country}
+                                isEditing={isEditing}
+                                name="country"
+                                onChange={handleChange}
+                            />
+                        </Section>
 
-                    {/* System Information Section (Read-only) */}
-                    <Section title="System Information">
-                        {/* <InfoField
-                            label="Business ID"
-                            value={formData.business_id}
-                            isEditing={false}
-                            name="business_id"
-                            onChange={handleChange}
-                        /> */}
-                        <InfoField
-                            label="Created Date"
-                            value={new Date(formData.created_at).toLocaleDateString()}
-                            isEditing={false}
-                            name="created_at"
-                            onChange={handleChange}
-                        />
-                        <InfoField
-                            label="Is Primary Location"
-                            value={formData.is_primary ? 'Yes' : 'No'}
-                            isEditing={false}
-                            name="is_primary"
-                            onChange={handleChange}
-                        />
-                    </Section>
-                </div>
-
-                {/* Submit button - only show when editing */}
-                {isEditing && (
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            type="submit"
-                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </button>
+                        {/* System Information Section */}
+                        <Section title="System Info">
+                            <InfoField
+                                label="Created Date"
+                                value={formData.created_at ? new Date(formData.created_at).toLocaleDateString() : 'N/A'}
+                                isEditing={false}
+                                name="created_at"
+                                onChange={handleChange}
+                            />
+                            <InfoField
+                                label="Primary Location"
+                                value={formData.is_primary ? 'YES' : 'NO'}
+                                isEditing={false}
+                                name="is_primary"
+                                onChange={handleChange}
+                            />
+                        </Section>
                     </div>
-                )}
-            </form>
+
+                    {/* Submit button - only show when editing */}
+                    {isEditing && (
+                        <div className="mt-8 sm:mt-12 flex justify-center">
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-blue-400 hover:bg-blue-500 border-4 border-black text-black font-black uppercase tracking-wider text-lg sm:text-xl transition-all duration-200 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
+        // </div>
     );
 }

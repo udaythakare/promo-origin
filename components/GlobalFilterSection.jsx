@@ -91,9 +91,9 @@ const GlobalFilterSection = () => {
                 // Fetch coupons based on stored area or fetch all
                 let couponResponse;
                 if (storedArea) {
-                    couponResponse = await fetchAreaCoupons(storedArea);
+                    couponResponse = await fetchAreaCoupons(storedArea, { sortBy: 'newest' });
                 } else {
-                    couponResponse = await fetchAllCoupons();
+                    couponResponse = await fetchAllCoupons({ sortBy: 'newest' });
                 }
 
                 if (couponResponse?.coupons) {

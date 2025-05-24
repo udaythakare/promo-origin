@@ -215,6 +215,8 @@ export default function Navbar() {
                         <Link href="/about" className="text-black font-bold hover:underline uppercase">
                             About
                         </Link>
+                        <Link href="/u/profile" className="text-black font-bold hover:underline uppercase">Profile</Link>
+                        <Link href="/u/profile/my-coupons" className="text-black font-bold hover:underline uppercase">My Coupon</Link>
                         {session && (
                             <Link href="/my-coupons" className="text-black font-bold hover:underline uppercase">
                                 My Coupons
@@ -246,7 +248,7 @@ export default function Navbar() {
                             {filtersOpen && (
                                 <>
                                     {/* Dark overlay */}
-                                    <div 
+                                    <div
                                         className="fixed inset-0 bg-black/50 z-50"
                                         onClick={() => setFiltersOpen(false)}
                                     />

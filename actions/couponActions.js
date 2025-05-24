@@ -40,144 +40,144 @@ import { revalidatePath } from 'next/cache';
 
 // }
 
-export async function fetchAllCoupons() {
-    const userId = await getUserId();
+// export async function fetchAllCoupons() {
+//     const userId = await getUserId();
 
-    // If no user is logged in, return all coupons without is_claimed field
-    if (!userId) {
-        const { data, error } = await supabaseAdmin.from("coupons").select("*, businesses(name)");
-        if (error) {
-            console.error("Error fetching coupons:", error);
-            return { success: false, error };
-        }
-        return {
-            success: true,
-            coupons: data || [],
-        };
-    } else {
-        // Fetch all coupons
-        const { data: couponsData, error: couponsError } = await supabaseAdmin
-            .from("coupons")
-            .select("*, businesses(name, business_locations(*)) ");
+//     // If no user is logged in, return all coupons without is_claimed field
+//     if (!userId) {
+//         const { data, error } = await supabaseAdmin.from("coupons").select("*, businesses(name)");
+//         if (error) {
+//             console.error("Error fetching coupons:", error);
+//             return { success: false, error };
+//         }
+//         return {
+//             success: true,
+//             coupons: data || [],
+//         };
+//     } else {
+//         // Fetch all coupons
+//         const { data: couponsData, error: couponsError } = await supabaseAdmin
+//             .from("coupons")
+//             .select("*, businesses(name, business_locations(*)) ");
 
-        if (couponsError) {
-            console.error("Error fetching coupons:", couponsError);
-            return { success: false, error: couponsError };
-        }
-
-
-        // // console.log(couponsData, '************************')
-
-        // Fetch user's claimed coupons
-        const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
-            .from("user_coupons")
-            .select("*")
-            .eq("user_id", userId);
-
-        if (userCouponsError) {
-            console.error("Error fetching user coupons:", userCouponsError);
-            return { success: false, error: userCouponsError };
-        }
-
-        // Create a Set of coupon IDs that the user has claimed for efficient lookup
-        const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
-
-        // Add is_claimed field to each coupon
-        const couponsWithClaimStatus = couponsData.map(coupon => ({
-            ...coupon,
-            is_claimed: claimedCouponIds.has(coupon.id)
-        }));
-
-        return {
-            success: true,
-            coupons: couponsWithClaimStatus || [],
-        };
-    }
-}
+//         if (couponsError) {
+//             console.error("Error fetching coupons:", couponsError);
+//             return { success: false, error: couponsError };
+//         }
 
 
-export async function fetchAreaCoupons(areaName) {
-    const userId = await getUserId();
+//         // // console.log(couponsData, '************************')
 
-    // First, find businesses in the specified area
-    const { data: businessLocations, error: locationsError } = await supabaseAdmin
-        .from("business_locations")
-        .select("business_id")
-        .eq("area", areaName);
+//         // Fetch user's claimed coupons
+//         const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
+//             .from("user_coupons")
+//             .select("*")
+//             .eq("user_id", userId);
 
-    // // console.log(businessLocations)
+//         if (userCouponsError) {
+//             console.error("Error fetching user coupons:", userCouponsError);
+//             return { success: false, error: userCouponsError };
+//         }
 
-    if (locationsError) {
-        console.error("Error fetching business locations:", locationsError);
-        return { success: false, error: locationsError };
-    }
+//         // Create a Set of coupon IDs that the user has claimed for efficient lookup
+//         const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
 
-    // If no businesses found in this area
-    if (!businessLocations || businessLocations.length === 0) {
-        return {
-            success: true,
-            coupons: [],
-        };
-    }
+//         // Add is_claimed field to each coupon
+//         const couponsWithClaimStatus = couponsData.map(coupon => ({
+//             ...coupon,
+//             is_claimed: claimedCouponIds.has(coupon.id)
+//         }));
 
-    // Extract business IDs
-    const businessIds = businessLocations.map(location => location.business_id);
+//         return {
+//             success: true,
+//             coupons: couponsWithClaimStatus || [],
+//         };
+//     }
+// }
 
-    // If no user is logged in, return coupons without is_claimed field
-    if (!userId) {
-        const { data, error } = await supabaseAdmin
-            .from("coupons")
-            .select("*")
-            .in("business_id", businessIds);
 
-        if (error) {
-            console.error("Error fetching area coupons:", error);
-            return { success: false, error };
-        }
+// export async function fetchAreaCoupons(areaName) {
+//     const userId = await getUserId();
 
-        return {
-            success: true,
-            coupons: data || [],
-        };
-    } else {
-        // Fetch all coupons for the specified businesses
-        const { data: couponsData, error: couponsError } = await supabaseAdmin
-            .from("coupons")
-            .select("*, businesses(name)")
-            .in("business_id", businessIds);
-        // // console.log(couponsData)
+//     // First, find businesses in the specified area
+//     const { data: businessLocations, error: locationsError } = await supabaseAdmin
+//         .from("business_locations")
+//         .select("business_id")
+//         .eq("area", areaName);
 
-        if (couponsError) {
-            console.error("Error fetching area coupons:", couponsError);
-            return { success: false, error: couponsError };
-        }
+//     // // console.log(businessLocations)
 
-        // Fetch user's claimed coupons
-        const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
-            .from("user_coupons")
-            .select("*")
-            .eq("user_id", userId);
+//     if (locationsError) {
+//         console.error("Error fetching business locations:", locationsError);
+//         return { success: false, error: locationsError };
+//     }
 
-        if (userCouponsError) {
-            console.error("Error fetching user coupons:", userCouponsError);
-            return { success: false, error: userCouponsError };
-        }
+//     // If no businesses found in this area
+//     if (!businessLocations || businessLocations.length === 0) {
+//         return {
+//             success: true,
+//             coupons: [],
+//         };
+//     }
 
-        // Create a Set of coupon IDs that the user has claimed for efficient lookup
-        const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
+//     // Extract business IDs
+//     const businessIds = businessLocations.map(location => location.business_id);
 
-        // Add is_claimed field to each coupon
-        const couponsWithClaimStatus = couponsData.map(coupon => ({
-            ...coupon,
-            is_claimed: claimedCouponIds.has(coupon.id)
-        }));
+//     // If no user is logged in, return coupons without is_claimed field
+//     if (!userId) {
+//         const { data, error } = await supabaseAdmin
+//             .from("coupons")
+//             .select("*")
+//             .in("business_id", businessIds);
 
-        return {
-            success: true,
-            coupons: couponsWithClaimStatus || [],
-        };
-    }
-}
+//         if (error) {
+//             console.error("Error fetching area coupons:", error);
+//             return { success: false, error };
+//         }
+
+//         return {
+//             success: true,
+//             coupons: data || [],
+//         };
+//     } else {
+//         // Fetch all coupons for the specified businesses
+//         const { data: couponsData, error: couponsError } = await supabaseAdmin
+//             .from("coupons")
+//             .select("*, businesses(name)")
+//             .in("business_id", businessIds);
+//         // // console.log(couponsData)
+
+//         if (couponsError) {
+//             console.error("Error fetching area coupons:", couponsError);
+//             return { success: false, error: couponsError };
+//         }
+
+//         // Fetch user's claimed coupons
+//         const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
+//             .from("user_coupons")
+//             .select("*")
+//             .eq("user_id", userId);
+
+//         if (userCouponsError) {
+//             console.error("Error fetching user coupons:", userCouponsError);
+//             return { success: false, error: userCouponsError };
+//         }
+
+//         // Create a Set of coupon IDs that the user has claimed for efficient lookup
+//         const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
+
+//         // Add is_claimed field to each coupon
+//         const couponsWithClaimStatus = couponsData.map(coupon => ({
+//             ...coupon,
+//             is_claimed: claimedCouponIds.has(coupon.id)
+//         }));
+
+//         return {
+//             success: true,
+//             coupons: couponsWithClaimStatus || [],
+//         };
+//     }
+// }
 
 // export async function claimCoupon(couponId) {
 //     const userId = await getUserId();
@@ -274,6 +274,239 @@ export async function fetchAreaCoupons(areaName) {
 //         coupon: data,
 //     };
 // }
+
+
+export async function fetchAllCoupons(options = {}) {
+    const {
+        sortBy = 'newest', // 'newest', 'oldest'
+        dateFilter = null, // { after: '2024-01-01', before: '2024-12-31' }
+        limit = null
+    } = options;
+
+    const userId = await getUserId();
+
+    // Build the base query
+    let query = supabaseAdmin.from("coupons");
+
+    // If no user is logged in, return all coupons without is_claimed field
+    if (!userId) {
+        query = query.select("*, businesses(name)");
+    } else {
+        query = query.select("*, businesses(name, business_locations(*))");
+    }
+
+    // Apply date filtering if provided
+    if (dateFilter) {
+        if (dateFilter.after) {
+            query = query.gte('created_at', dateFilter.after);
+        }
+        if (dateFilter.before) {
+            query = query.lte('created_at', dateFilter.before);
+        }
+    }
+
+    // Apply sorting
+    if (sortBy === 'newest') {
+        query = query.order('created_at', { ascending: false });
+    } else if (sortBy === 'oldest') {
+        query = query.order('created_at', { ascending: true });
+    }
+
+    // Apply limit if provided
+    if (limit) {
+        query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error("Error fetching coupons:", error);
+        return { success: false, error };
+    }
+
+    if (!userId) {
+        return {
+            success: true,
+            coupons: data || [],
+        };
+    }
+
+    // Fetch user's claimed coupons
+    const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
+        .from("user_coupons")
+        .select("*")
+        .eq("user_id", userId);
+
+    if (userCouponsError) {
+        console.error("Error fetching user coupons:", userCouponsError);
+        return { success: false, error: userCouponsError };
+    }
+
+    // Create a Set of coupon IDs that the user has claimed for efficient lookup
+    const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
+
+    // Add is_claimed field to each coupon
+    const couponsWithClaimStatus = data.map(coupon => ({
+        ...coupon,
+        is_claimed: claimedCouponIds.has(coupon.id)
+    }));
+
+    return {
+        success: true,
+        coupons: couponsWithClaimStatus || [],
+    };
+}
+
+export async function fetchAreaCoupons(areaName, options = {}) {
+    const {
+        sortBy = 'newest', // 'newest', 'oldest'
+        dateFilter = null, // { after: '2024-01-01', before: '2024-12-31' }
+        limit = null
+    } = options;
+
+    const userId = await getUserId();
+
+    // First, find businesses in the specified area
+    const { data: businessLocations, error: locationsError } = await supabaseAdmin
+        .from("business_locations")
+        .select("business_id")
+        .eq("area", areaName);
+
+    if (locationsError) {
+        console.error("Error fetching business locations:", locationsError);
+        return { success: false, error: locationsError };
+    }
+
+    // If no businesses found in this area
+    if (!businessLocations || businessLocations.length === 0) {
+        return {
+            success: true,
+            coupons: [],
+        };
+    }
+
+    // Extract business IDs
+    const businessIds = businessLocations.map(location => location.business_id);
+
+    // Build the base query
+    let query = supabaseAdmin
+        .from("coupons")
+        .in("business_id", businessIds);
+
+    // Add select based on user status
+    if (!userId) {
+        query = query.select("*");
+    } else {
+        query = query.select("*, businesses(name)");
+    }
+
+    // Apply date filtering if provided
+    if (dateFilter) {
+        if (dateFilter.after) {
+            query = query.gte('created_at', dateFilter.after);
+        }
+        if (dateFilter.before) {
+            query = query.lte('created_at', dateFilter.before);
+        }
+    }
+
+    // Apply sorting
+    if (sortBy === 'newest') {
+        query = query.order('created_at', { ascending: false });
+    } else if (sortBy === 'oldest') {
+        query = query.order('created_at', { ascending: true });
+    }
+
+    // Apply limit if provided
+    if (limit) {
+        query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error("Error fetching area coupons:", error);
+        return { success: false, error };
+    }
+
+    if (!userId) {
+        return {
+            success: true,
+            coupons: data || [],
+        };
+    }
+
+    // Fetch user's claimed coupons
+    const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
+        .from("user_coupons")
+        .select("*")
+        .eq("user_id", userId);
+
+    if (userCouponsError) {
+        console.error("Error fetching user coupons:", userCouponsError);
+        return { success: false, error: userCouponsError };
+    }
+
+    // Create a Set of coupon IDs that the user has claimed for efficient lookup
+    const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
+
+    // Add is_claimed field to each coupon
+    const couponsWithClaimStatus = data.map(coupon => ({
+        ...coupon,
+        is_claimed: claimedCouponIds.has(coupon.id)
+    }));
+
+    return {
+        success: true,
+        coupons: couponsWithClaimStatus || [],
+    };
+}
+
+// Additional helper functions for specific use cases
+
+export async function fetchRecentCoupons(days = 7) {
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - days);
+
+    return await fetchAllCoupons({
+        sortBy: 'newest',
+        dateFilter: {
+            after: dateThreshold.toISOString()
+        }
+    });
+}
+
+export async function fetchCouponsFromDateRange(startDate, endDate) {
+    return await fetchAllCoupons({
+        sortBy: 'newest',
+        dateFilter: {
+            after: startDate,
+            before: endDate
+        }
+    });
+}
+
+export async function fetchLatestCoupons(limit = 10) {
+    return await fetchAllCoupons({
+        sortBy: 'newest',
+        limit: limit
+    });
+}
+
+export async function fetchAreaCouponsRecent(areaName, days = 7) {
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - days);
+
+    return await fetchAreaCoupons(areaName, {
+        sortBy: 'newest',
+        dateFilter: {
+            after: dateThreshold.toISOString()
+        }
+    });
+}
+
+
+
 export async function claimCoupon(couponId, redeemMinutes = 0) {
     const userId = await getUserId();
     if (!userId) {

@@ -1,4 +1,8 @@
+'use client';
 import React from 'react'
+import Lottie from 'lottie-react'
+// import loadingAnimation from '/animations/success-animation.json' // Adjust path to your file
+import loadingAnimation from '@/public/animations/success-animation.json'
 
 const NeoBrutalistLoading = () => {
     return (
@@ -6,22 +10,20 @@ const NeoBrutalistLoading = () => {
             <div className="relative">
                 {/* Main loading container */}
                 <div className="bg-white border-4 border-black shadow-[8px_8px_0_black] p-8 rounded-lg">
-                    {/* Animated blocks */}
-                    <div className="flex space-x-4 justify-center items-center">
-                        {[1, 2, 3, 4].map((block) => (
-                            <div
-                                key={block}
-                                className={`w-12 h-12 bg-blue-600 border-2 border-black animate-bounce`}
-                                style={{
-                                    animationDelay: `${block * 0.2}s`,
-                                    animationDuration: '0.8s'
-                                }}
+                    {/* Lottie Animation */}
+                    <div className="flex justify-center items-center mb-6">
+                        <div className="w-32 h-32 border-4 border-black bg-yellow-300 p-2 shadow-[4px_4px_0_black]">
+                            <Lottie
+                                animationData={loadingAnimation}
+                                loop={true}
+                                autoplay={true}
+                                style={{ width: '100%', height: '100%' }}
                             />
-                        ))}
+                        </div>
                     </div>
 
                     {/* Loading text */}
-                    <div className="mt-6 text-center">
+                    <div className="text-center">
                         <span className="text-2xl font-bold text-black uppercase tracking-wider">
                             Loading
                             <span className="animate-pulse">...</span>

@@ -13,7 +13,7 @@ export async function fetchUserData() {
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    Cookie: cookies().toString()
+                    Cookie: (await cookies()).toString()
                 },
                 // Configure caching directly in fetch options
                 cache: 'force-cache', // Enables caching

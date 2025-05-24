@@ -36,7 +36,7 @@ export async function getAuthToken(options = {}) {
         }
 
         // For server components using the newer Next.js cookies() API
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const tokenCookie = cookieStore.get(cookieName || 'next-auth.session-token');
 
         if (!tokenCookie?.value) {

@@ -11,7 +11,8 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export default async function EditBusinessPage({ params }) {
+export default async function EditBusinessPage(props) {
+    const params = await props.params;
     const { id } = params;
 
     // Fetch business data

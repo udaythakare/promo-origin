@@ -1,5 +1,4 @@
 import { getBusinessInfo } from '@/actions/businessInfoAction';
-// import BusinessInfoForm from '@/components/BusinessInfoForm';
 import React from 'react';
 import BusinessInfoForm from './components/BusinessInfoForm';
 

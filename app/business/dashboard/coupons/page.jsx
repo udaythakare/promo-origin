@@ -4,9 +4,8 @@ import AddCouponButton from './components/AddCouponButton';
 import { Search } from './components/Search';
 import CouponsList from './components/CouponList';
 
-export default async function CouponsPage({
-    searchParams,
-}) {
+export default async function CouponsPage(props) {
+    const searchParams = await props.searchParams;
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
 

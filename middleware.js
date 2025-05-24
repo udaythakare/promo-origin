@@ -1,7 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 
-// Define paths that should be accessible without authenticati
+// Define paths that should be accessible without authentication
 const publicPaths = [
     '/login',
     '/register',
@@ -21,9 +21,10 @@ const publicPaths = [
 
 // Helper function to check if the current path is public
 function isPublicPath(path) {
-    return publicPaths.some(publicPath =>
-        path === publicPath || path.startsWith(`${publicPath}/`) || path.startsWith(publicPath)
-    );
+    return publicPaths.some(publicPath => {
+        // For exact matches or paths that start with the public path
+        return path === publicPath || path.startsWith(`${publicPath}/`);
+    });
 }
 
 export async function middleware(request) {
