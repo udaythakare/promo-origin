@@ -96,7 +96,6 @@ export default function ClaimedCoupons({ data: initialData, onDataUpdate }) {
                             console.log('Setting confirmation for currently open QR modal');
                             setShowConfirmation(true);
 
-                            revalidateMyCouponPage();
                             // Auto-close modal after animation
                             setTimeout(() => {
                                 setIsQROpen(false);
@@ -104,6 +103,8 @@ export default function ClaimedCoupons({ data: initialData, onDataUpdate }) {
                                 setSelectedCoupon(null);
                             }, 3000);
                         }
+
+                        revalidateMyCouponPage();
                     }
                 }
             )

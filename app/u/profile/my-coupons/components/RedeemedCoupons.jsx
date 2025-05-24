@@ -36,6 +36,25 @@ const RedeemedCoupons = ({ data }) => {
         setScrollPosition(e.target.scrollLeft);
     };
 
+    const refreshData = async () => {
+        try {
+            const response = await fetch('/api/profile/user-redeemed-coupon', {
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const newData = await response.json();
+                setData(newData);
+                if (onDataUpdate) {
+                    onDataUpdate(newData);
+                }
+                console.log('Data refreshed successfully');
+            }
+        } catch (error) {
+            console.error('Failed to refresh data:', error);
+        }
+    };
+
     return (
         <div className="bg-blue-300 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] overflow-hidden max-w-full mx-auto">
             <div className="p-4 border-b-4 border-black bg-blue-400">
@@ -43,6 +62,12 @@ const RedeemedCoupons = ({ data }) => {
                     <ShoppingBag className="h-5 w-5 mr-2" />
                     YOUR REDEEMED COUPONS
                 </h2>
+                <button
+                    onClick={refreshData}
+                    className="bg-yellow-300 text-black font-black px-3 py-1 border-2 border-black text-sm hover:bg-yellow-400 transition"
+                >
+                    Refresh
+                </button>
             </div>
 
             <div className="relative">
