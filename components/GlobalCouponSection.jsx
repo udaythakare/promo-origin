@@ -16,6 +16,8 @@ import { joinAddress } from '@/utils/addressUtils';
 import QRModal from '@/app/u/profile/components/QRModal';
 import { getUserId } from '@/helpers/userHelper';
 import { ConfirmationModal } from './ConfirmationModal';
+import { supabase } from '@/lib/supabase';
+import { revalidateHomeCouponPage } from '@/actions/revalidateActions';
 
 const GlobalCouponSection = () => {
     const [coupons, setCoupons] = useState([]);
@@ -329,6 +331,91 @@ const GlobalCouponSection = () => {
         return `${Math.min((current / max) * 100, 100)}%`;
     };
 
+
+    useEffect(() => {
+        let channel;
+
+        const setupRealtimeSubscription = async () => {
+            try {
+                const userId = await getUserId();
+
+                if (!userId) {
+                    console.log('No userId, skipping subscription setup');
+                    return;
+                }
+
+                console.log('Setting up realtime subscription for user:', userId);
+
+                channel = supabase
+                    .channel(`user_coupons_changes_${userId}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'user_coupons',
+                            filter: `user_id=eq.${userId}`
+                        },
+                        (payload) => {
+                            console.log('Realtime payload received:', payload);
+
+                            // Refresh the coupon data when any change occurs
+                            refreshCouponData();
+
+                            const updatedCoupon = payload.new;
+
+                            // Handle UI updates for redeemed coupons
+                            if (payload.eventType === 'UPDATE' && updatedCoupon?.coupon_status === 'redeemed') {
+                                console.log('Coupon redeemed:', updatedCoupon);
+
+                                // Check if this is the currently selected coupon in QR modal
+                                if (isQROpen && selectedCoupon && selectedCoupon.id === updatedCoupon.coupon_id) {
+                                    console.log('Coupon redeemed for currently open QR modal');
+
+                                    // Show success message and close modal
+                                    // alert('Coupon successfully redeemed!');
+                                    setShowConfirmation(true)
+
+                                    setTimeout(() => {
+                                        setIsQROpen(false);
+                                        setSelectedCoupon(null);
+                                        setQrData('');
+                                        setShowConfirmation(false);
+                                    }, 1000);
+                                }
+                                revalidateHomeCouponPage();
+                            }
+                        }
+                    )
+                    .subscribe((status) => {
+                        console.log('Subscription status:', status);
+
+                        if (status === 'SUBSCRIBED') {
+                            console.log('Successfully subscribed to realtime updates');
+                        } else if (status === 'CHANNEL_ERROR') {
+                            console.error('Channel subscription error');
+                        } else if (status === 'TIMED_OUT') {
+                            console.error('Channel subscription timed out');
+                        }
+                    });
+
+            } catch (error) {
+                console.error('Error setting up realtime subscription:', error);
+            }
+        };
+
+        setupRealtimeSubscription();
+
+        // Cleanup function
+        return () => {
+            if (channel) {
+                console.log('Cleaning up subscription');
+                supabase.removeChannel(channel);
+            }
+        };
+    }, [isQROpen, selectedCoupon, refreshCouponData]); // Include dependencies
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
     return (
         <div className="container mx-auto py-6 px-4">
             {/* Error display */}
@@ -543,6 +630,7 @@ const GlobalCouponSection = () => {
                     onClose={() => setIsQROpen(false)}
                     qrValue={qrData}
                     couponTitle={selectedCoupon?.title || 'Coupon'}
+                    showConfirmation={showConfirmation}
                 />
             )}
 

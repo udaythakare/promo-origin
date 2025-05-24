@@ -4,3 +4,7 @@ import { revalidatePath } from "next/cache"
 export async function revalidateMyCouponPage() {
     revalidatePath("/u/profile/my-coupons")
 }
+
+export async function revalidateHomeCouponPage() {
+    revalidatePath("/coupons")
+}
