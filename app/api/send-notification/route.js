@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+// import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase';
 import webpush from 'web-push';
 
 webpush.setVapidDetails(
@@ -11,7 +12,7 @@ export async function POST(request) {
     try {
         const { userId, title, body, url } = await request.json();
 
-        const supabase = createClient();
+        // const supabase = createClient();
 
         // Get user's push subscription
         const { data: subscriptions, error } = await supabase
