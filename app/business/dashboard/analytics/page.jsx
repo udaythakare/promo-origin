@@ -4,13 +4,48 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Package, Users, CheckCircle, X } from 'lucide-react';
 import { getAllVendorCoupons } from './actions/analyticsActions';
+// Import your server action if using the server action approach
+// import { fetchCouponUsers } from './actions/couponActions';
 
 const CouponAnalyticsTable = ({ coupons }) => {
     const [selectedCoupon, setSelectedCoupon] = useState(null);
     const [modalType, setModalType] = useState(null); // 'claims' or 'redemptions'
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const openModal = (coupon, type) => {
+    const openModal = async (coupon, type) => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Different endpoints for claims vs redemptions
+            const endpoint = type === 'claims' ? 'claimed-coupon-users' : 'redeemed-coupon-users';
+            const url = new URL(`${process.env.NEXT_PUBLIC_SITE_URL}/api/analytics/${endpoint}`);
+            url.searchParams.append('couponId', coupon.id);
+
+            const response = await fetch(url.toString(), {
+                method: "GET",
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                setUsers(userData);
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to fetch user data:', errorData.message);
+                setError(errorData.message || 'Failed to fetch user data');
+                setUsers([]);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            setError('Network error occurred');
+            setUsers([]);
+        } finally {
+            setLoading(false);
+        }
+
         setSelectedCoupon(coupon);
         setModalType(type);
         setIsModalOpen(true);
@@ -20,13 +55,6 @@ const CouponAnalyticsTable = ({ coupons }) => {
     const totalMaxClaims = coupons.reduce((sum, coupon) => sum + coupon.max_claims, 0);
     const totalCurrentClaims = coupons.reduce((sum, coupon) => sum + coupon.current_claims, 0);
     const totalRedemptions = coupons.reduce((sum, coupon) => sum + coupon.current_redemption, 0);
-
-    // Mock user data for demonstration (in a real app, you would fetch this data)
-    const mockUsers = [
-        { id: 1, name: "John Doe", email: "john@example.com", claimed_at: "2025-05-02T14:30:00" },
-        { id: 2, name: "Jane Smith", email: "jane@example.com", claimed_at: "2025-05-02T16:45:00" },
-        { id: 3, name: "Bob Johnson", email: "bob@example.com", claimed_at: "2025-05-03T09:15:00" }
-    ];
 
     return (
         <div className="space-y-8">
@@ -99,17 +127,19 @@ const CouponAnalyticsTable = ({ coupons }) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-center border-b-2 border-black">
                                     <button
                                         onClick={() => openModal(coupon, 'claims')}
-                                        className="bg-blue-400 text-black hover:bg-blue-500 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                                        disabled={loading}
+                                        className="bg-blue-400 text-black hover:bg-blue-500 disabled:opacity-50 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                                     >
-                                        {coupon.current_claims}
+                                        {loading ? '...' : coupon.current_claims}
                                     </button>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-center border-b-2 border-black">
                                     <button
                                         onClick={() => openModal(coupon, 'redemptions')}
-                                        className="bg-pink-400 text-black hover:bg-pink-500 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                                        disabled={loading}
+                                        className="bg-pink-400 text-black hover:bg-pink-500 disabled:opacity-50 font-bold px-4 py-1 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                                     >
-                                        {coupon.current_redemption}
+                                        {loading ? '...' : coupon.current_redemption}
                                     </button>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-black border-b-2 border-black">
@@ -137,19 +167,33 @@ const CouponAnalyticsTable = ({ coupons }) => {
                             </button>
                         </div>
                         <div className="p-4 max-h-96 overflow-y-auto">
-                            {((modalType === 'claims' && selectedCoupon.current_claims > 0) ||
-                                (modalType === 'redemptions' && selectedCoupon.current_redemption > 0)) ? (
+                            {loading ? (
+                                <p className="text-center py-4 text-black font-bold">Loading...</p>
+                            ) : error ? (
+                                <p className="text-center py-4 text-red-600 font-bold">Error: {error}</p>
+                            ) : users.length > 0 ? (
                                 <div className="space-y-4">
-                                    {mockUsers.slice(0, modalType === 'claims' ?
-                                        selectedCoupon.current_claims : selectedCoupon.current_redemption).map(user => (
-                                            <div key={user.id} className="p-3 border-3 border-black bg-purple-100 transform -rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                                <p className="font-bold text-black">{user.name}</p>
-                                                <p className="text-sm text-black">{user.email}</p>
-                                                <p className="text-xs text-black font-medium">
-                                                    {modalType === 'claims' ? 'Claimed' : 'Redeemed'}: {new Date(user.claimed_at).toLocaleString()}
-                                                </p>
+                                    {users.map(userCoupon => (
+                                        <div key={userCoupon.claimId} className="p-3 border-3 border-black bg-purple-100 transform -rotate-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                            <p className="font-bold text-black">
+                                                {userCoupon.user.fullName || userCoupon.user.username}
+                                            </p>
+                                            <p className="text-sm text-black">{userCoupon.user.email}</p>
+                                            {userCoupon.user.mobileNumber && (
+                                                <p className="text-sm text-black">📱 {userCoupon.user.mobileNumber}</p>
+                                            )}
+                                            <div className="text-xs text-black font-medium mt-2 space-y-1">
+                                                <p>Status: <span className="font-bold">{userCoupon.couponStatus || 'Claimed'}</span></p>
+                                                {userCoupon.remainingClaimTime && (
+                                                    <p>Valid Until: {new Date(userCoupon.remainingClaimTime).toLocaleString()}</p>
+                                                )}
+                                                {userCoupon.isExpired && (
+                                                    <p className="text-red-600 font-bold">⚠️ Expired</p>
+                                                )}
+                                                <p>User Since: {new Date(userCoupon.user.createdAt).toLocaleDateString()}</p>
                                             </div>
-                                        ))}
+                                        </div>
+                                    ))}
                                 </div>
                             ) : (
                                 <p className="text-center py-4 text-black font-bold">

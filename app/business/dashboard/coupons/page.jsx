@@ -1,4 +1,4 @@
-// app/coupons/page.tsx - Main coupons page (Server Component) with Neo-Brutalism theme
+// app/coupons/page.jsx - Main coupons page (Server Component) with Neo-Brutalism theme
 import { Suspense } from 'react';
 import AddCouponButton from './components/AddCouponButton';
 import { Search } from './components/Search';

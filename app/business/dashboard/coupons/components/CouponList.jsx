@@ -1,36 +1,19 @@
-// CouponsList.tsx - Neo-Brutalism style
+import { getUserId } from '@/helpers/userHelper';
 import { getAllCoupons } from '../actions/couponActions';
-import CouponCard from './CouponCard';
-import Pagination from './Pagination';
+import CouponsListClient from './CouponsListClient';
 
-export default async function CouponsList({
-    query,
-    currentPage
-}) {
+export default async function CouponsList({ query, currentPage }) {
     const couponsPerPage = 10;
     const { coupons, totalCount } = await getAllCoupons(query, currentPage, couponsPerPage);
-    const totalPages = Math.ceil(totalCount / couponsPerPage);
-
-    if (coupons.length === 0) {
-        return (
-            <div className="bg-orange-100 border-4 border-black p-8 text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-black font-bold text-xl">NO COUPONS FOUND. CREATE YOUR FIRST COUPON TO GET STARTED!</p>
-            </div>
-        );
-    }
+    const userId = await getUserId();
 
     return (
-        <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {coupons.map((coupon) => (
-                    <CouponCard key={coupon.id} coupon={coupon} />
-                ))}
-            </div>
-            {totalPages > 1 && (
-                <div className="mt-12">
-                    <Pagination totalPages={totalPages} currentPage={currentPage} />
-                </div>
-            )}
-        </div>
+        <CouponsListClient
+            initialCoupons={coupons}
+            totalCount={totalCount}
+            currentPage={currentPage}
+            userId={userId}
+            couponsPerPage={couponsPerPage}
+        />
     );
 }

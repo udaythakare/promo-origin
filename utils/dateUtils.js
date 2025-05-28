@@ -19,5 +19,19 @@ export const prepareFormDataForSubmission = (formData) => {
         }
     }
 
+    if (submissionData.redemption_start_time) {
+        if (/^\d{2}: \d{2}$/.test(submissionData.redemption_start_time)) {
+            return submissionData.redemption_start_time + ":00"
+        }
+
+        if (/^\d{2}:\d{2}\d{2}$/.test(submissionData.redemption_end_time)) {
+            return submissionData.redemption_end_time
+        }
+    }
+
+    if (submissionData.redemption_end_time) {
+
+    }
+
     return submissionData;
 };

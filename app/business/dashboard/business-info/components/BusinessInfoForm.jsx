@@ -1,5 +1,6 @@
 'use client';
 
+import { updateBusinessInfo } from '@/actions/businessInfoAction';
 import { useState } from 'react';
 
 // Component to display individual fields
@@ -77,10 +78,15 @@ export default function BusinessInfoForm({ businessInfo = {} }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(formData, 'this is formdata')
         setIsSubmitting(true);
         try {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const res = await updateBusinessInfo(formData)
+            console.log(res, 'this is data')
+
 
             setMessage({ type: 'success', text: 'BUSINESS INFO UPDATED SUCCESSFULLY!' });
             setIsEditing(false);
@@ -229,23 +235,7 @@ export default function BusinessInfoForm({ businessInfo = {} }) {
                             />
                         </Section>
 
-                        {/* System Information Section */}
-                        <Section title="System Info">
-                            <InfoField
-                                label="Created Date"
-                                value={formData.created_at ? new Date(formData.created_at).toLocaleDateString() : 'N/A'}
-                                isEditing={false}
-                                name="created_at"
-                                onChange={handleChange}
-                            />
-                            <InfoField
-                                label="Primary Location"
-                                value={formData.is_primary ? 'YES' : 'NO'}
-                                isEditing={false}
-                                name="is_primary"
-                                onChange={handleChange}
-                            />
-                        </Section>
+
                     </div>
 
                     {/* Submit button - only show when editing */}

@@ -66,7 +66,10 @@ export async function createCoupon(formData) {
                 coupon_type: formData.coupon_type,
                 redeem_duration: formData.redeem_duration || null,
                 max_claims: formData.max_claims || null,
-                user_id: session.user.id
+                user_id: session.user.id,
+                redemption_time_type: formData.redemption_time_type,
+                redemption_end_time: formData.redemption_end_time,
+                redemption_start_time: formData.redemption_start_time
             })
             .select('id')
             .single();
@@ -106,7 +109,9 @@ export async function updateCoupon(id, formData) {
         let formattedData = {
             ...formData,
             start_date: formatDateForDatabase(formData.start_date),
-            end_date: formatDateForDatabase(formData.end_date)
+            end_date: formatDateForDatabase(formData.end_date),
+            redemption_end_time: formatTimeForDatabase(formData.redemption_end_time),
+            redemption_start_time: formatTimeForDatabase(formData.redemption_start_time)
         };
 
         console.log('Formatted for database:', {
@@ -127,7 +132,10 @@ export async function updateCoupon(id, formData) {
                 coupon_type: formattedData.coupon_type,
                 redeem_duration: formattedData.redeem_duration || null,
                 max_claims: formattedData.max_claims || null,
-                user_id: session.user.id
+                user_id: session.user.id,
+                redemption_time_type: formData.redemption_time_type,
+                redemption_end_time: formData.redemption_end_time,
+                redemption_start_time: formData.redemption_start_time
             })
             .eq('id', id);
 
@@ -186,6 +194,20 @@ function formatDateForDatabase(dateValue) {
     const seconds = String(dateObj.getSeconds()).padStart(2, '0');
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function formatTimeForDatabase(timeValue) {
+    console.log(timeValue)
+    if (/^\d{2}:\d{2}$/.test(timeValue)) {
+        return timeValue + ":00"
+    }
+
+    if (/^\d{2}:\d{2}:\d{2}$/.test(timeValue)) {
+        return timeValue
+    }
+
+
+    throw new Error("Invalid time format couponActions ")
 }
 
 export async function getBusinessLocations(businessId) {

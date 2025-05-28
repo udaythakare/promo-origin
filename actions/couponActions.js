@@ -366,7 +366,7 @@ export async function fetchAreaCoupons(areaName, options = {}) {
 
     const userId = await getUserId();
 
-    // First, find businesses in the specified area
+    // Step 1: Find businesses in the specified area
     const { data: businessLocations, error: locationsError } = await supabaseAdmin
         .from("business_locations")
         .select("business_id")
@@ -377,47 +377,41 @@ export async function fetchAreaCoupons(areaName, options = {}) {
         return { success: false, error: locationsError };
     }
 
-    // If no businesses found in this area
     if (!businessLocations || businessLocations.length === 0) {
-        return {
-            success: true,
-            coupons: [],
-        };
+        return { success: true, coupons: [] };
     }
 
-    // Extract business IDs
     const businessIds = businessLocations.map(location => location.business_id);
+    if (businessIds.length === 0) {
+        return { success: true, coupons: [] };
+    }
 
-    // Build the base query
+    // Step 2: Build the base coupon query
     let query = supabaseAdmin
-        .from("coupons")
-        .in("business_id", businessIds);
+        .from("coupons");
 
-    // Add select based on user status
-    if (!userId) {
-        query = query.select("*");
-    } else {
-        query = query.select("*, businesses(name)");
+    // Add select based on user login status
+    query = userId
+        ? query.select("*, businesses(name)")
+        : query.select("*");
+
+    // Filter by business_ids using .in AFTER select
+    query = query.in("business_id", businessIds);
+
+    // Step 3: Apply optional filters
+    if (dateFilter?.after) {
+        query = query.gte("created_at", dateFilter.after);
+    }
+    if (dateFilter?.before) {
+        query = query.lte("created_at", dateFilter.before);
     }
 
-    // Apply date filtering if provided
-    if (dateFilter) {
-        if (dateFilter.after) {
-            query = query.gte('created_at', dateFilter.after);
-        }
-        if (dateFilter.before) {
-            query = query.lte('created_at', dateFilter.before);
-        }
+    if (sortBy === "newest") {
+        query = query.order("created_at", { ascending: false });
+    } else if (sortBy === "oldest") {
+        query = query.order("created_at", { ascending: true });
     }
 
-    // Apply sorting
-    if (sortBy === 'newest') {
-        query = query.order('created_at', { ascending: false });
-    } else if (sortBy === 'oldest') {
-        query = query.order('created_at', { ascending: true });
-    }
-
-    // Apply limit if provided
     if (limit) {
         query = query.limit(limit);
     }
@@ -436,10 +430,10 @@ export async function fetchAreaCoupons(areaName, options = {}) {
         };
     }
 
-    // Fetch user's claimed coupons
+    // Step 4: Check claimed coupons by user
     const { data: userCoupons, error: userCouponsError } = await supabaseAdmin
         .from("user_coupons")
-        .select("*")
+        .select("coupon_id")
         .eq("user_id", userId);
 
     if (userCouponsError) {
@@ -447,10 +441,8 @@ export async function fetchAreaCoupons(areaName, options = {}) {
         return { success: false, error: userCouponsError };
     }
 
-    // Create a Set of coupon IDs that the user has claimed for efficient lookup
     const claimedCouponIds = new Set(userCoupons.map(uc => uc.coupon_id));
 
-    // Add is_claimed field to each coupon
     const couponsWithClaimStatus = data.map(coupon => ({
         ...coupon,
         is_claimed: claimedCouponIds.has(coupon.id)
@@ -458,9 +450,10 @@ export async function fetchAreaCoupons(areaName, options = {}) {
 
     return {
         success: true,
-        coupons: couponsWithClaimStatus || [],
+        coupons: couponsWithClaimStatus,
     };
 }
+
 
 // Additional helper functions for specific use cases
 
@@ -516,7 +509,7 @@ export async function claimCoupon(couponId, redeemMinutes = 0) {
     // Fetch coupon details including type and end_date
     const { data: couponData, error: couponError } = await supabaseAdmin
         .from("coupons")
-        .select("user_id, coupon_type, end_date")
+        .select("user_id, coupon_type, end_date, redemption_time_type, redemption_start_time, redemption_end_time")
         .eq("id", couponId)
         .single();
 
@@ -550,6 +543,34 @@ export async function claimCoupon(couponId, redeemMinutes = 0) {
     if (checkError && checkError.code !== "PGRST116") {
         console.error("Error checking existing coupon:", checkError);
         return { success: false, error: checkError };
+    }
+
+    // Check time restrictions for specific hours redemption
+    if (couponData.redemption_time_type === "specific_hours") {
+        const now = new Date();
+        const currentTime = now.toTimeString().slice(0, 8); // Get HH:MM:SS format
+
+        const startTime = couponData.redemption_start_time;
+        const endTime = couponData.redemption_end_time;
+
+        // Function to compare time strings in HH:MM:SS format
+        const isTimeInRange = (current, start, end) => {
+            // Handle case where end time is next day (e.g., 22:00 to 06:00)
+            if (start <= end) {
+                // Same day range (e.g., 09:00 to 17:00)
+                return current >= start && current <= end;
+            } else {
+                // Cross midnight range (e.g., 22:00 to 06:00)
+                return current >= start || current <= end;
+            }
+        };
+
+        if (!isTimeInRange(currentTime, startTime, endTime)) {
+            return {
+                success: false,
+                message: `Coupon can only be claimed between ${startTime} and ${endTime}`
+            };
+        }
     }
 
     // Calculate expiration time based on coupon type

@@ -1,20 +1,26 @@
-"use client";
 import React from "react";
 import GlobalFilterSection from "@/components/GlobalFilterSection";
 import GlobalCouponSection from "@/components/GlobalCouponSection";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import Link from "next/link";
 import Image from "next/image";
+import { getUserId } from "@/helpers/userHelper";
 
-const CouponPage = () => {
+const CouponPage = async () => {
+  const userId = await getUserId();
   return (
     <div className="min-h-screen pb-40">
       {/* <GlobalFilterSection /> */}
       {/* Business Application Card */}
       <div className="p-4">
         <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
-        <Image src="/business.png" alt="Business Application Card" className="w-28 h-auto absolute bottom-0 -right-4" width={100} height={100} />
-
+          <Image
+            src="/business.png"
+            alt="Business Application Card"
+            className="w-28 h-auto absolute bottom-0 -right-4"
+            width={100}
+            height={100}
+          />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
             <div className="relative z-10">
               <h2 className="text-xl font-black mb-2">
@@ -37,20 +43,7 @@ const CouponPage = () => {
           </div>
         </div>
       </div>
-     
-      <GlobalCouponSection />
-
-      {/* Loading animation keyframes */}
-      <style jsx>{`
-        @keyframes loading {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
+      <GlobalCouponSection userId={userId} />
     </div>
   );
 };

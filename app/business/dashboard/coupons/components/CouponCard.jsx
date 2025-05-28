@@ -1,14 +1,12 @@
-// CouponCard.tsx - Neo-Brutalism style
+'use client';
 import Link from 'next/link';
 import CouponActions from './CouponActions';
 import { formatDate } from '@/helpers/dateHelpers';
-import Image from 'next/image';
+import ClaimsCounter from './ClaimCounter';
 
-export default function CouponCard({ coupon }) {
+export default function CouponCard({ coupon, userId }) {
+    // Remove the realtime hook - just use the coupon prop directly
     const isExpired = new Date(coupon.end_date) < new Date();
-    const usageStatus = coupon.max_claims
-        ? `${coupon.current_claims}/${coupon.max_claims} claimed`
-        : 'Unlimited claims';
 
     // Calculate days remaining
     const endDate = new Date(coupon.end_date);
@@ -24,25 +22,13 @@ export default function CouponCard({ coupon }) {
 
     return (
         <div className="bg-white border-4 border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 transform hover:-translate-y-1">
-            {coupon.image_url && (
-                <div className="relative h-48 w-full overflow-hidden border-b-4 border-black">
-                    <Image
-                        src={coupon.image_url}
-                        alt={coupon.title}
-                        fill
-                        className="object-cover"
-                    />
-                    <div className="absolute top-0 right-0 p-2 bg-yellow-400 text-black font-black border-l-4 border-b-4 border-black">
-                        {coupon.title}
-                    </div>
-                </div>
-            )}
             <div className="p-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="font-bold text-xl text-black">{coupon.description}</h3>
+                        <h3 className="font-bold text-2xl text-black mb-2">{coupon.title}</h3>
+                        <p className="font-medium text-lg text-black">{coupon.description}</p>
                         {coupon.coupon_type && (
-                            <p className="text-sm mt-1 font-medium uppercase">
+                            <p className="text-sm mt-2 font-medium uppercase">
                                 Type: <span className="font-bold">{coupon.coupon_type.replace(/_/g, ' ')}</span>
                             </p>
                         )}
@@ -51,11 +37,13 @@ export default function CouponCard({ coupon }) {
                         {!coupon.is_active ? 'DISABLED' : isExpired ? 'EXPIRED' : 'ACTIVE'}
                     </div>
                 </div>
-
                 <div className="mt-4 bg-blue-100 border-2 border-black p-3">
-                    <p className="text-black font-medium">
-                        {usageStatus}
-                    </p>
+                    <ClaimsCounter
+                        couponId={coupon.id}
+                        initialCount={coupon.current_claims}
+                        maxClaims={coupon.max_claims}
+                        userId={userId}
+                    />
                     <p className="mt-1">
                         Valid: {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
                     </p>
@@ -70,10 +58,11 @@ export default function CouponCard({ coupon }) {
                         </p>
                     )}
                 </div>
-
-                <div className="mt-4 border-t-2 border-black pt-3">
-                    <CouponActions couponId={coupon.id} />
-                </div>
+                {coupon.current_claims === 0 && (
+                    <div className="mt-4 border-t-2 border-black pt-3">
+                        <CouponActions couponId={coupon.id} />
+                    </div>
+                )}
             </div>
         </div>
     );
