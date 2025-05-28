@@ -5,6 +5,8 @@ import InstallPWAButton from "@/components/InstallPWAButton";
 import Link from "next/link";
 import Image from "next/image";
 import { getUserId } from "@/helpers/userHelper";
+import PushNotificationDebug from "@/components/PushNotificationDebug";
+import NotificationToggle from "@/components/NotificationToggle";
 
 const CouponPage = async () => {
   const userId = await getUserId();
@@ -42,6 +44,10 @@ const CouponPage = async () => {
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        {/* <PushNotificationDebug /> */}
+        <NotificationToggle />
       </div>
       <GlobalCouponSection userId={userId} />
     </div>

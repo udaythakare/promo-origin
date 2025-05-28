@@ -13,6 +13,7 @@ const VendorBottomBar = () => {
         { id: '/business/dashboard', icon: LayoutDashboard, label: 'Dashboard', bgColor: 'bg-yellow-400' },
         { id: '/business/dashboard/coupons', icon: Ticket, label: 'Coupons', bgColor: 'bg-green-400' },
         { id: '/business/dashboard/scan-coupon', icon: QrCode, label: 'Scan', bgColor: 'bg-blue-400' },
+        { id: '/business/dashboard/analytics', icon: QrCode, label: 'Analytics', bgColor: 'bg-blue-400' },
     ];
 
     const handleTabChange = (id) => {

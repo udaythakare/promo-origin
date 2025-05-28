@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { options } from '@/app/api/auth/[...nextauth]/options';
 import { getServerSession } from 'next-auth';
 import { getUserId } from '@/helpers/userHelper';
+import { sendNotificationToAllUsers } from '@/lib/pushNotifications';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -36,22 +37,72 @@ export async function getUserBusinesses() {
 }
 
 // Create a new coupon
+// export async function createCoupon(formData) {
+//     const session = await getServerSession(options);
+//     if (!session?.user?.id) {
+//         return { error: 'Unauthorized' };
+//     }
+//     try {
+//         // First verify that the user owns this business
+//         const { data: business, error: businessError } = await supabase
+//             .from('businesses')
+//             .select('id')
+//             .eq('id', formData.business_id)
+//             .eq('user_id', session.user.id)
+//             .single();
+//         if (businessError || !business) {
+//             return { error: 'Unauthorized access to this business' };
+//         }
+//         // Create the coupon
+//         const { data: coupon, error: couponError } = await supabase
+//             .from('coupons')
+//             .insert({
+//                 business_id: formData.business_id,
+//                 title: formData.title,
+//                 description: formData.description || null,
+//                 start_date: formData.start_date,
+//                 end_date: formData.end_date,
+//                 is_active: formData.is_active,
+//                 image_url: formData.image_url || null,
+//                 coupon_type: formData.coupon_type,
+//                 redeem_duration: formData.redeem_duration || null,
+//                 max_claims: formData.max_claims || null,
+//                 user_id: session.user.id,
+//                 redemption_time_type: formData.redemption_time_type,
+//                 redemption_end_time: formData.redemption_end_time,
+//                 redemption_start_time: formData.redemption_start_time
+//             })
+//             .select('id')
+//             .single();
+//         if (couponError) throw couponError;
+
+//         revalidatePath('/business/dashboard/coupons');
+//         return { success: true, id: coupon.id };
+//     } catch (error) {
+//         console.error('Error creating coupon:', error);
+//         return { error: 'Failed to create coupon' };
+//     }
+// }
+
 export async function createCoupon(formData) {
     const session = await getServerSession(options);
     if (!session?.user?.id) {
         return { error: 'Unauthorized' };
     }
+
     try {
         // First verify that the user owns this business
         const { data: business, error: businessError } = await supabase
             .from('businesses')
-            .select('id')
+            .select('id, name')
             .eq('id', formData.business_id)
             .eq('user_id', session.user.id)
             .single();
+
         if (businessError || !business) {
             return { error: 'Unauthorized access to this business' };
         }
+
         // Create the coupon
         const { data: coupon, error: couponError } = await supabase
             .from('coupons')
@@ -71,9 +122,18 @@ export async function createCoupon(formData) {
                 redemption_end_time: formData.redemption_end_time,
                 redemption_start_time: formData.redemption_start_time
             })
-            .select('id')
+            .select('id, title, description')
             .single();
+
         if (couponError) throw couponError;
+
+        // Send push notifications (don't await to avoid blocking the response)
+        if (formData.is_active) {
+            sendPushNotificationForNewCoupon(business, coupon, formData.business_id)
+                .catch(error => {
+                    console.error('Failed to send push notification:', error);
+                });
+        }
 
         revalidatePath('/business/dashboard/coupons');
         return { success: true, id: coupon.id };
@@ -81,6 +141,32 @@ export async function createCoupon(formData) {
         console.error('Error creating coupon:', error);
         return { error: 'Failed to create coupon' };
     }
+}
+
+async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
+    const notification = {
+        title: `🎉 New Coupon from ${business.name}!`,
+        body: `${coupon.title}${coupon.description ? ` - ${coupon.description}` : ' - Check it out now!'}`,
+        url: `/coupons/${coupon.id}`,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        tag: 'new-coupon',
+        data: {
+            couponId: coupon.id,
+            businessId: businessId,
+            type: 'new_coupon'
+        }
+    };
+
+    // Choose your notification strategy:
+    // Option 1: Send to ALL users (broad reach)
+    const result = await sendNotificationToAllUsers(notification);
+
+    // Option 2: Send only to business followers (more targeted)
+    // const result = await sendNotificationToBusinessFollowers(businessId, notification);
+
+    console.log('Notification result:', result);
+    return result;
 }
 
 export async function updateCoupon(id, formData) {
