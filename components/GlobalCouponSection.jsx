@@ -3,11 +3,11 @@
 import { useCouponClaim } from '@/hooks/useCouponClaim';
 import { useCouponData } from '@/hooks/useCouponData';
 import { useQRCode } from '@/hooks/useQRCode';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import React, { useState } from 'react';
 import { ErrorDisplay } from './GlobalCouponComp/ErrorDisplay';
 import { CouponHeader } from './GlobalCouponComp/CouponHeader';
 import { CouponCard } from './GlobalCouponComp/CouponCard/CouponCard';
-// import { ConfirmationModal } from './ConfirmationModal';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeSubscription';
 import { EmptyState } from './GlobalCouponComp/EmptyState';
 import { LoadingSpinner } from './GlobalCouponComp/LoadingSpinner';
@@ -24,9 +24,12 @@ const GlobalCouponSection = ({ userId }) => {
         loading,
         lastRefreshed,
         error,
+        hasMore,
+        totalCount,
         setError,
         refreshCouponData,
-        clearFilters
+        clearFilters,
+        loadMoreCoupons
     } = useCouponData();
 
     const {
@@ -38,7 +41,6 @@ const GlobalCouponSection = ({ userId }) => {
         handleConfirmClaim
     } = useCouponClaim(refreshCouponData);
 
-
     const {
         isQROpen,
         selectedCoupon,
@@ -48,6 +50,9 @@ const GlobalCouponSection = ({ userId }) => {
         showQrCode,
         closeQRModal
     } = useQRCode();
+
+    // Infinite scroll hook
+    const [targetRef, isFetchingMore] = useInfiniteScroll(loadMoreCoupons, hasMore);
 
     // Realtime updates
     useRealtimeUpdates(
@@ -76,9 +81,11 @@ const GlobalCouponSection = ({ userId }) => {
                 lastRefreshed={lastRefreshed}
                 loading={loading}
                 onRefresh={refreshCouponData}
+                totalCount={totalCount}
+                currentCount={coupons.length}
             />
 
-            {loading && <LoadingSpinner />}
+            {loading && coupons.length === 0 && <LoadingSpinner />}
 
             {!loading && coupons.length === 0 && (
                 <EmptyState onClearFilters={clearFilters} />
@@ -101,6 +108,31 @@ const GlobalCouponSection = ({ userId }) => {
                     />
                 ))}
             </div>
+
+            {/* Infinite Scroll Trigger */}
+            {hasMore && (
+                <div ref={targetRef} className="flex justify-center py-8">
+                    {isFetchingMore ? (
+                        <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-800"></div>
+                            <span className="text-gray-600">Loading more coupons...</span>
+                        </div>
+                    ) : (
+                        <div className="text-gray-400 text-sm">
+                            Scroll down to load more coupons
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* End of results indicator */}
+            {!hasMore && coupons.length > 0 && (
+                <div className="text-center py-8 text-gray-500">
+                    <div className="border-t border-gray-200 pt-4">
+                        You've reached the end! No more coupons to load.
+                    </div>
+                </div>
+            )}
 
             {/* QR Code Modal */}
             {isQROpen && selectedCoupon && (

@@ -280,7 +280,9 @@ export async function fetchAllCoupons(options = {}) {
     const {
         sortBy = 'newest', // 'newest', 'oldest'
         dateFilter = null, // { after: '2024-01-01', before: '2024-12-31' }
-        limit = null
+        limit = null,
+        offset = 0,
+        includeCount = false
     } = options;
 
     const userId = await getUserId();
@@ -312,22 +314,44 @@ export async function fetchAllCoupons(options = {}) {
         query = query.order('created_at', { ascending: true });
     }
 
-    // Apply limit if provided
+    // Apply pagination
     if (limit) {
-        query = query.limit(limit);
+        query = query.range(offset, offset + limit - 1);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
         console.error("Error fetching coupons:", error);
         return { success: false, error };
     }
 
+    // Get total count if requested
+    let totalCount = null;
+    if (includeCount) {
+        let countQuery = supabaseAdmin.from("coupons").select("*", { count: 'exact', head: true });
+
+        // Apply same filters for count
+        if (dateFilter) {
+            if (dateFilter.after) {
+                countQuery = countQuery.gte('created_at', dateFilter.after);
+            }
+            if (dateFilter.before) {
+                countQuery = countQuery.lte('created_at', dateFilter.before);
+            }
+        }
+
+        const { count: totalCouponsCount, error: countError } = await countQuery;
+        if (!countError) {
+            totalCount = totalCouponsCount;
+        }
+    }
+
     if (!userId) {
         return {
             success: true,
             coupons: data || [],
+            totalCount
         };
     }
 
@@ -354,6 +378,7 @@ export async function fetchAllCoupons(options = {}) {
     return {
         success: true,
         coupons: couponsWithClaimStatus || [],
+        totalCount
     };
 }
 
@@ -361,7 +386,9 @@ export async function fetchAreaCoupons(areaName, options = {}) {
     const {
         sortBy = 'newest', // 'newest', 'oldest'
         dateFilter = null, // { after: '2024-01-01', before: '2024-12-31' }
-        limit = null
+        limit = null,
+        offset = 0,
+        includeCount = false
     } = options;
 
     const userId = await getUserId();
@@ -378,17 +405,16 @@ export async function fetchAreaCoupons(areaName, options = {}) {
     }
 
     if (!businessLocations || businessLocations.length === 0) {
-        return { success: true, coupons: [] };
+        return { success: true, coupons: [], totalCount: 0 };
     }
 
     const businessIds = businessLocations.map(location => location.business_id);
     if (businessIds.length === 0) {
-        return { success: true, coupons: [] };
+        return { success: true, coupons: [], totalCount: 0 };
     }
 
     // Step 2: Build the base coupon query
-    let query = supabaseAdmin
-        .from("coupons");
+    let query = supabaseAdmin.from("coupons");
 
     // Add select based on user login status
     query = userId
@@ -412,8 +438,9 @@ export async function fetchAreaCoupons(areaName, options = {}) {
         query = query.order("created_at", { ascending: true });
     }
 
+    // Apply pagination
     if (limit) {
-        query = query.limit(limit);
+        query = query.range(offset, offset + limit - 1);
     }
 
     const { data, error } = await query;
@@ -423,10 +450,33 @@ export async function fetchAreaCoupons(areaName, options = {}) {
         return { success: false, error };
     }
 
+    // Get total count if requested
+    let totalCount = null;
+    if (includeCount) {
+        let countQuery = supabaseAdmin
+            .from("coupons")
+            .select("*", { count: 'exact', head: true })
+            .in("business_id", businessIds);
+
+        // Apply same filters for count
+        if (dateFilter?.after) {
+            countQuery = countQuery.gte("created_at", dateFilter.after);
+        }
+        if (dateFilter?.before) {
+            countQuery = countQuery.lte("created_at", dateFilter.before);
+        }
+
+        const { count: totalCouponsCount, error: countError } = await countQuery;
+        if (!countError) {
+            totalCount = totalCouponsCount;
+        }
+    }
+
     if (!userId) {
         return {
             success: true,
             coupons: data || [],
+            totalCount
         };
     }
 
@@ -451,6 +501,7 @@ export async function fetchAreaCoupons(areaName, options = {}) {
     return {
         success: true,
         coupons: couponsWithClaimStatus,
+        totalCount
     };
 }
 

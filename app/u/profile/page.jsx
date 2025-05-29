@@ -1,7 +1,7 @@
 // app/profile/page.js
 import Link from 'next/link'
 import React from 'react'
-import { getUser } from '@/helpers/userHelper'
+import { getUser, getUserRolesFromDB } from '@/helpers/userHelper'
 import LocationSection from './components/LocationSection'
 import { ChevronRight, IdCard, MapPin, Settings, User } from 'lucide-react'
 import LogoutButton from './components/LogoutButton'
@@ -9,6 +9,7 @@ import PersonalInfoSection from './components/PersonalInfoSection'
 
 export default async function Page() {
     const user = await getUser();
+    const userRoles = await getUserRolesFromDB(user.id);
 
     if (user.msg) {
         return (
@@ -53,7 +54,7 @@ export default async function Page() {
                 {/* Main content grid */}
                 <div className="grid grid-cols-1 gap-6">
                     {/* Business owner section */}
-                    {user.roles.includes('app_business_owner') && (
+                    {userRoles.includes('app_business_owner') && (
                         <div className="bg-yellow-500 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)] p-5">
                             <h2 className="font-black text-xl mb-2 uppercase">Business Dashboard</h2>
                             <p className="mb-4 text-sm font-bold">Manage your business listings, promotions and analytics</p>

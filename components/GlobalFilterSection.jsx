@@ -9,7 +9,8 @@ import {
     saveSelectedArea,
     saveLoadingState,
     getSelectedArea,
-    clearAllFilters
+    clearAllFilters,
+    getCoupons // Add this helper to check if coupons exist
 } from '@/helpers/couponStateManager';
 
 const GlobalFilterSection = () => {
@@ -17,6 +18,7 @@ const GlobalFilterSection = () => {
     const [loading, setLoading] = useState(false);
     const [areas, setAreas] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
     const dropdownRef = useRef(null);
 
     const clearFilters = async () => {
@@ -27,9 +29,7 @@ const GlobalFilterSection = () => {
         try {
             const response = await fetchAllCoupons();
             if (response?.coupons) {
-                // Update localStorage
                 saveCoupons(response.coupons);
-                // Clear area filter in localStorage
                 clearAllFilters();
             }
         } catch (error) {
@@ -50,13 +50,11 @@ const GlobalFilterSection = () => {
             saveLoadingState(true);
 
             if (area === '') {
-                // If "All Areas" is selected, fetch all coupons
                 const response = await fetchAllCoupons();
                 if (response?.coupons) {
                     saveCoupons(response.coupons);
                 }
             } else {
-                // Fetch coupons for selected area
                 const response = await fetchAreaCoupons(area);
                 if (response?.coupons) {
                     saveCoupons(response.coupons);
@@ -71,44 +69,61 @@ const GlobalFilterSection = () => {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
+        const initializeComponent = async () => {
+            // Skip if already initialized and coupons exist
+            const existingCoupons = getCoupons(); // You'll need to add this helper
+            const storedArea = getSelectedArea();
+
+            if (isInitialized && existingCoupons && existingCoupons.length > 0) {
+                // Just restore the stored area without fetching
+                if (storedArea) {
+                    setSelectedArea(storedArea);
+                }
+                return;
+            }
+
             try {
                 setLoading(true);
                 saveLoadingState(true);
 
-                // Get the previously selected area from localStorage
-                const storedArea = getSelectedArea();
+                // Set stored area
                 if (storedArea) {
                     setSelectedArea(storedArea);
                 }
 
-                // Fetch address dropdowns
-                const dropdownResponse = await getAddressDropdowns();
-                if (dropdownResponse?.areaData) {
-                    setAreas(dropdownResponse.areaData);
+                // Fetch address dropdowns only if not already loaded
+                if (areas.length === 0) {
+                    const dropdownResponse = await getAddressDropdowns();
+                    if (dropdownResponse?.areaData) {
+                        setAreas(dropdownResponse.areaData);
+                    }
                 }
 
-                // Fetch coupons based on stored area or fetch all
-                let couponResponse;
-                if (storedArea) {
-                    couponResponse = await fetchAreaCoupons(storedArea, { sortBy: 'newest' });
-                } else {
-                    couponResponse = await fetchAllCoupons({ sortBy: 'newest' });
+                // Fetch coupons only if they don't exist or it's the first initialization
+                if (!existingCoupons || existingCoupons.length === 0 || !isInitialized) {
+                    let couponResponse;
+                    if (storedArea) {
+                        couponResponse = await fetchAreaCoupons(storedArea, { sortBy: 'newest' });
+                    } else {
+                        couponResponse = await fetchAllCoupons({ sortBy: 'newest' });
+                    }
+
+                    if (couponResponse?.coupons) {
+                        saveCoupons(couponResponse.coupons);
+                    }
                 }
 
-                if (couponResponse?.coupons) {
-                    saveCoupons(couponResponse.coupons);
-                }
+                setIsInitialized(true);
             } catch (error) {
-                console.error('Error fetching initial data:', error);
+                console.error('Error initializing component:', error);
             } finally {
                 setLoading(false);
                 saveLoadingState(false);
             }
         };
 
-        fetchData();
-    }, []);
+        initializeComponent();
+    }, []); // Empty dependency array - only runs once when component mounts
 
     // Handle clicks outside of the dropdown to close it
     useEffect(() => {

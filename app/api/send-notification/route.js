@@ -17,10 +17,10 @@ export async function POST(request) {
         // Get push subscriptions based on strategy
         let query = supabase.from('push_subscriptions').select('subscription');
 
-        if (userId) {
-            // Send to specific user
-            query = query.eq('user_id', userId);
-        }
+        // if (userId) {
+        //     // Send to specific user
+        //     query = query.eq('user_id', userId);
+        // }
         // If no userId provided, send to all users (broadcast)
 
         const { data: subscriptions, error } = await query;

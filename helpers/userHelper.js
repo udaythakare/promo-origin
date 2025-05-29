@@ -20,6 +20,18 @@ export async function getUser() {
 
     return session.user
 }
+export async function getUserRolesFromDB(userId) {
+    const { data, error } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+    if (error) {
+        console.error("Error fetching user roles:", error);
+        return { success: false, error };
+    }
+    const roles = data.map(role => role.role);
+    return roles
+}
 
 export async function getSessionData() {
     const session = await getServerSession(options);
