@@ -20,6 +20,8 @@ export async function POST(request) {
             .select('subscription')
             .eq('user_id', userId);
 
+        console.log(subscriptions, 'this is subscriptions');
+
         if (error || !subscriptions.length) {
             return Response.json({ error: 'No subscription found' }, { status: 404 });
         }
@@ -33,7 +35,7 @@ export async function POST(request) {
 
         // Send notification to all user's subscriptions
         const promises = subscriptions.map(sub =>
-            webpush.sendNotification(JSON.parse(sub.subscription), payload)
+            webpush.sendNotification(sub.subscription, payload)
         );
 
         await Promise.all(promises);
