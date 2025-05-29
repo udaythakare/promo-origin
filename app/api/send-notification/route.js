@@ -18,7 +18,7 @@ export async function POST(request) {
         const { data: subscriptions, error } = await supabase
             .from('push_subscriptions')
             .select('subscription')
-            .eq('user_id', userId);
+        // .eq('user_id', userId);
 
         console.log(subscriptions, 'this is subscriptions');
 
