@@ -1,4 +1,4 @@
-// import { createClient } from '@/lib/supabase/server';
+// api/send-notifications/route.js
 import { supabase } from '@/lib/supabase';
 import webpush from 'web-push';
 
@@ -10,39 +10,99 @@ webpush.setVapidDetails(
 
 export async function POST(request) {
     try {
-        const { userId, title, body, url } = await request.json();
+        const { userId, title, body, url, tag, data: notificationData } = await request.json();
 
-        // const supabase = createClient();
+        console.log('Received notification request:', { userId, title, body, url, tag });
 
-        // Get user's push subscription
-        const { data: subscriptions, error } = await supabase
-            .from('push_subscriptions')
-            .select('subscription')
-        // .eq('user_id', userId);
+        // Get push subscriptions based on strategy
+        let query = supabase.from('push_subscriptions').select('subscription');
 
-        console.log(subscriptions, 'this is subscriptions');
+        if (userId) {
+            // Send to specific user
+            query = query.eq('user_id', userId);
+        }
+        // If no userId provided, send to all users (broadcast)
 
-        if (error || !subscriptions.length) {
-            return Response.json({ error: 'No subscription found' }, { status: 404 });
+        const { data: subscriptions, error } = await query;
+
+        console.log(`Found ${subscriptions?.length || 0} subscriptions`);
+
+        if (error) {
+            console.error('Database error:', error);
+            return Response.json({ error: 'Database error' }, { status: 500 });
         }
 
+        if (!subscriptions || subscriptions.length === 0) {
+            return Response.json({
+                error: 'No subscriptions found',
+                message: userId ? `No subscriptions for user ${userId}` : 'No subscriptions in database'
+            }, { status: 404 });
+        }
+
+        // Prepare the push payload
         const payload = JSON.stringify({
             title,
             body,
             url: url || '/',
-            icon: '/icon-192x192.png'
+            icon: '/icon-192x192.png',
+            badge: '/badge-72x72.png',
+            tag: tag || 'general',
+            data: notificationData || {}
         });
 
-        // Send notification to all user's subscriptions
-        const promises = subscriptions.map(sub =>
-            webpush.sendNotification(sub.subscription, payload)
-        );
+        console.log('Sending payload:', payload);
 
-        await Promise.all(promises);
+        // Send notifications to all subscriptions
+        const promises = subscriptions.map(async (sub, index) => {
+            try {
+                await webpush.sendNotification(sub.subscription, payload);
+                console.log(`Notification ${index + 1}/${subscriptions.length} sent successfully`);
+                return { success: true, index };
+            } catch (error) {
+                console.error(`Failed to send notification ${index + 1}:`, error);
 
-        return Response.json({ success: true });
+                // Handle invalid subscriptions (expired/unsubscribed)
+                if (error.statusCode === 410 || error.statusCode === 404) {
+                    // TODO: Remove invalid subscription from database
+                    console.log(`Subscription ${index + 1} appears to be invalid (${error.statusCode})`);
+                }
+
+                return { success: false, error: error.message, index };
+            }
+        });
+
+        const results = await Promise.allSettled(promises);
+
+        // Count successful and failed notifications
+        const successful = results.filter(result =>
+            result.status === 'fulfilled' && result.value.success
+        ).length;
+
+        const failed = results.length - successful;
+
+        console.log(`Notification summary: ${successful} successful, ${failed} failed`);
+
+        if (successful === 0) {
+            return Response.json({
+                error: 'All notifications failed',
+                details: results
+            }, { status: 500 });
+        }
+
+        return Response.json({
+            success: true,
+            summary: {
+                total: subscriptions.length,
+                successful,
+                failed
+            }
+        });
+
     } catch (error) {
         console.error('Error sending notification:', error);
-        return Response.json({ error: 'Failed to send notification' }, { status: 500 });
+        return Response.json({
+            error: 'Failed to send notification',
+            message: error.message
+        }, { status: 500 });
     }
 }

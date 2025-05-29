@@ -89,7 +89,6 @@ export async function createCoupon(formData) {
     if (!session?.user?.id) {
         return { error: 'Unauthorized' };
     }
-
     try {
         // First verify that the user owns this business
         const { data: business, error: businessError } = await supabase
@@ -98,11 +97,9 @@ export async function createCoupon(formData) {
             .eq('id', formData.business_id)
             .eq('user_id', session.user.id)
             .single();
-
         if (businessError || !business) {
             return { error: 'Unauthorized access to this business' };
         }
-
         // Create the coupon
         const { data: coupon, error: couponError } = await supabase
             .from('coupons')
@@ -124,17 +121,14 @@ export async function createCoupon(formData) {
             })
             .select('id, title, description')
             .single();
-
         if (couponError) throw couponError;
-
-        // Send push notifications (don't await to avoid blocking the response)
+        // Send push notifications via API (don't await to avoid blocking the response)
         if (formData.is_active) {
             sendPushNotificationForNewCoupon(business, coupon, formData.business_id)
                 .catch(error => {
                     console.error('Failed to send push notification:', error);
                 });
         }
-
         revalidatePath('/business/dashboard/coupons');
         return { success: true, id: coupon.id };
     } catch (error) {
@@ -144,29 +138,45 @@ export async function createCoupon(formData) {
 }
 
 async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
-    const notification = {
-        title: `🎉 New Coupon from ${business.name}!`,
-        body: `${coupon.title}${coupon.description ? ` - ${coupon.description}` : ' - Check it out now!'}`,
-        url: `/coupons/${coupon.id}`,
-        icon: '/icon-192x192.png',
-        badge: '/badge-72x72.png',
-        tag: 'new-coupon',
-        data: {
-            couponId: coupon.id,
-            businessId: businessId,
-            type: 'new_coupon'
+    try {
+        // Prepare the notification data
+        const notificationData = {
+            title: `🎉 New Coupon from ${business.name}!`,
+            body: `${coupon.title}${coupon.description ? ` - ${coupon.description}` : ' - Check it out now!'}`,
+            url: `/coupons/${coupon.id}`,
+            // Optional: Add additional data for your service worker
+            tag: 'new-coupon',
+            data: {
+                couponId: coupon.id,
+                businessId: businessId,
+                type: 'new_coupon'
+            }
+        };
+
+        console.log('Sending notification via API:', notificationData);
+
+        // Call your API endpoint
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-notifications`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(notificationData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API call failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
         }
-    };
 
-    // Choose your notification strategy:
-    // Option 1: Send to ALL users (broad reach)
-    const result = await sendNotificationToAllUsers(notification);
+        const result = await response.json();
+        console.log('Notification sent successfully:', result);
+        return result;
 
-    // Option 2: Send only to business followers (more targeted)
-    // const result = await sendNotificationToBusinessFollowers(businessId, notification);
-
-    console.log('Notification result:', result);
-    return result;
+    } catch (error) {
+        console.error('Error calling notification API:', error);
+        throw error; // Re-throw so the parent function can catch it
+    }
 }
 
 export async function updateCoupon(id, formData) {
