@@ -73,6 +73,9 @@ const GlobalCouponSection = ({ userId }) => {
         setDetailsOpen(detailsOpen === couponId ? null : couponId);
     };
 
+
+    console.log(coupons,'this is coupon data in global')
+
     return (
         <div className="container mx-auto py-6 px-4">
             <ErrorDisplay error={error} onClose={() => setError(null)} />
@@ -140,7 +143,7 @@ const GlobalCouponSection = ({ userId }) => {
                     isOpen={isQROpen}
                     onClose={closeQRModal}
                     coupon={selectedCoupon}
-                    qrData={qrData}
+                    qrValue={qrData}
                 />
             )}
 

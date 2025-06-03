@@ -8,12 +8,14 @@ export const useQRCode = () => {
     const [showConfirmation, setShowConfirmation] = useState(false);
 
     const showQrCode = async (coupon) => {
+        console.log(coupon,'this is show qr')
         try {
             const userId = await getUserId();
             if (!userId) {
                 throw new Error('Unable to get user ID');
             }
             const data = JSON.stringify({ userId, couponId: coupon.id });
+            console.log(data,'this is string data')
             setQrData(data);
             setSelectedCoupon(coupon);
             setIsQROpen(true);

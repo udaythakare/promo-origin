@@ -6,6 +6,8 @@ import { X, CheckCircle, Sparkles } from 'lucide-react';
 export default function QRModal({ isOpen, onClose, qrValue, couponTitle, showConfirmation = false }) {
     const modalRef = useRef(null);
 
+    console.log(qrValue,'value from qr code modal')
+
     useEffect(() => {
         const handleEscape = (e) => {
             if (e.key === 'Escape') onClose();

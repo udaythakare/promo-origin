@@ -25,6 +25,7 @@ export default function ScanPage() {
             ]);
 
             // Parse the QR code data
+            console.log(value,'this is value')
             const data = JSON.parse(value);
             const couponId = data.couponId;
             const userId = data.userId;
