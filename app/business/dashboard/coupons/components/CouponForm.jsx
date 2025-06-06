@@ -61,12 +61,12 @@ export default function CouponForm({ coupon }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-                <BusinessSelector
+                {/* <BusinessSelector
                     businesses={businesses}
                     value={formData.business_id}
                     onChange={handleChange}
                     error={errors.business_id}
-                />
+                /> */}
 
                 <FormInput
                     label="Title"
