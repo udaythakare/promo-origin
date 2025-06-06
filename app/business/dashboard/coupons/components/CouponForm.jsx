@@ -85,7 +85,7 @@ export default function CouponForm({ coupon }) {
                     value={formData.description}
                     onChange={handleChange}
                     placeholder="Describe the coupon details and any terms & conditions"
-                    required
+                    // required
                 />
 
                 <CouponTypeSelector
