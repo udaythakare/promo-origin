@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
 import {
     getCoupons,
@@ -10,7 +10,7 @@ import {
     areCouponsStale
 } from '@/helpers/couponStateManager';
 
-const ITEMS_PER_PAGE = 5; // Adjust this based on your needs
+const ITEMS_PER_PAGE = 5;
 
 export const useCouponData = () => {
     const [coupons, setCoupons] = useState([]);
@@ -24,11 +24,15 @@ export const useCouponData = () => {
     const [page, setPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
 
+    // Use ref to prevent initial load from running multiple times
+    const hasInitialized = useRef(false);
+
     console.log(coupons, "coupons in useCouponData");
 
-    // Handler functions
+    // Memoized handler functions
     const handleCouponsUpdated = useCallback(() => {
-        setCoupons(getCoupons());
+        const newCoupons = getCoupons();
+        setCoupons(newCoupons);
         setLastRefreshed(new Date());
     }, []);
 
@@ -51,12 +55,16 @@ export const useCouponData = () => {
         setCoupons([]);
     }, []);
 
-    // Fetch initial data or refresh
+    // Fetch initial data or refresh - MEMOIZED PROPERLY
     const refreshCouponData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            resetPagination();
+            
+            // Reset pagination
+            setPage(0);
+            setHasMore(true);
+            setCoupons([]);
 
             const area = getSelectedArea();
             const response = area
@@ -93,7 +101,7 @@ export const useCouponData = () => {
         } finally {
             setLoading(false);
         }
-    }, [resetPagination]);
+    }, []); // Empty dependency array since it doesn't depend on any state
 
     // Load more coupons for infinite scroll
     const loadMoreCoupons = useCallback(async () => {
@@ -118,8 +126,17 @@ export const useCouponData = () => {
             if (response?.coupons) {
                 const newCoupons = response.coupons;
 
+                // Prevent duplicates by checking existing IDs
                 setCoupons(prev => {
-                    const updated = [...prev, ...newCoupons];
+                    const existingIds = new Set(prev.map(c => c.id));
+                    const uniqueNewCoupons = newCoupons.filter(coupon => !existingIds.has(coupon.id));
+                    
+                    if (uniqueNewCoupons.length === 0) {
+                        setHasMore(false);
+                        return prev;
+                    }
+                    
+                    const updated = [...prev, ...uniqueNewCoupons];
                     saveCoupons(updated);
                     return updated;
                 });
@@ -140,12 +157,16 @@ export const useCouponData = () => {
     }, [hasMore, loading, page, totalCount]);
 
     // Clear filters and reset
-    const clearFilters = async () => {
+    const clearFilters = useCallback(async () => {
         setLoading(true);
         setError(null);
         clearAllFilters();
         setSelectedArea('');
-        resetPagination();
+        
+        // Reset pagination
+        setPage(0);
+        setHasMore(true);
+        setCoupons([]);
 
         try {
             const response = await fetchAllCoupons({
@@ -175,10 +196,13 @@ export const useCouponData = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    // Setup effect
+    // Initial setup effect - RUNS ONLY ONCE
     useEffect(() => {
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
+
         // Initial load from localStorage
         const storedCoupons = getCoupons();
         setCoupons(storedCoupons);
@@ -201,22 +225,25 @@ export const useCouponData = () => {
             setPage(initialPage);
         }
 
-        // Set up periodic refresh (optional - you might want to disable this with infinite scroll)
-        const refreshInterval = setInterval(() => {
-            if (shouldRefreshData()) {
-                refreshCouponData();
-            }
-        }, 300000); // Increased to 5 minutes to be less aggressive
-
-        // Clean up event listeners and interval
+        // Clean up event listeners on unmount
         return () => {
             window.removeEventListener('coupons-updated', handleCouponsUpdated);
             window.removeEventListener('area-updated', handleAreaUpdated);
             window.removeEventListener('loading-updated', handleLoadingUpdated);
             window.removeEventListener('filters-cleared', handleFilterCleared);
-            clearInterval(refreshInterval);
         };
-    }, [handleCouponsUpdated, handleAreaUpdated, handleLoadingUpdated, handleFilterCleared, refreshCouponData]);
+    }, []); // Empty dependency array - runs only once
+
+    // Separate effect for periodic refresh
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+            if (shouldRefreshData()) {
+                refreshCouponData();
+            }
+        }, 300000); // 5 minutes
+
+        return () => clearInterval(refreshInterval);
+    }, [refreshCouponData]);
 
     return {
         coupons,

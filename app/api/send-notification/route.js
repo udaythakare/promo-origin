@@ -12,15 +12,17 @@ export async function POST(request) {
     try {
         const { userId, title, body, url, tag, data: notificationData } = await request.json();
 
+        console.log('reached till here','**************************************')
+
         console.log('Received notification request:', { userId, title, body, url, tag });
 
         // Get push subscriptions based on strategy
         let query = supabase.from('push_subscriptions').select('subscription');
 
-        // if (userId) {
-        //     // Send to specific user
-        //     query = query.eq('user_id', userId);
-        // }
+        if (userId) {
+            // Send to specific user
+            query = query.eq('user_id', userId);
+        }
         // If no userId provided, send to all users (broadcast)
 
         const { data: subscriptions, error } = await query;

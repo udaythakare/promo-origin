@@ -59,7 +59,8 @@ export default function SignInPage() {
     const handleGoogleSignIn = async () => {
         try {
             const result = await signIn('google', {
-                callbackUrl: 'http://localhost:3000/',
+                // callbackUrl: 'http://localhost:3000/',
+                callbackUrl: process.env.NEXT_PUBLIC_SITE_URL,
                 redirect: false,
             });
 

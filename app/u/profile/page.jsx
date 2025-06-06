@@ -78,12 +78,6 @@ export default async function Page() {
                             <PersonalInfoSection userData={user} />
                         </div>
 
-                        <div className="bg-green-200 p-4 text-sm">
-                            <p className="flex items-start font-bold">
-                                <span className="text-black mr-2 text-lg font-black">✓</span>
-                                <span>Your address is used to show you relevant deals and delivery options in your area.</span>
-                            </p>
-                        </div>
                     </div>
 
                     {/* Delivery info section */}

@@ -6,6 +6,7 @@ import { options } from '@/app/api/auth/[...nextauth]/options';
 import { getServerSession } from 'next-auth';
 import { getUserId } from '@/helpers/userHelper';
 import { sendNotificationToAllUsers } from '@/lib/pushNotifications';
+import { cookies } from 'next/headers';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -125,9 +126,9 @@ export async function createCoupon(formData) {
         // Send push notifications via API (don't await to avoid blocking the response)
         if (formData.is_active) {
             sendPushNotificationForNewCoupon(business, coupon, formData.business_id)
-                .catch(error => {
-                    console.error('Failed to send push notification:', error);
-                });
+                // .catch(error => {
+                //     console.error('Failed to send push notification:', error);
+                // });
         }
         revalidatePath('/business/dashboard/coupons');
         return { success: true, id: coupon.id };
@@ -138,6 +139,7 @@ export async function createCoupon(formData) {
 }
 
 async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
+    console.log(business, coupon, businessId);
     try {
         // Prepare the notification data
         const notificationData = {
@@ -156,12 +158,15 @@ async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
         console.log('Sending notification via API:', notificationData);
 
         // Call your API endpoint
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-notifications`, {
+        const response = await fetch(`http://localhost:3000/api/send-notification`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                Cookie: (await cookies()).toString()
             },
-            body: JSON.stringify(notificationData)
+            body: JSON.stringify(notificationData),
+            
+
         });
 
         if (!response.ok) {
