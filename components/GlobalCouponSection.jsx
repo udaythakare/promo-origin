@@ -144,6 +144,7 @@ const GlobalCouponSection = ({ userId }) => {
                     onClose={closeQRModal}
                     coupon={selectedCoupon}
                     qrValue={qrData}
+                    showConfirmation={showConfirmation}
                 />
             )}
 
@@ -160,7 +161,7 @@ const GlobalCouponSection = ({ userId }) => {
             )}
 
             {/* QR Code Success/Confirmation Modal */}
-            {showConfirmation && selectedCoupon && (
+            {/* {showConfirmation && selectedCoupon && (
                 <ConfirmationModal
                     isOpen={showConfirmation}
                     onClose={() => setShowConfirmation(false)}
@@ -171,7 +172,7 @@ const GlobalCouponSection = ({ userId }) => {
                     confirmText="OK"
                     showCancel={false}
                 />
-            )}
+            )} */}
         </div>
     );
 };
