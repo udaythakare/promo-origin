@@ -298,7 +298,7 @@ export default function BusinessForm({ business, locations = [], categories, isE
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-full">
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Business Name *
+                            My Business Name *
                         </label>
                         <input
                             type="text"

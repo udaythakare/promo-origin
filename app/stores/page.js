@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Globe, Phone, Mail, MapPin, Tag } from 'lucide-react'
+import { ShopMap } from './ShopMap'
 
 const StoresPage = () => {
   const [businesses, setBusinesses] = useState([])
@@ -166,6 +167,12 @@ const StoresPage = () => {
                     View Store Details
                   </button>
                 </div>
+                {business.latitude && business.longitude && (
+                <div>
+                  <ShopMap lat={business.latitude} lng={business.longitude} shopName={business.name} />
+                </div>
+                )}
+                
               </div>
             ))}
           </div>

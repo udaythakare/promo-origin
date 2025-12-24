@@ -61,12 +61,58 @@ const Section = ({ title, children }) => (
     </div>
 );
 
+
+
+
+
 // Main component that receives the business info data
 export default function BusinessInfoForm({ businessInfo = {} }) {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState(businessInfo);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [location, setLocation] = useState(null);
+
+
+
+
+    const getLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const coords = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                }
+                setLocation(coords);
+                console.log(coords);
+
+                const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL + '/api/vendor-location',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            latitude: coords.lat,
+                            longitude: coords.lng
+                        })
+
+                    }
+                )
+
+                const data = await response.json();
+                console.log(data, 'this is data form api vendor')
+            },
+                (error) => {
+                    alert('Error getting location: ' + error.message);
+                }
+            );
+        } else {
+            alert('Geolocation not supported by this browser.')
+        }
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -105,7 +151,7 @@ export default function BusinessInfoForm({ businessInfo = {} }) {
             <div className="bg-yellow-300 border-4 border-black p-4 sm:p-6 mb-6 sm:mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black uppercase tracking-wider">
-                        Business Info
+                        My Business Info
                     </h1>
                     <button
                         onClick={() => {
@@ -252,6 +298,12 @@ export default function BusinessInfoForm({ businessInfo = {} }) {
                         </div>
                     )}
                 </div>
+            </div>
+
+            <div>
+                <button onClick={getLocation}>
+                    Get my location
+                </button>
             </div>
         </div>
         // </div>

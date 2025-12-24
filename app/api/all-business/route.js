@@ -31,6 +31,8 @@ export async function GET(request) {
         website, 
         phone, 
         email,
+        latitude,
+        longitude,
         business_locations!inner (
           city, 
           state
@@ -49,7 +51,9 @@ export async function GET(request) {
             phone: business.phone,
             email: business.email,
             city: business.business_locations[0]?.city,
-            state: business.business_locations[0]?.state
+            state: business.business_locations[0]?.state,
+            latitude: business.latitude,
+            longitude: business.longitude,
         }));
 
         console.log('Formatted Businesses:', formattedBusinesses);

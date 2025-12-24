@@ -15,8 +15,10 @@ import {
     MapPin
 } from 'lucide-react';
 import GlobalFilterSection from './GlobalFilterSection';
+import InternalNotifications from './InternalNotifications';
+import { getUserId } from '@/helpers/userHelper';
 
-export default function Navbar() {
+export default function Navbar({userId}) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -27,9 +29,14 @@ export default function Navbar() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    // const [userId, setUserId] =useState(null);
+
     const profileRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const filtersRef = useRef(null);
+
+
+    // console.log(user,'this is user in navbar')
 
     // Handle clicks outside of dropdown menus
     useEffect(() => {
@@ -59,6 +66,8 @@ export default function Navbar() {
         const fetchSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             setSession(session);
+
+            console.log(session, 'this is session in navbar');
 
             if (session?.user) {
                 const { data, error } = await supabase
@@ -100,6 +109,10 @@ export default function Navbar() {
             subscription?.unsubscribe();
         };
     }, []);
+
+
+
+    // console.log(session.user.id,'this is session user id')
 
     // Fetch areas for filters
     useEffect(() => {
@@ -221,6 +234,14 @@ export default function Navbar() {
                             <Link href="/my-coupons" className="text-black font-bold hover:underline uppercase">
                                 My Coupons
                             </Link>
+                        )}
+                    </div>
+
+
+                    <div>
+                        {userId && (
+                        <InternalNotifications userId={userId}/>
+
                         )}
                     </div>
 

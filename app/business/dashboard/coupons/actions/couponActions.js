@@ -518,6 +518,8 @@ export async function getAllCoupons(query = '', page = 1, limit = 10) {
         return { coupons: [], totalCount: 0 };
     }
 
+    console.log(coupons,'this is coupons')
+
     return { coupons, totalCount };
 }
 
