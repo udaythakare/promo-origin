@@ -11,6 +11,7 @@ import SettingsContent from './contentPages/SettingsContent';
 import HelpContent from './contentPages/HelpContent';
 import DashboardContent from './contentPages/DashboardContent';
 import { useRouter } from 'next/navigation';
+import BusinessInfoContent from './contentPages/BusinessInfoContent';
 
 // Main Dashboard Layout
 const VendorDashboard = () => {
@@ -28,19 +29,29 @@ const VendorDashboard = () => {
         switch (activePage) {
             case 'dashboard':
                 return <DashboardContent />;
+
             case 'coupons':
-                // return <CouponsContent />;
-                return router.push("/business/dashboard/coupons")
+                return router.push('/business/dashboard/coupons');
+
+            // ✅ ADD THIS (ONLY THIS)
+            case 'business-info':
+                return <BusinessInfoContent />;
+
             case 'analytics':
                 return <AnalyticsContent />;
+
             case 'customers':
                 return <CustomersContent />;
+
             case 'reports':
                 return <ReportsContent />;
+
             case 'settings':
                 return <SettingsContent />;
+
             case 'help':
                 return <HelpContent />;
+
             default:
                 return <DashboardContent />;
         }
@@ -56,11 +67,7 @@ const VendorDashboard = () => {
 
     return (
         <div className="flex h-screen bg-gray-100">
-            {/* Overlay for mobile when sidebar is open */}
-
-
             <div className="flex-1 flex flex-col overflow-hidden">
-
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                     {renderContent()}
                 </main>

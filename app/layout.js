@@ -8,29 +8,29 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "CouponStall - Your Ultimate Coupon & Deals Destination",
-  description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with CouponStall's verified offers and exclusive deals.",
+  title: "LocalGrow - Your Ultimate Coupon & Deals Destination",
+  description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with LocalGrow's verified offers and exclusive deals.",
   keywords: "coupons, deals, discounts, savings, promo codes, online shopping, retail deals",
-  authors: [{ name: "CouponStall Team" }],
-  creator: "CouponStall",
-  publisher: "CouponStall",
+  authors: [{ name: "LocalGrow Team" }],
+  creator: "LocalGrow",
+  publisher: "LocalGrow",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://couponstall.com'),
+  metadataBase: new URL('https://LocalGrow.com'),
   openGraph: {
-    title: "CouponStall - Your Ultimate Coupon & Deals Destination",
-    description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with CouponStall's verified offers and exclusive deals.",
-    url: 'https://couponstall.com',
-    siteName: 'CouponStall',
+    title: "LocalGrow - Your Ultimate Coupon & Deals Destination",
+    description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with LocalGrow's verified offers and exclusive deals.",
+    url: 'https://LocalGrow.com',
+    siteName: 'LocalGrow',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'CouponStall - Your Ultimate Coupon & Deals Destination',
+        alt: 'LocalGrow - Your Ultimate Coupon & Deals Destination',
       },
     ],
     locale: 'en_US',
@@ -38,10 +38,10 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "CouponStall - Your Ultimate Coupon & Deals Destination",
-    description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with CouponStall's verified offers and exclusive deals.",
+    title: "LocalGrow - Your Ultimate Coupon & Deals Destination",
+    description: "Find the best deals, discounts, and coupons for your favorite stores. Save money with LocalGrow's verified offers and exclusive deals.",
     images: ['/twitter-image.jpg'],
-    creator: '@couponstall',
+    creator: '@LocalGrow',
   },
   robots: {
     index: true,
@@ -64,7 +64,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'CouponStall'
+    title: 'LocalGrow'
   },
   viewport: {
     width: 'device-width',
@@ -91,7 +91,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-title" content="CouponStall" />
+        <meta name="apple-mobile-web-app-title" content="LocalGrow" />
       </head>
       <body className={`${jetBrainsMono.variable} antialiased`}>
         <DotBackground>

@@ -79,7 +79,7 @@ export default function SignInPage() {
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <div className="w-full max-w-md">
                 <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">CouponStall</h1>
+                    <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">LocalGrow</h1>
                     <p className="text-xl font-bold text-gray-800">Your Ultimate Savings Destination</p>
                 </div>
 
@@ -188,7 +188,7 @@ export default function SignInPage() {
                 </div>
 
                 <div className="mt-8 text-center text-sm font-bold">
-                    <p>© {new Date().getFullYear()} CouponStall. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} LocalGrow. All rights reserved.</p>
                 </div>
             </div>
         </div>

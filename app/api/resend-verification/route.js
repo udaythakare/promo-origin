@@ -80,7 +80,7 @@ export async function POST(request) {
             },
             body: JSON.stringify({
                 email: user.email,
-                subject: 'Verify your Coupon Stall account',
+                subject: 'Verify your LocalGrow account',
                 message: `
                     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 20px;">
@@ -93,7 +93,7 @@ export async function POST(request) {
                         <div style="border: 3px solid #000; padding: 20px; background-color: #fff;">
                             <h2 style="margin-top: 0;">Verify Your Email Address</h2>
                             <p>Hello ${user.full_name},</p>
-                            <p>You requested a new verification link for your Coupon Stall account. Please click the button below to verify your email:</p>
+                            <p>You requested a new verification link for your LocalGrow account. Please click the button below to verify your email:</p>
                             
                             <div style="text-align: center; margin: 30px 0;">
                                 <a href="${verificationUrl}" style="background-color: #4ade80; color: #000; font-weight: bold; text-transform: uppercase; padding: 12px 24px; text-decoration: none; border: 3px solid #000; box-shadow: 4px 4px 0 0 #000; display: inline-block;">
@@ -110,7 +110,7 @@ export async function POST(request) {
                         </div>
                         
                         <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
-                            <p>&copy; ${new Date().getFullYear()} Coupon Stall. All rights reserved.</p>
+                            <p>&copy; ${new Date().getFullYear()} LocalGrow. All rights reserved.</p>
                         </div>
                     </div>
                 `

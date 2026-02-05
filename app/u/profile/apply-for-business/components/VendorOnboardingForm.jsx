@@ -106,7 +106,7 @@ export default function VendorOnboardingForm({ initialFormData, dropdownData, on
                         <h1 className="text-3xl font-black uppercase text-white relative z-10 pl-4">VENDOR ONBOARDING</h1>
                     </div>
                 </div>
-                <p className="text-white mt-2 font-bold">Join the Coupon Stall platform and grow your business</p>
+                <p className="text-white mt-2 font-bold">Join the LocalGrow platform and grow your business</p>
             </div>
 
             {/* Custom Progress Indicator */}

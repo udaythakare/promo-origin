@@ -61,7 +61,7 @@ export async function POST(request) {
                 },
                 body: JSON.stringify({
                     email: email,
-                    subject: 'Verify your Coupon Stall account',
+                    subject: 'Verify your LocalGrow account',
                     message: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                             <div style="text-align: center; margin-bottom: 20px;">
@@ -72,10 +72,10 @@ export async function POST(request) {
                             </div>
                             
                             <div style="border: 3px solid #000; padding: 20px; background-color: #fff;">
-                                <h2 style="margin-top: 0;">Verify Your Email Address</h2>
+                                <h2> style="margin-top: 0;">Verify Your Email Address</h2>
                                 <p>Hello ${fullname},</p>
-                                <p>Thank you for registering with Coupon Stall. To complete your registration and verify your account, please click the button below:</p>
-                                
+                                <p>Thank you for registering with LocalGrow. To complete your registration and verify your account, please click the button below:</p>
+
                                 <div style="text-align: center; margin: 30px 0;">
                                     <a href="${verificationUrl}" style="background-color: #4ade80; color: #000; font-weight: bold; text-transform: uppercase; padding: 12px 24px; text-decoration: none; border: 3px solid #000; box-shadow: 4px 4px 0 0 #000; display: inline-block;">
                                         Verify My Account
@@ -87,11 +87,11 @@ export async function POST(request) {
                                 
                                 <p>This verification link will expire in 24 hours.</p>
                                 
-                                <p>If you didn't create an account with Coupon Stall, please ignore this email.</p>
+                                <p>If you didn't create an account with LocalGrow, please ignore this email.</p>
                             </div>
                             
                             <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
-                                <p>&copy; ${new Date().getFullYear()} Coupon Stall. All rights reserved.</p>
+                                <p>&copy; ${new Date().getFullYear()} LocalGrow. All rights reserved.</p>
                             </div>
                         </div>
                     `

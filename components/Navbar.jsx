@@ -213,7 +213,7 @@ export default function Navbar({userId}) {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/">
-                            <h1 className="text-lg font-black uppercase tracking-tight transform -rotate-1">CouponStall</h1>
+                            <h1 className="text-lg font-black uppercase tracking-tight transform -rotate-1">LocalGrow</h1>
                         </Link>
                     </div>
 

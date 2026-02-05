@@ -1,6 +1,6 @@
 import React from 'react'
 import { cookies } from 'next/headers'
-import { updateUserPersonalInfo } from '../actions/userActions'
+import { updateUserPersonalInfo } from '../apply-for-investor/actions/userActions'
 import PersonalInfoForm from './PersonalInfoForm'
 
 // Use Next.js 14 data caching with fetch

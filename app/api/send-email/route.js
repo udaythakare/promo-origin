@@ -15,7 +15,7 @@ export async function POST(request) {
         const resend = new Resend(process.env.RESEND_API_KEY);
 
         const { data, error } = await resend.emails.send({
-            from: `Coupon Stall <${process.env.FROM_EMAIL || 'noreply@yourdomain.com'}>`,
+            from: `LocalGrow <${process.env.FROM_EMAIL || 'noreply@yourdomain.com'}>`,
             to: email,
             subject: subject,
             html: message

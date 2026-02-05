@@ -1,19 +1,17 @@
 import React from "react";
-import GlobalFilterSection from "@/components/GlobalFilterSection";
 import GlobalCouponSection from "@/components/GlobalCouponSection";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import Link from "next/link";
 import Image from "next/image";
 import { getUserId } from "@/helpers/userHelper";
-import PushNotificationDebug from "@/components/PushNotificationDebug";
 import NotificationToggle from "@/components/NotificationToggle";
 
 const CouponPage = async () => {
   const userId = await getUserId();
+
   return (
     <div className="min-h-screen pb-40">
-      {/* <GlobalFilterSection /> */}
-      {/* Business Application Card */}
+      {/* ================= BUSINESS APPLY CARD ================= */}
       <div className="p-4">
         <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
           <Image
@@ -23,6 +21,7 @@ const CouponPage = async () => {
             width={100}
             height={100}
           />
+
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
             <div className="relative z-10">
               <h2 className="text-xl font-black mb-2">
@@ -33,11 +32,12 @@ const CouponPage = async () => {
                 your customers.
               </p>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-4">
               <InstallPWAButton />
               <Link
                 href="/u/profile/apply-for-business"
-                className="px-6 py-3 bg-red-100 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base whitespace-nowrap"
+                className="px-6 py-3 bg-red-100 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
               >
                 Apply for Business
               </Link>
@@ -45,10 +45,47 @@ const CouponPage = async () => {
           </div>
         </div>
       </div>
+
+      {/* ================= INVESTOR APPLY CARD (NEW) ================= */}
+      <div className="p-4">
+        <div className="bg-yellow-50 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
+          <Image
+            src="/investor.png"
+            alt="Investor Application Card"
+            className="w-28 h-auto absolute bottom-0 -right-4"
+            width={100}
+            height={100}
+          />
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative">
+            <div className="relative z-10">
+              <h2 className="text-xl font-black mb-2">
+                Want to invest in local businesses?
+              </h2>
+              <p className="text-gray-700 text-sm">
+                Become an investor and support local vendors while growing your
+                capital.
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <Link
+                href="/u/profile/apply-for-investor"
+                className="px-6 py-3 bg-yellow-300 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
+              >
+                Apply as Investor
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= NOTIFICATIONS ================= */}
       <div>
-        {/* <PushNotificationDebug /> */}
         <NotificationToggle />
       </div>
+
+      {/* ================= COUPONS ================= */}
       <GlobalCouponSection userId={userId} />
     </div>
   );

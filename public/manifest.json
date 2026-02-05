@@ -1,6 +1,6 @@
 {
-  "name": "CouponStall",
-  "short_name": "CouponStall",
+  "name": "LocalGrow",
+  "short_name": "LocalGrow",
   "description": "Your Ultimate Coupon & Deals Destination",
   "start_url": "/",
   "display": "standalone",

@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import LocationForm from './LocationForm'
-import { updateUserLocation } from '../actions/userActions'
+import { updateUserLocation } from '../apply-for-investor/actions/userActions'
 
 // Fetch location data with caching
 export async function fetchLocationData() {
