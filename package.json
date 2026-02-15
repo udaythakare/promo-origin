@@ -29,6 +29,7 @@
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
+    "recharts": "^3.7.0",
     "resend": "^4.5.1",
     "use-debounce": "^10.0.4",
     "web-push": "^3.6.7",

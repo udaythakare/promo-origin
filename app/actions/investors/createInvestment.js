@@ -11,7 +11,7 @@ export async function createInvestment({ businessId, amount }) {
   }
 
   /* 🔐 VERIFY INVESTOR ROLE */
-  const { data: role, error: roleError } = await supabaseAdmin
+  const { data: role } = await supabaseAdmin
     .from("user_roles")
     .select("id")
     .eq("user_id", userId)
@@ -19,8 +19,23 @@ export async function createInvestment({ businessId, amount }) {
     .eq("is_active", true)
     .single();
 
-  if (roleError || !role) {
+  if (!role) {
     throw new Error("Only investors can create investments");
+  }
+
+  /* 🚨 PREVENT DUPLICATE ACTIVE INVESTMENT */
+  const { data: existing } = await supabaseAdmin
+    .from("investments")
+    .select("id")
+    .eq("investor_id", userId)
+    .eq("business_id", businessId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (existing) {
+    throw new Error(
+      "You already have an active investment in this business."
+    );
   }
 
   /* 💰 CREATE INVESTMENT */
@@ -29,7 +44,7 @@ export async function createInvestment({ businessId, amount }) {
     .insert({
       investor_id: userId,
       business_id: businessId,
-      amount,
+      amount: Number(amount),
       status: "active",
       invested_at: new Date().toISOString(),
     })
@@ -37,8 +52,8 @@ export async function createInvestment({ businessId, amount }) {
     .single();
 
   if (error) {
-    console.error(error);
-    throw new Error("Failed to create investment");
+    console.error("Supabase Insert Error:", error);
+    throw new Error(error.message);
   }
 
   return data;

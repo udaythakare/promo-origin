@@ -10,44 +10,60 @@ export default function InvestmentsClient({
   initialStats,
   vendors,
 }) {
-  const [investments, setInvestments] = useState(initialInvestments);
-  const [stats, setStats] = useState(initialStats);
+  const [investments, setInvestments] = useState(initialInvestments || []);
+  const [stats, setStats] = useState(initialStats || {});
 
+  /* ================= HANDLE NEW INVESTMENT ================= */
   function handleInvestmentCreated(newInvestment) {
-    /* 1️⃣ Update investments list */
-    setInvestments((prev) => [newInvestment, ...prev]);
+    // Update investments list
+    setInvestments((prev) => [newInvestment, ...(prev || [])]);
 
-    /* 2️⃣ Update stats optimistically */
+    // Update stats safely
     setStats((prev) => ({
       ...prev,
-      totalInvested: prev.totalInvested + Number(newInvestment.amount),
-      totalInvestments: prev.totalInvestments + 1,
-      activeInvestments: prev.activeInvestments + 1,
+      totalInvested:
+        Number(prev?.totalInvested || 0) +
+        Number(newInvestment?.amount || 0),
+      totalInvestments: Number(prev?.totalInvestments || 0) + 1,
+      activeInvestments: Number(prev?.activeInvestments || 0) + 1,
     }));
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Investments</h1>
-          <p className="text-gray-500">
-            Track and manage your vendor investments
-          </p>
-        </div>
+    <div className="space-y-10">
 
-        <CreateInvestmentClient
-          vendors={vendors}
-          onCreated={handleInvestmentCreated}
-        />
+      {/* ================= HEADER SECTION ================= */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+
+          {/* Left Content */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              My Investments
+            </h1>
+            <p className="text-gray-500 mt-2 text-sm sm:text-base">
+              Track and manage your vendor investments portfolio
+            </p>
+          </div>
+
+          {/* Right Action */}
+          <CreateInvestmentClient
+            vendors={vendors}
+            onCreated={handleInvestmentCreated}
+          />
+        </div>
       </div>
 
-      {/* Stats */}
-      <InvestmentStats stats={stats} />
+      {/* ================= STATS SECTION ================= */}
+      <div>
+        <InvestmentStats stats={stats} />
+      </div>
 
-      {/* Table */}
-      <InvestmentsTable investments={investments} />
+      {/* ================= TABLE SECTION ================= */}
+      <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6">
+        <InvestmentsTable investments={investments} />
+      </div>
+
     </div>
   );
 }
