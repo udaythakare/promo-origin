@@ -11,29 +11,70 @@ export async function saveInvestorProfile(formData) {
     fullName,
     phone,
     city,
-    investmentRange,
-    investmentInterest,
+    country,
+    profileType,
+    companyName,
+    registrationNumber,
+    officeAddress,
+    netWorth,
+    annualIncome,
+    investmentRangeMin,
+    investmentRangeMax,
+    riskAppetite,
+    investmentType,
+    debtInterestRate,
+    preferredIndustries,
+    preferredLocations,
+    investmentHorizon,
+    expectedROI,
   } = formData;
 
+  // Construct structured investor object
+  const investorData = {
+    user_id: userId,
+    full_name: fullName,
+    phone,
+    city,
+    country,
+    profile_type: profileType,
+    company_name: companyName,
+    registration_number: registrationNumber,
+    office_address: officeAddress,
+    net_worth: netWorth ? Number(netWorth) : null,
+    annual_income: annualIncome ? Number(annualIncome) : null,
+    investment_range_min: investmentRangeMin
+      ? Number(investmentRangeMin)
+      : null,
+    investment_range_max: investmentRangeMax
+      ? Number(investmentRangeMax)
+      : null,
+    risk_appetite: riskAppetite,
+    investment_type: investmentType,
+    debt_interest_rate: debtInterestRate
+      ? Number(debtInterestRate)
+      : null,
+    preferred_industries: preferredIndustries || null,
+    preferred_locations: preferredLocations || null,
+    investment_horizon: investmentHorizon,
+    expected_roi: expectedROI ? Number(expectedROI) : null,
+    updated_at: new Date(),
+  };
+
   // 1️⃣ Check if profile already exists
-  const { data: existingProfile } = await supabaseAdmin
-    .from("investor_profiles")
-    .select("id")
-    .eq("user_id", userId)
-    .single();
+  const { data: existingProfile, error: fetchError } =
+    await supabaseAdmin
+      .from("investor_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+  if (fetchError) throw fetchError;
 
   if (existingProfile) {
     // 2️⃣ UPDATE existing profile
     const { error: updateError } = await supabaseAdmin
       .from("investor_profiles")
-      .update({
-        full_name: fullName,
-        phone,
-        city,
-        investment_range: investmentRange,
-        investment_interest: investmentInterest,
-        updated_at: new Date(),
-      })
+      .update(investorData)
       .eq("user_id", userId);
 
     if (updateError) throw updateError;
@@ -41,14 +82,7 @@ export async function saveInvestorProfile(formData) {
     // 3️⃣ INSERT new profile
     const { error: insertError } = await supabaseAdmin
       .from("investor_profiles")
-      .insert({
-        user_id: userId,
-        full_name: fullName,
-        phone,
-        city,
-        investment_range: investmentRange,
-        investment_interest: investmentInterest,
-      });
+      .insert(investorData);
 
     if (insertError) throw insertError;
   }
@@ -59,7 +93,7 @@ export async function saveInvestorProfile(formData) {
     .select("id")
     .eq("user_id", userId)
     .eq("role", "app_investor")
-    .single();
+    .maybeSingle();
 
   if (!existingRole) {
     const { error: roleError } = await supabaseAdmin

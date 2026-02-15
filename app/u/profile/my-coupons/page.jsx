@@ -5,23 +5,16 @@ import ClaimedCoupons from './components/ClaimedCoupons'
 import RedeemedCoupons from './components/RedeemedCoupons'
 
 const page = async () => {
-    // 1️⃣ Read the incoming Cookie header
-    // `cookies().toString()` gives you "key1=val1; key2=val2" etc.
+
     const cookieHeader = (await cookies()).toString()
 
-    // 2️⃣ Fire both requests in parallel, forwarding the cookie header
     const [claimedRes, redeemedRes] = await Promise.all([
         fetch(
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-claimed-coupon`,
             {
                 cache: 'force-cache',
-                next: {
-                    revalidate: 3600,
-                },
-                headers: {
-                    // forward auth cookies/session
-                    cookie: cookieHeader,
-                },
+                next: { revalidate: 3600 },
+                headers: { cookie: cookieHeader },
                 credentials: "include",
             }
         ),
@@ -29,116 +22,63 @@ const page = async () => {
             `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user-redeemed-coupon`,
             {
                 cache: 'force-cache',
-                next: {
-                    revalidate: 3600,
-                },
+                next: { revalidate: 3600 },
                 headers: { cookie: cookieHeader },
                 credentials: "include"
             },
         ),
     ])
 
-    // 3️⃣ Parse JSON
     const claimedJson = await claimedRes.json()
     const redeemedJson = await redeemedRes.json()
 
-    // console.log(claimedJson, 'claimedJson')
-
-    // 4️⃣ Render components
     return (
-        <div>
-            <ClaimedCoupons data={claimedJson} />
-            <RedeemedCoupons data={redeemedJson} />
+        <div className="min-h-screen bg-slate-50">
+
+           {/* ================= HERO HEADER ================= */}
+<div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
+            My Profile Dashboard
+        </h1>
+        <p className="mt-2 text-indigo-100 text-sm sm:text-base max-w-xl">
+            Manage your claimed and redeemed coupons in one place.
+        </p>
+    </div>
+</div>
+
+
+            {/* ================= MAIN CONTENT ================= */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-12">
+
+                {/* Claimed Coupons Section */}
+                <section className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-6 md:p-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                        <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
+                            Claimed Coupons
+                        </h2>
+                        <div className="w-16 h-1 bg-indigo-600 rounded hidden sm:block"></div>
+                    </div>
+
+                    <ClaimedCoupons data={claimedJson} />
+                </section>
+
+                {/* Redeemed Coupons Section */}
+                <section className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-6 md:p-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                        <h2 className="text-xl sm:text-2xl font-semibold text-emerald-600">
+                            Redeemed Coupons
+                        </h2>
+                        <div className="w-16 h-1 bg-emerald-600 rounded hidden sm:block"></div>
+                    </div>
+
+                    <RedeemedCoupons data={redeemedJson} />
+                </section>
+
+            </div>
+
         </div>
     )
 }
 
 export default page
-
-
-// app/profile/page.jsx
-// 'use client';
-// import React, { useState, useEffect } from 'react';
-// import ClaimedCoupons from './components/ClaimedCoupons';
-// import RedeemedCoupons from './components/RedeemedCoupons';
-
-// const ProfilePage = () => {
-//     const [claimedData, setClaimedData] = useState(null);
-//     const [redeemedData, setRedeemedData] = useState(null);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
-
-//     useEffect(() => {
-//         const fetchData = async () => {
-//             try {
-//                 const [claimedRes, redeemedRes] = await Promise.all([
-//                     fetch('/api/profile/user-claimed-coupon', {
-//                         credentials: 'include',
-//                     }),
-//                     fetch('/api/profile/user-redeemed-coupon', {
-//                         credentials: 'include',
-//                     }),
-//                 ]);
-
-//                 if (!claimedRes.ok || !redeemedRes.ok) {
-//                     throw new Error('Failed to fetch data');
-//                 }
-
-//                 const claimedJson = await claimedRes.json();
-//                 const redeemedJson = await redeemedRes.json();
-
-//                 setClaimedData(claimedJson);
-//                 setRedeemedData(redeemedJson);
-//             } catch (err) {
-//                 console.error('Error fetching profile data:', err);
-//                 setError(err.message);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//         fetchData();
-//     }, []);
-
-//     if (loading) {
-//         return (
-//             <div className="min-h-screen flex items-center justify-center">
-//                 <div className="text-center">
-//                     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
-//                     <p className="mt-4 font-bold">Loading your coupons...</p>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     if (error) {
-//         return (
-//             <div className="min-h-screen flex items-center justify-center">
-//                 <div className="text-center">
-//                     <p className="text-red-500 font-bold">Error: {error}</p>
-//                     <button
-//                         onClick={() => window.location.reload()}
-//                         className="mt-4 bg-black text-white px-4 py-2 font-bold"
-//                     >
-//                         Retry
-//                     </button>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <div>
-//             <ClaimedCoupons
-//                 data={claimedData}
-//                 onDataUpdate={setClaimedData} // Pass update function
-//             />
-//             <RedeemedCoupons
-//                 data={redeemedData}
-//                 onDataUpdate={setRedeemedData} // Pass update function
-//             />
-//         </div>
-//     );
-// };
-
-// export default ProfilePage;

@@ -1,19 +1,32 @@
-import React from "react";
 import GlobalCouponSection from "@/components/GlobalCouponSection";
 import InstallPWAButton from "@/components/InstallPWAButton";
 import Link from "next/link";
 import Image from "next/image";
-import { getUserId } from "@/helpers/userHelper";
 import NotificationToggle from "@/components/NotificationToggle";
+import { getUserId } from "@/helpers/userHelper";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-const CouponPage = async () => {
+export default async function CouponPage() {
+  // Get logged-in user ID
   const userId = await getUserId();
+
+  // Create server Supabase client (Next 15 compatible)
+  const supabase = await createSupabaseServerClient();
+
+  // Check if investor profile exists
+  const { data: investorProfile } = await supabase
+    .from("investor_profiles")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const isInvestor = !!investorProfile;
 
   return (
     <div className="min-h-screen pb-40">
       {/* ================= BUSINESS APPLY CARD ================= */}
       <div className="p-4">
-        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
+        <div className="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
           <Image
             src="/business.png"
             alt="Business Application Card"
@@ -28,8 +41,8 @@ const CouponPage = async () => {
                 Don't have a business yet?
               </h2>
               <p className="text-gray-600 text-sm">
-                Start your business journey with us and create amazing coupons for
-                your customers.
+                Start your business journey with us and create amazing coupons
+                for your customers.
               </p>
             </div>
 
@@ -37,7 +50,7 @@ const CouponPage = async () => {
               <InstallPWAButton />
               <Link
                 href="/u/profile/apply-for-business"
-                className="px-6 py-3 bg-red-100 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
+                className="px-6 py-3 bg-red-100 border-2 border-black hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
               >
                 Apply for Business
               </Link>
@@ -46,9 +59,9 @@ const CouponPage = async () => {
         </div>
       </div>
 
-      {/* ================= INVESTOR APPLY CARD (NEW) ================= */}
+      {/* ================= INVESTOR CARD ================= */}
       <div className="p-4">
-        <div className="bg-yellow-50 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
+        <div className="bg-yellow-50 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] p-4 relative overflow-hidden">
           <Image
             src="/investor.png"
             alt="Investor Application Card"
@@ -69,26 +82,31 @@ const CouponPage = async () => {
             </div>
 
             <div className="flex gap-4">
-              <Link
-                href="/u/profile/apply-for-investor"
-                className="px-6 py-3 bg-yellow-300 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
-              >
-                Apply as Investor
-              </Link>
+              {isInvestor ? (
+                <Link
+                  href="/investors"
+                  className="px-6 py-3 bg-green-300 border-2 border-black hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
+                >
+                  Manage Investments
+                </Link>
+              ) : (
+                <Link
+                  href="/u/profile/apply-for-investor"
+                  className="px-6 py-3 bg-yellow-300 border-2 border-black hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base"
+                >
+                  Apply as Investor
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* ================= NOTIFICATIONS ================= */}
-      <div>
-        <NotificationToggle />
-      </div>
+      <NotificationToggle />
 
       {/* ================= COUPONS ================= */}
       <GlobalCouponSection userId={userId} />
     </div>
   );
-};
-
-export default CouponPage;
+}
