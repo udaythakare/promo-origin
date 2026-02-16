@@ -9,7 +9,7 @@ import {
   BarChart3,
   MessageSquare,
   Bell,
-  Settings,
+  User,
 } from "lucide-react";
 
 const menuItems = [
@@ -19,7 +19,7 @@ const menuItems = [
   { name: "Analytics", path: "/investors/analytics", icon: BarChart3 },
   { name: "Messages", path: "/investors/messages", icon: MessageSquare },
   { name: "Notifications", path: "/investors/notifications", icon: Bell },
-  { name: "Settings", path: "/investors/settings", icon: Settings },
+  { name: "Profile", path: "/investors/profile", icon: User },
 ];
 
 export default function Sidebar() {

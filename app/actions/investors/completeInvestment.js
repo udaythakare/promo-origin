@@ -2,6 +2,7 @@
 
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { getUserId } from "../../../helpers/userHelper";
+import { createNotification } from "../notifications/createNotification";
 
 /* 🧠 Helper: Validate UUID */
 function isValidUUID(value) {
@@ -38,7 +39,7 @@ export async function completeInvestment({ investmentId, roiPercentage }) {
   /* 🔍 Fetch investment */
   const { data: investment, error: fetchError } = await supabaseAdmin
     .from("investments")
-    .select("id, status")
+    .select("id, status, business_id")
     .eq("id", investmentId)
     .eq("investor_id", userId)
     .single();
@@ -75,10 +76,22 @@ export async function completeInvestment({ investmentId, roiPercentage }) {
     `)
     .single();
 
-  if (error) {
+  if (error || !data) {
     console.error("Complete Investment Error:", error);
     return { success: false, code: "DB_ERROR" };
   }
+
+  /* 🔔 CREATE NOTIFICATION */
+  await createNotification({
+    userId: userId,
+    title: "Investment Completed ✅",
+    message: `Your investment in ${
+      data.businesses?.name || "a business"
+    } has been successfully completed.`,
+    type: "success",
+    category: "investment",
+    referenceId: data.id,
+  });
 
   return {
     success: true,

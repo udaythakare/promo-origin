@@ -1,16 +1,25 @@
 "use server";
 
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-
-// TODO: Replace with actual investor ID from auth session
-const TEMP_INVESTOR_ID = "your-investor-uuid-here";
+import { getUserId } from "@/helpers/userHelper";
+import { createNotification } from "../notifications/createNotification";
 
 export async function sendConnectionRequest(vendorBusinessId) {
   try {
-    // Step 1: Get the vendor's user_id from their business
+    /* 🔐 Get Logged-in Investor */
+    const investorId = await getUserId();
+
+    if (!investorId) {
+      return {
+        success: false,
+        message: "Unauthorized",
+      };
+    }
+
+    /* 🏢 Step 1: Get vendor user_id from business */
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
-      .select("user_id")
+      .select("user_id, name")
       .eq("id", vendorBusinessId)
       .single();
 
@@ -23,13 +32,14 @@ export async function sendConnectionRequest(vendorBusinessId) {
 
     const vendorUserId = business.user_id;
 
-    // Step 2: Check if connection already exists
-    const { data: existingConnection, error: checkError } = await supabaseAdmin
-      .from("investor_vendor_connections")
-      .select("*")
-      .eq("investor_id", TEMP_INVESTOR_ID)
-      .eq("vendor_id", vendorUserId)
-      .maybeSingle();
+    /* 🔍 Step 2: Check if connection already exists */
+    const { data: existingConnection, error: checkError } =
+      await supabaseAdmin
+        .from("investor_vendor_connections")
+        .select("id")
+        .eq("investor_id", investorId)
+        .eq("vendor_id", vendorUserId)
+        .maybeSingle();
 
     if (checkError) {
       console.error("Error checking existing connection:", checkError);
@@ -42,23 +52,24 @@ export async function sendConnectionRequest(vendorBusinessId) {
     if (existingConnection) {
       return {
         success: false,
-        message: "You already have a connection with this vendor",
+        message: "Connection already exists",
       };
     }
 
-    // Step 3: Create new connection request
-    const { data: newConnection, error: insertError } = await supabaseAdmin
-      .from("investor_vendor_connections")
-      .insert({
-        investor_id: TEMP_INVESTOR_ID,
-        vendor_id: vendorUserId,
-        status: "pending",
-        request_message: "I'm interested in learning more about your business.",
-      })
-      .select()
-      .single();
+    /* ✅ Step 3: Create connection request */
+    const { data: newConnection, error: insertError } =
+      await supabaseAdmin
+        .from("investor_vendor_connections")
+        .insert({
+          investor_id: investorId,
+          vendor_id: vendorUserId,
+          initiated_by: "investor",
+          status: "pending",
+        })
+        .select()
+        .single();
 
-    if (insertError) {
+    if (insertError || !newConnection) {
       console.error("Error creating connection:", insertError);
       return {
         success: false,
@@ -66,12 +77,21 @@ export async function sendConnectionRequest(vendorBusinessId) {
       };
     }
 
+    /* 🔔 Step 4: Notify Vendor */
+    await createNotification({
+      userId: vendorUserId,
+      title: "New Investor Connection Request 🤝",
+      message: `An investor wants to connect with your business "${business.name}".`,
+      type: "info",
+      category: "connection",
+      referenceId: newConnection.id,
+    });
+
     return {
       success: true,
       message: "Request sent successfully",
       connectionId: newConnection.id,
     };
-
   } catch (error) {
     console.error("Unexpected error in sendConnectionRequest:", error);
     return {
