@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
 
-export default function InternalNotifications({userId}) {
+export default function InternalNotifications({ userId }) {
   const [notifications, setNotifications] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function InternalNotifications({userId}) {
     try {
       const response = await fetch(process.env.NEXT_PUBLIC_SITE_URL + `/api/send-internal-notification?limit=50`)
       const data = await response.json()
-      
+
       if (data.notifications) {
         setNotifications(data.notifications)
         setUnreadCount(data.notifications.filter((n) => !n.is_read).length)
@@ -39,8 +39,8 @@ export default function InternalNotifications({userId}) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId })
       })
-      
-      setNotifications(prev => 
+
+      setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
       )
       setUnreadCount(prev => Math.max(0, prev - 1))
@@ -57,7 +57,7 @@ export default function InternalNotifications({userId}) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAllAsRead: true, userId })
       })
-      
+
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
       setUnreadCount(0)
     } catch (error) {
@@ -86,7 +86,7 @@ export default function InternalNotifications({userId}) {
             setUnreadCount(prev => prev + 1)
           } else if (payload.eventType === 'UPDATE') {
             const updatedNotification = payload.new
-            setNotifications(prev => 
+            setNotifications(prev =>
               prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
             )
           }
@@ -112,7 +112,7 @@ export default function InternalNotifications({userId}) {
     const date = new Date(dateString)
     const now = new Date()
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-    
+
     if (diffInHours < 1) {
       return 'Just now'
     } else if (diffInHours < 24) {
@@ -127,9 +127,9 @@ export default function InternalNotifications({userId}) {
       {/* Notification Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-3 bg-yellow-300 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+        className="relative p-2 sm:p-3 bg-yellow-300 border-3 sm:border-4 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150 active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
       >
-        <Bell className="w-6 h-6" />
+        <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
         {unreadCount > 0 && (
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-black">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -139,7 +139,7 @@ export default function InternalNotifications({userId}) {
 
       {/* Notifications Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] z-50">
+        <div className="fixed sm:absolute right-2 sm:right-0 left-2 sm:left-auto mt-2 sm:w-96 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] z-50 max-h-[80vh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-yellow-200 border-b-4 border-black">
             <h3 className="font-bold text-lg">Notifications</h3>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
+import { fetchAllCoupons, fetchAreaCoupons, fetchLocationBasedCoupons } from '@/actions/couponActions';
 import {
     getCoupons,
     getSelectedArea,
@@ -7,7 +7,10 @@ import {
     saveCoupons,
     clearAllFilters,
     shouldRefreshData,
-    areCouponsStale
+    areCouponsStale,
+    saveLocationSource,
+    getLocationSource,
+    getLocationName
 } from '@/helpers/couponStateManager';
 
 const ITEMS_PER_PAGE = 5;
@@ -18,6 +21,8 @@ export const useCouponData = () => {
     const [selectedArea, setSelectedArea] = useState('');
     const [lastRefreshed, setLastRefreshed] = useState(null);
     const [error, setError] = useState(null);
+    const [locationSource, setLocationSource] = useState('all');
+    const [locationName, setLocationName] = useState('');
 
     // Infinite scroll states
     const [hasMore, setHasMore] = useState(true);
@@ -26,8 +31,26 @@ export const useCouponData = () => {
 
     // Use ref to prevent initial load from running multiple times
     const hasInitialized = useRef(false);
+    // Cache detected city from IP geolocation
+    const detectedCity = useRef(null);
 
     console.log(coupons, "coupons in useCouponData");
+
+    // Helper to detect city from IP
+    const detectCity = async () => {
+        if (detectedCity.current) return detectedCity.current;
+        try {
+            const res = await fetch('/api/geo');
+            const data = await res.json();
+            if (data?.success && data?.city) {
+                detectedCity.current = data.city;
+                return data.city;
+            }
+        } catch (err) {
+            console.error('Failed to detect city from IP:', err);
+        }
+        return null;
+    };
 
     // Memoized handler functions
     const handleCouponsUpdated = useCallback(() => {
@@ -60,24 +83,40 @@ export const useCouponData = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             // Reset pagination
             setPage(0);
             setHasMore(true);
             setCoupons([]);
 
             const area = getSelectedArea();
-            const response = area
-                ? await fetchAreaCoupons(area, {
-                    limit: ITEMS_PER_PAGE,
-                    offset: 0,
-                    includeCount: true
-                })
-                : await fetchAllCoupons({
+            let response;
+
+            if (area) {
+                // If user manually selected an area, use that
+                response = await fetchAreaCoupons(area, {
                     limit: ITEMS_PER_PAGE,
                     offset: 0,
                     includeCount: true
                 });
+                // Manual area selection doesn't set locationSource
+            } else {
+                // Use location-based fetching (auto-detect city from IP)
+                const city = await detectCity();
+                response = await fetchLocationBasedCoupons({
+                    city,
+                    limit: ITEMS_PER_PAGE,
+                    offset: 0,
+                    includeCount: true
+                });
+
+                // Update location source info
+                if (response?.locationSource) {
+                    setLocationSource(response.locationSource);
+                    setLocationName(response.locationName || '');
+                    saveLocationSource(response.locationSource, response.locationName);
+                }
+            }
 
             if (response?.coupons) {
                 setCoupons(response.coupons);
@@ -130,12 +169,12 @@ export const useCouponData = () => {
                 setCoupons(prev => {
                     const existingIds = new Set(prev.map(c => c.id));
                     const uniqueNewCoupons = newCoupons.filter(coupon => !existingIds.has(coupon.id));
-                    
+
                     if (uniqueNewCoupons.length === 0) {
                         setHasMore(false);
                         return prev;
                     }
-                    
+
                     const updated = [...prev, ...uniqueNewCoupons];
                     saveCoupons(updated);
                     return updated;
@@ -156,20 +195,23 @@ export const useCouponData = () => {
         }
     }, [hasMore, loading, page, totalCount]);
 
-    // Clear filters and reset
+    // Clear filters and reset to location-based auto-detection
     const clearFilters = useCallback(async () => {
         setLoading(true);
         setError(null);
         clearAllFilters();
         setSelectedArea('');
-        
+
         // Reset pagination
         setPage(0);
         setHasMore(true);
         setCoupons([]);
 
         try {
-            const response = await fetchAllCoupons({
+            // Revert to location-based fetching (auto-detect city from IP)
+            const city = await detectCity();
+            const response = await fetchLocationBasedCoupons({
+                city,
                 limit: ITEMS_PER_PAGE,
                 offset: 0,
                 includeCount: true
@@ -180,6 +222,13 @@ export const useCouponData = () => {
                 saveCoupons(response.coupons);
                 setLastRefreshed(new Date());
                 setPage(1);
+
+                // Update location source info
+                if (response?.locationSource) {
+                    setLocationSource(response.locationSource);
+                    setLocationName(response.locationName || '');
+                    saveLocationSource(response.locationSource, response.locationName);
+                }
 
                 if (response.totalCount !== undefined) {
                     setTotalCount(response.totalCount);
@@ -253,6 +302,8 @@ export const useCouponData = () => {
         error,
         hasMore,
         totalCount,
+        locationSource,
+        locationName,
         setError,
         refreshCouponData,
         clearFilters,

@@ -11,7 +11,7 @@ import { getUserId } from '@/helpers/userHelper';
 export default function DashboardLayout({ children }) {
     const pathname = usePathname();
     const router = useRouter();
-    
+
     // Extract the active page from the pathname
     const getActivePageFromPath = (path) => {
         const segments = path.split('/');
@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }) {
                 <div className="text-center p-8 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                     <p className="text-xl font-bold text-gray-700 mb-4">Access Denied</p>
                     <p className="text-gray-600 mb-6">Please log in to view the dashboard.</p>
-                    <button 
+                    <button
                         onClick={() => router.push('/auth/signin')}
                         className="px-6 py-3 bg-yellow-400 border-4 border-black font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-150"
                     >
@@ -119,11 +119,11 @@ export default function DashboardLayout({ children }) {
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Pass userId to BusinessNavbar - it will handle notifications */}
                 <BusinessNavbar userId={userId} />
-                
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-3 sm:p-4 md:p-6 pb-24 md:pb-6">
                     {children}
                 </main>
-                
+
                 <VendorBottomBar />
             </div>
         </div>

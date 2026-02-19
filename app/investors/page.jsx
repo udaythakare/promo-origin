@@ -51,66 +51,70 @@ export default async function InvestorDashboard() {
 
       {/* ================= HEADER ================= */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight">
           Investor Dashboard
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-600 mt-1 font-bold">
           Overview of your investment portfolio
         </p>
       </div>
 
       {/* ================= SUMMARY CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
 
         <SummaryCard
           title="Total Invested"
           value={`₹${totalAmount.toLocaleString()}`}
+          accent="bg-yellow-400"
         />
 
         <SummaryCard
           title="Total Profit"
           value={`₹${totalProfit.toLocaleString()}`}
+          accent="bg-yellow-200"
         />
 
         <SummaryCard
           title="Overall ROI"
           value={`${overallROI}%`}
+          accent="bg-yellow-400"
         />
 
         <SummaryCard
           title="Active Investments"
           value={activeInvestments}
+          accent="bg-yellow-200"
         />
 
       </div>
 
       {/* ================= STATUS OVERVIEW ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <h2 className="text-lg font-semibold mb-4">
+        <div className="bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6">
+          <h2 className="text-lg font-black uppercase mb-4">
             Investment Status
           </h2>
 
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
+          <div className="flex justify-between text-sm font-bold text-gray-700 mb-3 pb-3 border-b-2 border-black">
             <span>Active</span>
-            <span>{activeInvestments}</span>
+            <span className="bg-yellow-400 px-3 py-1 border-2 border-black font-black">{activeInvestments}</span>
           </div>
 
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm font-bold text-gray-700">
             <span>Completed</span>
-            <span>{completedInvestments}</span>
+            <span className="bg-gray-200 px-3 py-1 border-2 border-black font-black">{completedInvestments}</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border">
-          <h2 className="text-lg font-semibold mb-4">
+        <div className="bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6">
+          <h2 className="text-lg font-black uppercase mb-4">
             Portfolio Insights
           </h2>
 
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-700 font-bold">
             You currently have{" "}
-            <span className="font-semibold text-gray-900">
+            <span className="bg-yellow-400 px-2 py-0.5 border-2 border-black font-black">
               {totalInvestments}
             </span>{" "}
             total investments across multiple businesses.
@@ -120,15 +124,15 @@ export default async function InvestorDashboard() {
       </div>
 
       {/* ================= RECENT INVESTMENTS ================= */}
-      <div className="bg-white rounded-xl shadow-sm border">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h2 className="text-lg font-semibold">
+      <div className="bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className="p-6 border-b-4 border-black flex justify-between items-center bg-yellow-200">
+          <h2 className="text-lg font-black uppercase">
             Recent Investments
           </h2>
 
           <Link
             href="/investors/investments"
-            className="text-sm text-green-600 hover:underline"
+            className="text-sm font-bold bg-black text-yellow-400 px-4 py-2 border-2 border-black hover:bg-gray-900 transition-colors uppercase"
           >
             View All
           </Link>
@@ -136,46 +140,45 @@ export default async function InvestorDashboard() {
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-gray-100 border-b-2 border-black">
               <tr>
-                <th className="text-left px-6 py-3">Business</th>
-                <th className="text-left px-6 py-3">Amount</th>
-                <th className="text-left px-6 py-3">ROI %</th>
-                <th className="text-left px-6 py-3">Status</th>
-                <th className="text-left px-6 py-3">Date</th>
+                <th className="text-left px-6 py-3 font-black uppercase text-xs">Business</th>
+                <th className="text-left px-6 py-3 font-black uppercase text-xs">Amount</th>
+                <th className="text-left px-6 py-3 font-black uppercase text-xs">ROI %</th>
+                <th className="text-left px-6 py-3 font-black uppercase text-xs">Status</th>
+                <th className="text-left px-6 py-3 font-black uppercase text-xs">Date</th>
               </tr>
             </thead>
             <tbody>
               {recentInvestments.map((inv) => (
                 <tr
                   key={inv.id}
-                  className="border-t hover:bg-gray-50"
+                  className="border-b-2 border-gray-200 hover:bg-yellow-50 transition-colors"
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 font-bold">
                     {inv.businesses?.name || "N/A"}
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 font-bold">
                     ₹{Number(inv.amount).toLocaleString()}
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 font-bold">
                     {inv.roi_percentage}%
                   </td>
 
                   <td className="px-6 py-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        inv.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
+                      className={`px-3 py-1 text-xs font-black uppercase border-2 border-black ${inv.status === "active"
+                        ? "bg-yellow-400 text-black"
+                        : "bg-gray-200 text-black"
+                        }`}
                     >
                       {inv.status}
                     </span>
                   </td>
 
-                  <td className="px-6 py-4 text-gray-500">
+                  <td className="px-6 py-4 text-gray-600 font-bold">
                     {new Date(inv.invested_at).toLocaleDateString()}
                   </td>
                 </tr>
@@ -185,7 +188,7 @@ export default async function InvestorDashboard() {
                 <tr>
                   <td
                     colSpan="5"
-                    className="text-center py-6 text-gray-500"
+                    className="text-center py-6 text-gray-500 font-bold"
                   >
                     No investments found.
                   </td>
@@ -204,11 +207,11 @@ export default async function InvestorDashboard() {
    REUSABLE SUMMARY CARD
 =========================== */
 
-function SummaryCard({ title, value }) {
+function SummaryCard({ title, value, accent = "bg-yellow-400" }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border">
-      <p className="text-sm text-gray-500 mb-2">{title}</p>
-      <p className="text-2xl font-bold text-gray-900">
+    <div className="bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
+      <p className="text-sm text-gray-600 mb-2 font-bold uppercase tracking-wide">{title}</p>
+      <p className={`text-xl sm:text-2xl font-black text-black inline-block ${accent} px-2 py-1 border-2 border-black`}>
         {value}
       </p>
     </div>

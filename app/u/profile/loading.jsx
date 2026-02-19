@@ -1,8 +1,16 @@
 'use client';
 import React from 'react'
-import Lottie from 'lottie-react'
-// import loadingAnimation from '/animations/success-animation.json' // Adjust path to your file
+import dynamic from 'next/dynamic'
 import loadingAnimation from '@/public/animations/success-animation.json'
+
+const Lottie = dynamic(() => import('lottie-react'), {
+    ssr: false,
+    loading: () => (
+        <div className="h-full w-full flex items-center justify-center">
+            <div className="h-8 w-8 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
+        </div>
+    ),
+});
 
 const NeoBrutalistLoading = () => {
     return (

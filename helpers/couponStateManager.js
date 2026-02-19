@@ -6,7 +6,9 @@ const STORAGE_KEYS = {
     COUPONS: 'app_coupons',
     SELECTED_AREA: 'app_selected_area',
     LOADING: 'app_loading_state',
-    LAST_SYNC: 'app_last_sync_time'
+    LAST_SYNC: 'app_last_sync_time',
+    LOCATION_SOURCE: 'app_location_source',
+    LOCATION_NAME: 'app_location_name'
 };
 
 // Maximum age of cached coupons (in milliseconds)
@@ -97,4 +99,21 @@ export const shouldRefreshData = () => {
     const lastSync = getLastSyncTime();
     const timeSinceLastSync = Date.now() - lastSync;
     return timeSinceLastSync > MAX_CACHE_AGE;
+};
+
+// Function to save location source (area, city, all)
+export const saveLocationSource = (source, name = null) => {
+    localStorage.setItem(STORAGE_KEYS.LOCATION_SOURCE, source || 'all');
+    localStorage.setItem(STORAGE_KEYS.LOCATION_NAME, name || '');
+    window.dispatchEvent(new CustomEvent('location-source-updated'));
+};
+
+// Function to get location source
+export const getLocationSource = () => {
+    return localStorage.getItem(STORAGE_KEYS.LOCATION_SOURCE) || 'all';
+};
+
+// Function to get location name
+export const getLocationName = () => {
+    return localStorage.getItem(STORAGE_KEYS.LOCATION_NAME) || '';
 };

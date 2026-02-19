@@ -34,11 +34,11 @@ const MobileBottomNav = () => {
 
     return (
         <div className="fixed bottom-2 left-2 right-2 md:hidden z-40">
-            <div className="flex justify-between items-center p-2 bg-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0)]">
+            <div className="flex justify-between items-center p-1.5 sm:p-2 bg-white border-3 sm:border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0)]">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
-                        className={`flex flex-col items-center justify-center px-4 font-black transition-transform ${activeTab === item.id ? 'scale-105' : ''
+                        className={`flex flex-col items-center justify-center px-2 sm:px-4 font-black transition-transform ${activeTab === item.id ? 'scale-105' : ''
                             }`}
                         onClick={() => handleTabChange(item.id)}
                     >
@@ -48,9 +48,9 @@ const MobileBottomNav = () => {
                             ${activeTab === item.id ? 'shadow-[4px_4px_0px_0px_rgba(0,0,0)]' : ''}
                             transition-all duration-200
                         `}>
-                            <item.icon size={20} className="text-black" />
+                            <item.icon size={18} className="text-black" />
                         </div>
-                        <span className={`text-xs mt-2 font-bold ${activeTab === item.id ? 'bg-black text-white px-2' : 'text-black'}`}>
+                        <span className={`text-[9px] sm:text-xs mt-1 sm:mt-2 font-bold ${activeTab === item.id ? 'bg-black text-white px-1.5 sm:px-2' : 'text-black'}`}>
                             {item.label}
                         </span>
                     </button>

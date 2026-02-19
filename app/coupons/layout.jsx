@@ -2,7 +2,7 @@ import MobileBottomNav from "@/components/BottomBar";
 import Navbar from "@/components/Navbar";
 import { getUserId } from "@/helpers/userHelper";
 
-const CouponLayout = async({ children }) => {
+const CouponLayout = async ({ children }) => {
     const userId = await getUserId();
     if (!userId) {
         return (
@@ -15,7 +15,7 @@ const CouponLayout = async({ children }) => {
         <div>
             <Navbar userId={userId} />
             {/* Other layout elements like header */}
-            <main className="pb-16 md:pb-0">{children}</main>
+            <main className="pb-20 md:pb-0">{children}</main>
             <MobileBottomNav />
         </div>
     );

@@ -26,6 +26,8 @@ const GlobalCouponSection = ({ userId }) => {
         error,
         hasMore,
         totalCount,
+        locationSource,
+        locationName,
         setError,
         refreshCouponData,
         clearFilters,
@@ -74,7 +76,7 @@ const GlobalCouponSection = ({ userId }) => {
     };
 
 
-    console.log(coupons,'this is coupon data in global')
+    console.log(coupons, 'this is coupon data in global')
 
     return (
         <div className="container mx-auto py-6 px-4">
@@ -86,6 +88,8 @@ const GlobalCouponSection = ({ userId }) => {
                 onRefresh={refreshCouponData}
                 totalCount={totalCount}
                 currentCount={coupons.length}
+                locationSource={locationSource}
+                locationName={locationName}
             />
 
             {loading && coupons.length === 0 && <LoadingSpinner />}

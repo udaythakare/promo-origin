@@ -1,6 +1,6 @@
 'use client'
 
-import { fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
+import { fetchAllCoupons, fetchAreaCoupons, fetchLocationBasedCoupons } from '@/actions/couponActions';
 import React, { useEffect, useState, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { getAddressDropdowns } from '@/actions/addressActions';
@@ -10,7 +10,8 @@ import {
     saveLoadingState,
     getSelectedArea,
     clearAllFilters,
-    getCoupons // Add this helper to check if coupons exist
+    getCoupons,
+    saveLocationSource
 } from '@/helpers/couponStateManager';
 
 const GlobalFilterSection = () => {
@@ -27,10 +28,21 @@ const GlobalFilterSection = () => {
         saveLoadingState(true);
 
         try {
-            const response = await fetchAllCoupons();
+            // Detect city from IP and revert to location-based fetching
+            let city = null;
+            try {
+                const geoRes = await fetch('/api/geo');
+                const geoData = await geoRes.json();
+                if (geoData?.success && geoData?.city) city = geoData.city;
+            } catch (e) { /* fallback to all */ }
+
+            const response = await fetchLocationBasedCoupons({ city });
             if (response?.coupons) {
                 saveCoupons(response.coupons);
                 clearAllFilters();
+                if (response.locationSource) {
+                    saveLocationSource(response.locationSource, response.locationName);
+                }
             }
         } catch (error) {
             console.error('Error clearing filters:', error);
@@ -70,12 +82,10 @@ const GlobalFilterSection = () => {
 
     useEffect(() => {
         const initializeComponent = async () => {
-            // Skip if already initialized and coupons exist
-            const existingCoupons = getCoupons(); // You'll need to add this helper
+            const existingCoupons = getCoupons();
             const storedArea = getSelectedArea();
 
             if (isInitialized && existingCoupons && existingCoupons.length > 0) {
-                // Just restore the stored area without fetching
                 if (storedArea) {
                     setSelectedArea(storedArea);
                 }
@@ -86,11 +96,6 @@ const GlobalFilterSection = () => {
                 setLoading(true);
                 saveLoadingState(true);
 
-                // Set stored area
-                if (storedArea) {
-                    setSelectedArea(storedArea);
-                }
-
                 // Fetch address dropdowns only if not already loaded
                 if (areas.length === 0) {
                     const dropdownResponse = await getAddressDropdowns();
@@ -99,17 +104,38 @@ const GlobalFilterSection = () => {
                     }
                 }
 
-                // Fetch coupons only if they don't exist or it's the first initialization
-                if (!existingCoupons || existingCoupons.length === 0 || !isInitialized) {
-                    let couponResponse;
-                    if (storedArea) {
-                        couponResponse = await fetchAreaCoupons(storedArea, { sortBy: 'newest' });
-                    } else {
-                        couponResponse = await fetchAllCoupons({ sortBy: 'newest' });
-                    }
-
+                // If there's a stored area (manual selection), use that
+                if (storedArea) {
+                    setSelectedArea(storedArea);
+                    const couponResponse = await fetchAreaCoupons(storedArea, { sortBy: 'newest' });
                     if (couponResponse?.coupons) {
                         saveCoupons(couponResponse.coupons);
+                    }
+                } else {
+                    // Auto-detect city from IP geolocation
+                    let detectedCity = null;
+                    try {
+                        const geoRes = await fetch('/api/geo');
+                        const geoData = await geoRes.json();
+                        if (geoData?.success && geoData?.city) {
+                            detectedCity = geoData.city;
+                        }
+                    } catch (e) {
+                        console.error('Failed to detect city from IP:', e);
+                    }
+
+                    // Use location-based fetching for coupons
+                    if (!existingCoupons || existingCoupons.length === 0 || !isInitialized) {
+                        const couponResponse = await fetchLocationBasedCoupons({
+                            city: detectedCity,
+                            sortBy: 'newest'
+                        });
+                        if (couponResponse?.coupons) {
+                            saveCoupons(couponResponse.coupons);
+                            if (couponResponse.locationSource) {
+                                saveLocationSource(couponResponse.locationSource, couponResponse.locationName);
+                            }
+                        }
                     }
                 }
 
@@ -140,10 +166,10 @@ const GlobalFilterSection = () => {
     }, []);
 
     return (
-        <div className="bg-green-200 sticky top-0 z-10 p-4 border-b-6 border-black">
+        <div className="bg-green-200 sticky top-0 z-10 p-3 sm:p-4 border-b-6 border-black">
             <div className="container mx-auto">
                 <div className="flex justify-between items-start sm:items-center">
-                    <h2 className="text-xl font-black text-black mb-2 sm:mb-0">FIND COUPONS</h2>
+                    <h2 className="text-lg sm:text-xl font-black text-black mb-2 sm:mb-0">FIND COUPONS</h2>
                     <button
                         onClick={clearFilters}
                         className={`text-sm font-bold ${selectedArea ? 'bg-red-500 text-white px-3 py-1 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all' : 'text-gray-600'}`}

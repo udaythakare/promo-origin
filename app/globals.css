@@ -5,8 +5,46 @@
   --font-family-default: var(--font-jetbrains-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font-family-default), monospace;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent horizontal overflow globally */
+#__next,
+main {
+  overflow-x: hidden;
+}
+
+/* Safe area insets for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .fixed.bottom-2,
+  .fixed.bottom-4 {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Better touch targets */
+button,
+a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exceptions for inline/small elements */
+button.inline-btn,
+a.inline-link,
+span button,
+td button,
+td a {
+  min-height: unset;
+  min-width: unset;
 }
 
 @keyframes loading {

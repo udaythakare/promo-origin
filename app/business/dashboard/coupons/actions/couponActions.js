@@ -101,7 +101,30 @@ export async function createCoupon(formData) {
         if (businessError || !business) {
             return { error: 'Unauthorized access to this business' };
         }
-        // Create the coupon
+
+        // Fetch the business's primary location for geo-tagging the coupon
+        const { data: businessLocation } = await supabase
+            .from('business_locations')
+            .select('city, state')
+            .eq('business_id', formData.business_id)
+            .eq('is_primary', true)
+            .single();
+
+        // If no primary location, try any location
+        let locationCity = businessLocation?.city || null;
+        let locationState = businessLocation?.state || null;
+        if (!locationCity) {
+            const { data: anyLocation } = await supabase
+                .from('business_locations')
+                .select('city, state')
+                .eq('business_id', formData.business_id)
+                .limit(1)
+                .single();
+            locationCity = anyLocation?.city || null;
+            locationState = anyLocation?.state || null;
+        }
+
+        // Create the coupon with location data
         const { data: coupon, error: couponError } = await supabase
             .from('coupons')
             .insert({
@@ -118,7 +141,9 @@ export async function createCoupon(formData) {
                 user_id: session.user.id,
                 redemption_time_type: formData.redemption_time_type,
                 redemption_end_time: formData.redemption_end_time,
-                redemption_start_time: formData.redemption_start_time
+                redemption_start_time: formData.redemption_start_time,
+                city: locationCity,
+                state: locationState
             })
             .select('id, title, description')
             .single();
@@ -126,9 +151,9 @@ export async function createCoupon(formData) {
         // Send push notifications via API (don't await to avoid blocking the response)
         if (formData.is_active) {
             sendPushNotificationForNewCoupon(business, coupon, formData.business_id)
-                // .catch(error => {
-                //     console.error('Failed to send push notification:', error);
-                // });
+            // .catch(error => {
+            //     console.error('Failed to send push notification:', error);
+            // });
         }
         revalidatePath('/business/dashboard/coupons');
         return { success: true, id: coupon.id };
@@ -137,6 +162,7 @@ export async function createCoupon(formData) {
         return { error: 'Failed to create coupon' };
     }
 }
+
 
 async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
     console.log(business, coupon, businessId);
@@ -165,7 +191,7 @@ async function sendPushNotificationForNewCoupon(business, coupon, businessId) {
                 Cookie: (await cookies()).toString()
             },
             body: JSON.stringify(notificationData),
-            
+
 
         });
 
@@ -518,7 +544,7 @@ export async function getAllCoupons(query = '', page = 1, limit = 10) {
         return { coupons: [], totalCount: 0 };
     }
 
-    console.log(coupons,'this is coupons')
+    console.log(coupons, 'this is coupons')
 
     return { coupons, totalCount };
 }

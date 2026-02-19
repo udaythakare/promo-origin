@@ -549,6 +549,89 @@ export async function fetchAreaCouponsRecent(areaName, days = 7) {
     });
 }
 
+/**
+ * Fetch coupons based on the user's detected location (from IP geolocation).
+ * Queries coupons.city directly (set during coupon creation from business location).
+ * Falls back to all coupons if no matches found.
+ * Returns { coupons, totalCount, locationSource, locationName }
+ */
+export async function fetchLocationBasedCoupons(options = {}) {
+    const {
+        city = null,
+        limit = null,
+        offset = 0,
+        includeCount = false
+    } = options;
+
+    const userId = await getUserId();
+
+    // If no city provided, return all coupons
+    if (!city) {
+        const result = await fetchAllCoupons({ limit, offset, includeCount });
+        return { ...result, locationSource: 'all', locationName: null };
+    }
+
+    // Query coupons directly by city (case-insensitive)
+    let query = supabaseAdmin.from("coupons");
+    query = query.select("*, businesses(name, business_locations(*))");
+    query = query.ilike("city", city);
+    query = query.order("created_at", { ascending: false });
+
+    if (limit) {
+        query = query.range(offset, offset + limit - 1);
+    }
+
+    const { data: cityCoupons, error: cityCouponsError } = await query;
+
+    if (cityCouponsError || !cityCoupons || cityCoupons.length === 0) {
+        // No coupons in this city — fallback to all
+        const result = await fetchAllCoupons({ limit, offset, includeCount });
+        return { ...result, locationSource: 'all', locationName: city };
+    }
+
+    // Get total count if requested
+    let totalCount = null;
+    if (includeCount) {
+        const { count, error: countError } = await supabaseAdmin
+            .from("coupons")
+            .select("*", { count: 'exact', head: true })
+            .ilike("city", city);
+        if (!countError) totalCount = count;
+    }
+
+    // Add claim status if user is logged in
+    if (userId) {
+        const { data: userCoupons } = await supabaseAdmin
+            .from("user_coupons")
+            .select("coupon_id")
+            .eq("user_id", userId);
+
+        const claimedCouponIds = new Set((userCoupons || []).map(uc => uc.coupon_id));
+        const couponsWithClaimStatus = cityCoupons.map(coupon => ({
+            ...coupon,
+            is_claimed: claimedCouponIds.has(coupon.id)
+        }));
+
+        return {
+            success: true,
+            coupons: couponsWithClaimStatus,
+            totalCount,
+            locationSource: 'city',
+            locationName: city
+        };
+    }
+
+    return {
+        success: true,
+        coupons: cityCoupons,
+        totalCount,
+        locationSource: 'city',
+        locationName: city
+    };
+}
+
+
+
 
 
 export async function claimCoupon(couponId, redeemMinutes = 0) {

@@ -18,7 +18,7 @@ import GlobalFilterSection from './GlobalFilterSection';
 import InternalNotifications from './InternalNotifications';
 import { getUserId } from '@/helpers/userHelper';
 
-export default function Navbar({userId}) {
+export default function Navbar({ userId }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -240,7 +240,7 @@ export default function Navbar({userId}) {
 
                     <div>
                         {userId && (
-                        <InternalNotifications userId={userId}/>
+                            <InternalNotifications userId={userId} />
 
                         )}
                     </div>
@@ -253,15 +253,15 @@ export default function Navbar({userId}) {
                         <div className="relative" ref={filtersRef}>
                             <button
                                 onClick={toggleFiltersDropdown}
-                                className="p-2 bg-yellow-200 border-2 border-black rounded-none font-bold text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
+                                className="p-1.5 sm:p-2 bg-yellow-200 border-2 border-black rounded-none font-bold text-xs sm:text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
                                 aria-label="Open filter menu"
                                 aria-expanded={filtersOpen}
                             >
-                                <FilterIcon size={16} className="mr-1" />
-                                Filters
+                                <FilterIcon size={14} className="sm:mr-1" />
+                                <span className="hidden sm:inline ml-1">Filters</span>
                                 <ChevronDown
-                                    size={16}
-                                    className={`ml-1 transition-transform duration-200 ${filtersOpen ? 'transform rotate-180' : ''}`}
+                                    size={14}
+                                    className={`ml-0.5 sm:ml-1 transition-transform duration-200 ${filtersOpen ? 'transform rotate-180' : ''}`}
                                 />
                             </button>
 
@@ -273,7 +273,7 @@ export default function Navbar({userId}) {
                                         className="fixed inset-0 bg-black/50 z-50"
                                         onClick={() => setFiltersOpen(false)}
                                     />
-                                    <div className="absolute right-0 mt-2 w-72 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] z-50">
+                                    <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 mt-2 sm:w-80 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] z-50 max-h-[80vh] overflow-y-auto">
                                         <GlobalFilterSection />
                                     </div>
                                 </>
@@ -294,7 +294,7 @@ export default function Navbar({userId}) {
                             <div className="relative" ref={profileRef}>
                                 <button
                                     onClick={toggleProfileDropdown}
-                                    className="flex items-center p-2 bg-white border-2 border-black rounded-none hover:bg-gray-100 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
+                                    className="flex items-center p-1.5 sm:p-2 bg-white border-2 border-black rounded-none hover:bg-gray-100 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                                     aria-label="Open user menu"
                                     aria-expanded={profileOpen}
                                 >

@@ -52,11 +52,11 @@ export const CouponCard = ({
     };
 
     return (
-        <div className={`${getBackgroundColor(index)} border-2 border-gray-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow`}>
+        <div className={`${getBackgroundColor(index)} border-2 border-gray-800 p-3 sm:p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow`}>
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2">
                         {coupon.title}
                     </h2>
 

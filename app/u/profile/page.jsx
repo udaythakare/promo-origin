@@ -41,25 +41,25 @@ export default async function Page() {
   const userRoles = await getUserRolesFromDB(user.id);
 
   return (
-    <div className="min-h-screen py-6">
-      <div className="max-w-5xl mx-auto px-3">
+    <div className="min-h-screen py-4 sm:py-6">
+      <div className="max-w-5xl mx-auto px-2 sm:px-3">
 
         {/* HEADER */}
-        <div className="bg-gray-100 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] p-4 mb-6">
+        <div className="bg-gray-100 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center space-x-3 mb-3 sm:mb-0">
               <div className="bg-white rounded-full p-2 border-3 border-black">
                 <User className="h-6 w-6 text-black" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-black">
+                <h1 className="text-lg sm:text-xl font-black text-black">
                   {user.username}
                 </h1>
                 <p className="text-sm font-bold">{user.email}</p>
               </div>
             </div>
-            <div className="flex space-x-3">
-              <button className="bg-white text-black font-bold px-3 py-2 border-3 border-black shadow-[3px_3px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <button className="bg-white text-black font-bold px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-3 border-black shadow-[3px_3px_0px_rgba(0,0,0)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center">
                 <Settings className="h-5 w-5 mr-1" />
                 SETTINGS
               </button>
@@ -72,11 +72,11 @@ export default async function Page() {
 
           {/* BUSINESS DASHBOARD */}
           {userRoles.includes("app_business_owner") && (
-            <div className="bg-yellow-500 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] p-5">
+            <div className="bg-yellow-500 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] p-3 sm:p-5">
               <h2 className="font-black text-xl mb-2 uppercase">
                 Business Dashboard
               </h2>
-              <p className="mb-4 text-sm font-bold">
+              <p className="mb-3 sm:mb-4 text-xs sm:text-sm font-bold">
                 Manage your business listings, promotions and analytics
               </p>
               <Link
@@ -91,7 +91,7 @@ export default async function Page() {
 
           {/* INVESTOR DASHBOARD */}
           {userRoles.includes("app_investor") ? (
-            <div className="bg-blue-500 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] p-5">
+            <div className="bg-blue-500 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] p-3 sm:p-5">
               <h2 className="font-black text-xl mb-2 uppercase flex items-center">
                 <TrendingUp className="mr-2" />
                 Investment Dashboard
@@ -108,7 +108,7 @@ export default async function Page() {
               </Link>
             </div>
           ) : (
-            <div className="bg-blue-200 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] p-5">
+            <div className="bg-blue-200 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] p-3 sm:p-5">
               <h2 className="font-black text-xl mb-2 uppercase flex items-center">
                 <Briefcase className="mr-2" />
                 Become an Investor
@@ -127,7 +127,7 @@ export default async function Page() {
           )}
 
           {/* PERSONAL INFO */}
-          <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] overflow-hidden">
+          <div className="bg-green-400 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] overflow-hidden">
             <div className="p-4 border-b-4 border-black bg-green-300">
               <h2 className="text-xl font-black flex items-center">
                 <IdCard className="h-5 w-5 mr-2" />
@@ -140,7 +140,7 @@ export default async function Page() {
           </div>
 
           {/* LOCATION */}
-          <div className="bg-green-400 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0)] overflow-hidden">
+          <div className="bg-green-400 border-3 sm:border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0)] sm:shadow-[8px_8px_0px_rgba(0,0,0)] overflow-hidden">
             <div className="p-4 border-b-4 border-black bg-green-300">
               <h2 className="text-xl font-black flex items-center">
                 <MapPin className="h-5 w-5 mr-2" />

@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
-import withPWA from 'next-pwa';
+import withSerwist from '@serwist/next';
 
 const nextConfig = {
+    turbopack: {},
     images: {
+        formats: ['image/avif', 'image/webp'],
         remotePatterns: [
             {
                 protocol: 'https',
@@ -16,13 +18,47 @@ const nextConfig = {
             },
         ],
     },
+    experimental: {
+        optimizePackageImports: [
+            'react-icons',
+            'lucide-react',
+            'date-fns',
+            'recharts',
+            'framer-motion',
+        ],
+        staleTimes: {
+            dynamic: 30,
+            static: 180,
+        },
+    },
+    async headers() {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'X-DNS-Prefetch-Control',
+                        value: 'on',
+                    },
+                ],
+            },
+            {
+                source: '/icons/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'public, max-age=31536000, immutable',
+                    },
+                ],
+            },
+        ];
+    },
 };
 
-const config = withPWA({
-    dest: 'public',
-    register: true,
-    skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development'
+const config = withSerwist({
+    swSrc: 'app/sw.js',
+    swDest: 'public/sw.js',
+    disable: process.env.NODE_ENV === 'development',
 })(nextConfig);
 
 export default config;
