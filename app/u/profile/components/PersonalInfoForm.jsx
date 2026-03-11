@@ -19,7 +19,6 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
             [name]: value
         }))
 
-        // Clear field-specific error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -31,7 +30,6 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
     const validateForm = () => {
         const newErrors = {}
 
-        // Check required fields
         if (!formData.username.trim()) {
             newErrors.username = 'Username is required'
         }
@@ -53,7 +51,6 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        // Validate form before submission
         if (!validateForm()) {
             toast.error('Please fix the errors in the form')
             return
@@ -67,7 +64,6 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
             if (result.success) {
                 toast.success('Personal information updated successfully')
             } else {
-                // Handle specific field errors from backend
                 if (result.fieldErrors) {
                     setErrors(result.fieldErrors)
                     toast.error('Please fix the errors in the form')
@@ -84,112 +80,114 @@ const PersonalInfoForm = ({ initialData, onSubmit }) => {
     }
 
     return (
-        <div className="bg-yellow-100 p-5 md:p-7 rounded-none border-3 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-2xl mx-auto">
+        <div className="bg-white border-2 border-black rounded-xl shadow-sm p-6 sm:p-7 max-w-2xl mx-auto">
 
-            {/* General error message area */}
             {errors.general && (
-                <div className="mb-5 p-3 bg-red-300 border-3 border-black text-black font-bold rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <div className="mb-5 p-3 bg-red-50 border border-red-400 text-red-700 rounded-md text-sm">
                     {errors.general}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Full Name Field */}
+
+                {/* Full Name */}
                 <div>
-                    <label htmlFor="full_name" className="block text-base font-bold text-black mb-1">
+                    <label htmlFor="full_name" className="block text-sm font-semibold text-gray-800 mb-1">
                         Full Name
                     </label>
+
                     <input
                         type="text"
                         id="full_name"
                         name="full_name"
                         value={formData.full_name}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border-3 ${errors.full_name ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
-                        required
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3716A8] text-sm
+                        ${errors.full_name ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                     />
+
                     {errors.full_name && (
-                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
-                            {errors.full_name}
-                        </p>
+                        <p className="mt-1 text-xs text-red-600">{errors.full_name}</p>
                     )}
                 </div>
 
-                {/* Username Field */}
+                {/* Username */}
                 <div>
-                    <label htmlFor="username" className="block text-base font-bold text-black mb-1">
+                    <label htmlFor="username" className="block text-sm font-semibold text-gray-800 mb-1">
                         Username
                     </label>
+
                     <input
                         type="text"
                         id="username"
                         name="username"
                         value={formData.username}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border-3 ${errors.username ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
-                        required
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3716A8] text-sm
+                        ${errors.username ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                     />
+
                     {errors.username && (
-                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
-                            {errors.username}
-                        </p>
+                        <p className="mt-1 text-xs text-red-600">{errors.username}</p>
                     )}
                 </div>
 
-                {/* Email Field */}
+                {/* Email */}
                 <div>
-                    <label htmlFor="email" className="block text-base font-bold text-black mb-1">
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">
                         Email
                     </label>
+
                     <input
                         type="email"
                         id="email"
                         name="email"
                         value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border-3 border-black rounded-none bg-gray-200 text-gray-600 font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                         disabled
-                        title="Email cannot be changed"
+                        className="w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-500 rounded-md text-sm"
                     />
-                    <p className="mt-1 text-xs font-bold text-black bg-gray-200 p-1 border-2 border-black inline-block rotate-1">
+
+                    <p className="mt-1 text-xs text-gray-500">
                         Email cannot be changed
                     </p>
                 </div>
 
-                {/* Mobile Number Field */}
+                {/* Mobile Number */}
                 <div>
-                    <label htmlFor="mobile_number" className="block text-base font-bold text-black mb-1">
+                    <label htmlFor="mobile_number" className="block text-sm font-semibold text-gray-800 mb-1">
                         Mobile Number
                     </label>
+
                     <input
                         type="tel"
                         id="mobile_number"
                         name="mobile_number"
                         value={formData.mobile_number}
                         onChange={handleChange}
-                        className={`w-full px-3 py-2 border-3 ${errors.mobile_number ? 'border-red-500 bg-red-100' : 'border-black'} rounded-none focus:outline-none focus:bg-cyan-100 transition-colors text-black font-medium text-base shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
-                        required
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3716A8] text-sm
+                        ${errors.mobile_number ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                     />
+
                     {errors.mobile_number && (
-                        <p className="mt-1 text-xs font-bold text-red-600 bg-red-100 p-1 border-2 border-red-500 inline-block">
-                            {errors.mobile_number}
-                        </p>
+                        <p className="mt-1 text-xs text-red-600">{errors.mobile_number}</p>
                     )}
                 </div>
 
-                {/* Submit Button */}
-                <div className="pt-5">
+                {/* Submit */}
+                <div className="pt-4">
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-full py-3 px-5 rounded-none text-black font-black text-lg 
-                            ${isSubmitting ? 'bg-blue-300 border-black' : 'bg-green-400 hover:bg-green-500 hover:-translate-y-1'} 
-                            border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
-                            transition-all duration-200 ease-in-out transform hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+                        className={`w-full py-3 text-sm font-semibold text-white rounded-md transition-all
+                        ${isSubmitting
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-[#3716A8] hover:bg-[#2c1185]'
+                            }`}
                     >
-                        {isSubmitting ? 'UPDATING...' : 'UPDATE INFO'}
+                        {isSubmitting ? 'Updating...' : 'Update Information'}
                     </button>
                 </div>
+
             </form>
         </div>
     )

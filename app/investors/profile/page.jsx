@@ -16,7 +16,7 @@ export default async function InvestorProfilePage() {
     <div className="space-y-10">
 
       {/* ================= HEADER SECTION ================= */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl p-8 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-black to-yellow-500 rounded-2xl p-8 text-white shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
           <div className="flex items-center gap-5">

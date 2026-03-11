@@ -87,44 +87,26 @@ export async function getUserBusinesses() {
 
 export async function createCoupon(formData) {
     const session = await getServerSession(options);
+
     if (!session?.user?.id) {
         return { error: 'Unauthorized' };
     }
+
     try {
-        // First verify that the user owns this business
+
+        // Verify user owns the business
         const { data: business, error: businessError } = await supabase
             .from('businesses')
             .select('id, name')
             .eq('id', formData.business_id)
             .eq('user_id', session.user.id)
             .single();
+
         if (businessError || !business) {
             return { error: 'Unauthorized access to this business' };
         }
 
-        // Fetch the business's primary location for geo-tagging the coupon
-        const { data: businessLocation } = await supabase
-            .from('business_locations')
-            .select('city, state')
-            .eq('business_id', formData.business_id)
-            .eq('is_primary', true)
-            .single();
-
-        // If no primary location, try any location
-        let locationCity = businessLocation?.city || null;
-        let locationState = businessLocation?.state || null;
-        if (!locationCity) {
-            const { data: anyLocation } = await supabase
-                .from('business_locations')
-                .select('city, state')
-                .eq('business_id', formData.business_id)
-                .limit(1)
-                .single();
-            locationCity = anyLocation?.city || null;
-            locationState = anyLocation?.state || null;
-        }
-
-        // Create the coupon with location data
+        // Create coupon (NO city/state here)
         const { data: coupon, error: couponError } = await supabase
             .from('coupons')
             .insert({
@@ -135,28 +117,34 @@ export async function createCoupon(formData) {
                 end_date: formData.end_date,
                 is_active: formData.is_active,
                 image_url: formData.image_url || null,
-                coupon_type: formData.coupon_type,
+                coupon_type: 'redeem_at_store', // enforce store redeem
                 redeem_duration: formData.redeem_duration || null,
                 max_claims: formData.max_claims || null,
                 user_id: session.user.id,
                 redemption_time_type: formData.redemption_time_type,
                 redemption_end_time: formData.redemption_end_time,
-                redemption_start_time: formData.redemption_start_time,
-                city: locationCity,
-                state: locationState
+                redemption_start_time: formData.redemption_start_time
             })
             .select('id, title, description')
             .single();
+
         if (couponError) throw couponError;
-        // Send push notifications via API (don't await to avoid blocking the response)
+
+        // Send push notification (non-blocking)
         if (formData.is_active) {
-            sendPushNotificationForNewCoupon(business, coupon, formData.business_id)
-            // .catch(error => {
-            //     console.error('Failed to send push notification:', error);
-            // });
+            sendPushNotificationForNewCoupon(
+                business,
+                coupon,
+                formData.business_id
+            ).catch(error => {
+                console.error('Push notification failed:', error);
+            });
         }
+
         revalidatePath('/business/dashboard/coupons');
+
         return { success: true, id: coupon.id };
+
     } catch (error) {
         console.error('Error creating coupon:', error);
         return { error: 'Failed to create coupon' };

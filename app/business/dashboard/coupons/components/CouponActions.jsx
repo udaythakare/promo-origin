@@ -1,36 +1,56 @@
 // CouponActions.tsx - Neo-Brutalism style
 'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DeleteCouponModal from './DeleteCouponModal';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CouponActions({ couponId }) {
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const router = useRouter();
+
+    const ctx = useLanguage();
+    const t = ctx?.t;
 
     return (
         <>
             <div className="flex flex-wrap gap-2">
+
+                {/* VIEW */}
+
                 <Link
                     href={`/business/dashboard/coupons/${couponId}`}
-                    className="bg-blue-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-blue-500 transition-colors"
+                    className="text-black px-4 py-1 border-2 border-black font-bold transition-colors"
+                    style={{ backgroundColor: '#df6824' }}
                 >
-                    VIEW
+                    {t?.common?.view ?? "View"}
                 </Link>
+
+                {/* EDIT */}
+
                 <Link
                     href={`/business/dashboard/coupons/edit/${couponId}`}
-                    className="bg-yellow-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-yellow-500 transition-colors"
+                    className="text-black px-4 py-1 border-2 border-black font-bold transition-colors"
+                    style={{ backgroundColor: '#fff4ec' }}
                 >
-                    EDIT
+                    {t?.common?.edit ?? "Edit"}
                 </Link>
+
+                {/* DELETE */}
+
                 <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="bg-red-400 text-black px-4 py-1 border-2 border-black font-bold hover:bg-red-500 transition-colors"
+                    className="text-black px-4 py-1 border-2 border-black font-bold transition-colors"
+                    style={{ backgroundColor: '#fca5a5' }}
                 >
-                    DELETE
+                    {t?.common?.delete ?? "Delete"}
                 </button>
+
             </div>
+
             {showDeleteModal && (
                 <DeleteCouponModal
                     couponId={couponId}

@@ -1,10 +1,12 @@
 // hooks/useCouponForm.js
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCoupon, updateCoupon, getUserBusinesses } from '../app/business/dashboard/coupons/actions/couponActions';
 import { prepareFormDataForSubmission } from '@/utils/dateUtils';
 
 export const useCouponForm = (coupon) => {
+
     const router = useRouter();
     const isEditing = !!coupon?.id;
 
@@ -22,7 +24,7 @@ export const useCouponForm = (coupon) => {
         end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         is_active: true,
         image_url: '',
-        coupon_type: 'redeem_at_store',
+        coupon_type: 'redeem_at_store', // always store redeem
         redeem_duration: '5 minutes',
         max_claims: '',
         redemption_time_type: 'anytime',
@@ -31,34 +33,60 @@ export const useCouponForm = (coupon) => {
     });
 
     useEffect(() => {
+
         async function loadInitialData() {
+
             setIsLoading(true);
+
             try {
+
                 const businessesResult = await getUserBusinesses();
+
                 if (businessesResult.businesses) {
+
                     setBusinesses(businessesResult.businesses);
 
                     if (isEditing && coupon) {
-                        setFormData(prev => ({ ...prev, ...coupon }));
+
+                        setFormData(prev => ({
+                            ...prev,
+                            ...coupon,
+                            coupon_type: 'redeem_at_store' // force store redeem
+                        }));
+
                     } else if (businessesResult.businesses.length > 0) {
+
                         setFormData(prev => ({
                             ...prev,
                             business_id: businessesResult.businesses[0].id
                         }));
+
                     }
+
                 }
+
             } catch (error) {
+
                 console.error('Error loading initial data:', error);
+
             } finally {
+
                 setIsLoading(false);
+
             }
+
         }
 
         loadInitialData();
+
     }, [isEditing, coupon]);
 
+
+
     const validateForm = () => {
+
         const newErrors = {};
+
         const now = new Date();
         const startDate = new Date(formData.start_date);
         const endDate = new Date(formData.end_date);
@@ -73,23 +101,31 @@ export const useCouponForm = (coupon) => {
 
         if (!formData.start_date) {
             newErrors.start_date = 'Start date is required';
-        } else if (startDate < now && !isEditing) {
+        } 
+        else if (startDate < now && !isEditing) {
             newErrors.start_date = 'Start date must be in the future';
         }
 
         if (!formData.end_date) {
             newErrors.end_date = 'End date is required';
-        } else if (endDate <= startDate) {
+        } 
+        else if (endDate <= startDate) {
             newErrors.end_date = 'End date must be after start date';
-        } else if (endDate < now && !isEditing) {
+        } 
+        else if (endDate < now && !isEditing) {
             newErrors.end_date = 'End date must be in the future';
         }
 
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
+
     };
 
+
+
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         if (!validateForm()) {
@@ -104,12 +140,18 @@ export const useCouponForm = (coupon) => {
         setIsSubmitting(true);
 
         try {
-            const submissionData = prepareFormDataForSubmission(formData);
+
+            const submissionData = prepareFormDataForSubmission({
+                ...formData,
+                coupon_type: 'redeem_at_store' // enforce store redeem
+            });
 
             let result;
+
             if (isEditing && coupon?.id) {
                 result = await updateCoupon(coupon.id, submissionData);
-            } else {
+            } 
+            else {
                 result = await createCoupon(submissionData);
             }
 
@@ -120,20 +162,38 @@ export const useCouponForm = (coupon) => {
 
             router.push('/business/dashboard/coupons');
             router.refresh();
+
         } catch (error) {
+
             console.error('Error submitting form:', error);
+
             setErrors({ form: 'Failed to save coupon. Please try again.' });
+
         } finally {
+
             setIsSubmitting(false);
+
         }
+
     };
+
+
 
     const handleChange = (e) => {
+
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
     };
 
+
+
     return {
+
         formData,
         setFormData,
         businesses,
@@ -146,5 +206,7 @@ export const useCouponForm = (coupon) => {
         isEditing,
         handleSubmit,
         handleChange,
+
     };
+
 };

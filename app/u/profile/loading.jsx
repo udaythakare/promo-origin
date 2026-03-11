@@ -1,54 +1,69 @@
-'use client';
+'use client'
+
 import React from 'react'
 import dynamic from 'next/dynamic'
 import loadingAnimation from '@/public/animations/success-animation.json'
 
 const Lottie = dynamic(() => import('lottie-react'), {
-    ssr: false,
-    loading: () => (
-        <div className="h-full w-full flex items-center justify-center">
-            <div className="h-8 w-8 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
-        </div>
-    ),
-});
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center w-16 h-16">
+      <div className="h-8 w-8 border-4 border-gray-200 border-t-[#3716A8] rounded-full animate-spin" />
+    </div>
+  ),
+})
 
-const NeoBrutalistLoading = () => {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">
-            <div className="relative">
-                {/* Main loading container */}
-                <div className="bg-white border-4 border-black shadow-[8px_8px_0_black] p-8 rounded-lg">
-                    {/* Lottie Animation */}
-                    <div className="flex justify-center items-center mb-6">
-                        <div className="w-32 h-32 border-4 border-black bg-yellow-300 p-2 shadow-[4px_4px_0_black]">
-                            <Lottie
-                                animationData={loadingAnimation}
-                                loop={true}
-                                autoplay={true}
-                                style={{ width: '100%', height: '100%' }}
-                            />
-                        </div>
-                    </div>
+const AppLoading = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f8f7ff] px-4">
 
-                    {/* Loading text */}
-                    <div className="text-center">
-                        <span className="text-2xl font-bold text-black uppercase tracking-wider">
-                            Loading
-                            <span className="animate-pulse">...</span>
-                        </span>
-                    </div>
-                </div>
+      <div className="w-full max-w-sm">
 
-                {/* Shadow effect for neo-brutalist depth */}
-                <div
-                    className="absolute inset-0 bg-black opacity-20 rounded-lg -z-10"
-                    style={{
-                        transform: 'translate(12px, 12px)',
-                    }}
-                />
+        {/* Card */}
+        <div className="bg-white border border-[#3716A8]/10 rounded-2xl shadow-lg p-8 text-center transition-all">
+
+          {/* Animation */}
+          <div className="flex justify-center mb-6">
+            <div className="w-32 h-32 flex items-center justify-center rounded-xl bg-[#3716A8]/5 border border-[#3716A8]/10">
+
+              <Lottie
+                animationData={loadingAnimation}
+                loop={true}
+                autoplay={true}
+                style={{ width: "100%", height: "100%" }}
+              />
+
             </div>
+          </div>
+
+          {/* Text */}
+          <div className="space-y-2">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Loading your dashboard
+            </h2>
+
+            <p className="text-sm text-gray-500">
+              Please wait while we prepare everything for you
+            </p>
+
+          </div>
+
+          {/* Animated dots */}
+          <div className="flex justify-center mt-6 gap-2">
+
+            <span className="w-2 h-2 bg-[#3716A8] rounded-full animate-bounce"></span>
+            <span className="w-2 h-2 bg-[#3716A8] rounded-full animate-bounce [animation-delay:.15s]"></span>
+            <span className="w-2 h-2 bg-[#3716A8] rounded-full animate-bounce [animation-delay:.3s]"></span>
+
+          </div>
+
         </div>
-    )
+
+      </div>
+
+    </div>
+  )
 }
 
-export default NeoBrutalistLoading
+export default AppLoading

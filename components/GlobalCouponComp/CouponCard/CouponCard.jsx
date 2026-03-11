@@ -1,190 +1,203 @@
-import React, { useState } from 'react';
-import { Calendar, Check, ChevronDown, ChevronUp, Clock, Gift, QrCode, Scissors, Star, Store, Timer, Users, X } from 'lucide-react';
-import { joinAddress } from '@/utils/addressUtils';
-import ClaimsCounter from '@/app/business/dashboard/coupons/components/ClaimCounter';
-import { getUserId } from '@/helpers/userHelper';
+import React, { useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  QrCode,
+  Scissors,
+  Timer,
+  Store,
+  X,
+  MapPin,
+  Flame
+} from "lucide-react";
+
+import { joinAddress } from "@/utils/addressUtils";
+import ClaimsCounter from "@/app/business/dashboard/coupons/components/ClaimCounter";
 
 export const CouponCard = ({
-    coupon,
-    index,
-    isClaimed,
-    claimingStatus,
-    session,
-    onClaimClick,
-    onShowQR,
-    onToggleDetails,
-    userId
+  coupon,
+  isClaimed,
+  claimingStatus,
+  session,
+  onClaimClick,
+  onShowQR,
+  onToggleDetails,
+  userId
 }) => {
-    const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
-    const getBackgroundColor = (index) => {
-        const colors = [
-            'bg-yellow-300', 'bg-blue-100', 'bg-green-300', 'bg-pink-100',
-            'bg-purple-300', 'bg-orange-100', 'bg-teal-300', 'bg-red-100'
-        ];
-        return colors[index % colors.length];
-    };
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric"
+    });
+  };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return 'Invalid Date';
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        } catch (error) {
-            console.error('Error formatting date:', error);
-            return 'Invalid Date';
-        }
-    };
+  const getProgressBarWidth = (current, max) => {
+    if (!current || !max) return "0%";
+    return `${Math.min((current / max) * 100, 100)}%`;
+  };
 
-    const getProgressBarWidth = (current, max) => {
-        if (!current || !max || max <= 0) return '0%';
-        return `${Math.min((current / max) * 100, 100)}%`;
-    };
+  const handleToggleDetails = () => {
+    setDetailsOpen(!detailsOpen);
+    if (onToggleDetails) onToggleDetails(coupon.id);
+  };
 
-    const handleToggleDetails = () => {
-        setDetailsOpen(!detailsOpen);
-        if (onToggleDetails) onToggleDetails(coupon.id);
-    };
+  return (
+    <div className="w-full max-w-[280px] mx-auto bg-white border-2 border-black rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
-    return (
-        <div className={`${getBackgroundColor(index)} border-2 border-gray-800 p-3 sm:p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow`}>
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2">
-                        {coupon.title}
-                    </h2>
+      {/* TOP BAR */}
+      <div
+        className="text-white px-3 py-1.5 flex items-center justify-between text-xs font-semibold"
+        style={{ background: "linear-gradient(90deg,#3716A8,#2C1288)" }}
+      >
+        <span className="flex items-center gap-1">
+          <Flame size={14} /> Hot Deal
+        </span>
+        <span>Ends {formatDate(coupon.end_date)}</span>
+      </div>
 
-                    <div className="flex items-center gap-2">
-                        <span className="bg-gray-800 text-white px-2 py-1 text-sm font-medium rounded">
-                            {coupon?.businesses?.name || 'VENDOR'}
-                        </span>
-                        <Gift size={20} className="text-gray-600" />
-                    </div>
-                </div>
-            </div>
+      <div className="p-3 flex flex-col gap-2 flex-grow">
 
-            {/* Description */}
-            <p className="text-gray-700 mb-3 p-2 bg-white rounded border-l-4 border-gray-800">
-                {coupon.description && coupon.description.length > 100 && !detailsOpen
-                    ? `${coupon.description.substring(0, 100)}...`
-                    : coupon.description || 'No description available'}
-            </p>
+        {/* TITLE */}
+        <h2 className="text-sm font-bold text-gray-900 line-clamp-2">
+          {coupon.title}
+        </h2>
 
-            {/* Date and Claims Info */}
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
-                <div className="bg-white border border-gray-300 px-3 py-1 rounded flex items-center">
-                    <Timer className="mr-2 w-4 h-4" />
-                    <span className="text-sm font-medium">
-                        {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
-                    </span>
-                </div>
-
-                <div className="w-full sm:w-auto">
-                    <div className="bg-white border border-gray-300 px-3 py-1 rounded">
-                        <ClaimsCounter
-                            couponId={coupon.id}
-                            initialCount={coupon.current_claims}
-                            maxClaims={coupon.max_claims}
-                            userId={userId}
-                        />
-                        <div className="w-full bg-gray-200 h-2 mt-1 rounded overflow-hidden">
-                            <div
-                                className="bg-gray-800 h-full rounded"
-                                style={{ width: getProgressBarWidth(coupon.current_claims, coupon.max_claims) }}
-                            ></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Expanded Details */}
-            {detailsOpen && (
-                <div className="mt-3 pt-3 border-t border-gray-300 mb-3">
-                    <div className="bg-white p-3 border border-gray-300 rounded">
-                        <p className="text-gray-700 mb-2">{coupon.description || 'No description available'}</p>
-                        <p className="text-sm mb-2 flex items-center gap-2">
-                            <span className="bg-gray-800 text-white px-2 py-1 rounded text-xs">REDEMPTION:</span>
-                            <span>{coupon.coupon_type === 'redeem_at_store' ? 'IN-STORE' : 'ONLINE'}</span>
-                        </p>
-                        <p className="text-sm flex items-center gap-2">
-                            <span className="bg-gray-800 text-white px-2 py-1 rounded text-xs">LOCATION:</span>
-                            <span>{coupon?.businesses?.business_locations && coupon.businesses.business_locations[0] ?
-                                joinAddress(coupon.businesses.business_locations[0]) :
-                                'Contact store for details'}</span>
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* Toggle Details and Store Type */}
-            <div className="flex justify-between items-center mb-3">
-                <button
-                    onClick={handleToggleDetails}
-                    className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 px-2 py-1 rounded border border-blue-200 hover:bg-blue-50 transition-colors"
-                >
-                    {detailsOpen ? (
-                        <>Hide Details <ChevronUp size={16} /></>
-                    ) : (
-                        <>View Details <ChevronDown size={16} /></>
-                    )}
-                </button>
-
-                {coupon.coupon_type === 'redeem_at_store' && (
-                    <span className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
-                        IN-STORE ONLY
-                    </span>
-                )}
-            </div>
-
-            {/* Action Buttons */}
-            {isClaimed ? (
-                <div className="flex gap-2">
-                    <button
-                        disabled
-                        className="flex-1 bg-gray-800 text-white font-medium py-2 px-4 rounded cursor-not-allowed flex justify-center items-center"
-                    >
-                        <Check className="mr-2" size={18} /> CLAIMED
-                    </button>
-                    <button
-                        onClick={() => onShowQR(coupon)}
-                        className="bg-white text-gray-800 font-medium py-2 px-4 rounded border-2 border-gray-800 hover:bg-gray-50 transition-colors flex justify-center items-center"
-                    >
-                        <QrCode className="mr-2" size={18} /> QR
-                    </button>
-                </div>
-            ) : coupon.current_claims >= coupon.max_claims ? (
-                <button
-                    disabled
-                    className="w-full bg-gray-400 text-white font-medium py-2 px-4 rounded cursor-not-allowed flex justify-center items-center"
-                >
-                    <X className="mr-2" size={18} /> FULLY CLAIMED
-                </button>
-            ) : claimingStatus === 'claiming' ? (
-                <button
-                    disabled
-                    className="w-full bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded cursor-wait flex justify-center items-center border-2 border-gray-300"
-                >
-                    CLAIMING...
-                </button>
-            ) : (
-                <button
-                    onClick={() => onClaimClick(coupon)}
-                    disabled={!session}
-                    className={`w-full font-medium py-2 px-4 rounded transition-colors flex justify-center items-center ${!session
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed border-2 border-gray-300'
-                        : 'bg-white text-gray-800 border-2 border-gray-800 hover:bg-gray-50'
-                        }`}
-                >
-                    <Scissors className="mr-2" size={18} />
-                    {!session ? 'SIGN IN TO CLAIM' : 'CLAIM NOW!'}
-                </button>
-            )}
+        {/* STORE */}
+        <div className="flex items-center gap-1 text-xs text-gray-600">
+          <Store size={13} />
+          <span className="font-semibold">
+            {coupon?.businesses?.name || "Vendor"}
+          </span>
         </div>
-    );
+
+        {/* DESCRIPTION */}
+        <p className="text-xs text-gray-600 line-clamp-2">
+          {coupon.description || "No description available"}
+        </p>
+
+        {/* CLAIM COUNTER */}
+        <div>
+          <ClaimsCounter
+            couponId={coupon.id}
+            initialCount={coupon.current_claims}
+            maxClaims={coupon.max_claims}
+            userId={userId}
+          />
+
+          <div className="w-full bg-gray-200 h-1.5 rounded-full mt-1 overflow-hidden">
+            <div
+              className="h-full"
+              style={{
+                width: getProgressBarWidth(
+                  coupon.current_claims,
+                  coupon.max_claims
+                ),
+                background: "#3716A8"
+              }}
+            />
+          </div>
+        </div>
+
+        {/* DIVIDER */}
+        <div className="border-t border-dashed border-gray-300 my-1"></div>
+
+        {/* DETAILS */}
+        {detailsOpen && (
+          <div className="text-xs text-gray-600 space-y-1">
+            <div className="flex items-start gap-1">
+              <MapPin size={13} />
+              <span>
+                {coupon?.businesses?.business_locations &&
+                coupon.businesses.business_locations[0]
+                  ? joinAddress(coupon.businesses.business_locations[0])
+                  : "Store location"}
+              </span>
+            </div>
+
+            <div
+              className="flex items-center gap-1 font-medium"
+              style={{ color: "#3716A8" }}
+            >
+              <Timer size={13} />
+              {formatDate(coupon.start_date)} – {formatDate(coupon.end_date)}
+            </div>
+          </div>
+        )}
+
+        {/* TOGGLE */}
+        <button
+          onClick={handleToggleDetails}
+          className="text-xs font-medium flex items-center gap-1"
+          style={{ color: "#3716A8" }}
+        >
+          {detailsOpen ? (
+            <>
+              Hide details <ChevronUp size={13} />
+            </>
+          ) : (
+            <>
+              View details <ChevronDown size={13} />
+            </>
+          )}
+        </button>
+
+        {/* ACTION BUTTONS */}
+        <div className="mt-auto pt-2">
+
+          {isClaimed ? (
+            <div className="flex gap-2">
+              <button
+                disabled
+                className="flex-1 bg-green-600 text-white text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1"
+              >
+                <Check size={13} />
+                Claimed
+              </button>
+
+              <button
+                onClick={() => onShowQR(coupon)}
+                className="px-3 bg-black text-white text-xs font-semibold py-2 rounded-lg hover:bg-gray-900 flex items-center gap-1"
+              >
+                <QrCode size={13} />
+              </button>
+            </div>
+          ) : coupon.current_claims >= coupon.max_claims ? (
+            <button
+              disabled
+              className="w-full bg-gray-300 text-gray-600 text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1"
+            >
+              <X size={13} />
+              Fully Claimed
+            </button>
+          ) : claimingStatus === "claiming" ? (
+            <button
+              disabled
+              className="w-full bg-gray-100 text-gray-600 text-xs font-semibold py-2 rounded-lg"
+            >
+              Claiming...
+            </button>
+          ) : (
+            <button
+              onClick={() => onClaimClick(coupon)}
+              disabled={!session}
+              className={`w-full text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1 ${
+                !session
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "text-white"
+              }`}
+              style={session ? { background: "#3716A8" } : {}}
+            >
+              <Scissors size={13} />
+              {!session ? "Sign in to claim" : "Claim Coupon"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };

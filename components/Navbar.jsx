@@ -1,430 +1,451 @@
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getAddressDropdowns } from '@/actions/addressActions';
 import { fetchAllCoupons, fetchAreaCoupons } from '@/actions/couponActions';
+
 import {
-    Menu as MenuIcon,
-    X as XIcon,
-    User as UserIcon,
-    LogOut as LogOutIcon,
-    ChevronDown,
-    Filter as FilterIcon,
-    MapPin
+Menu as MenuIcon,
+X as XIcon,
+User as UserIcon,
+LogOut as LogOutIcon,
+ChevronDown,
+Filter as FilterIcon
 } from 'lucide-react';
+
 import GlobalFilterSection from './GlobalFilterSection';
 import InternalNotifications from './InternalNotifications';
-import { getUserId } from '@/helpers/userHelper';
 
 export default function Navbar({ userId }) {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [profileOpen, setProfileOpen] = useState(false);
-    const [filtersOpen, setFiltersOpen] = useState(false);
-    const [session, setSession] = useState(null);
-    const [user, setUser] = useState(null);
-    const [areas, setAreas] = useState([]);
-    const [selectedArea, setSelectedArea] = useState('');
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
 
-    // const [userId, setUserId] =useState(null);
+const [mobileMenuOpen,setMobileMenuOpen] = useState(false);
+const [profileOpen,setProfileOpen] = useState(false);
+const [filtersOpen,setFiltersOpen] = useState(false);
+const [session,setSession] = useState(null);
+const [user,setUser] = useState(null);
 
-    const profileRef = useRef(null);
-    const mobileMenuRef = useRef(null);
-    const filtersRef = useRef(null);
+const router = useRouter();
+
+const profileRef = useRef(null);
+const mobileMenuRef = useRef(null);
+const filtersRef = useRef(null);
 
 
-    // console.log(user,'this is user in navbar')
+/* CLICK OUTSIDE */
 
-    // Handle clicks outside of dropdown menus
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (profileRef.current && !profileRef.current.contains(event.target)) {
-                setProfileOpen(false);
-            }
+useEffect(() => {
 
-            if (mobileMenuOpen && mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
-                setMobileMenuOpen(false);
-            }
+function handleClickOutside(event){
 
-            if (filtersRef.current && !filtersRef.current.contains(event.target)) {
-                setFiltersOpen(false);
-            }
-        }
+if(profileRef.current && !profileRef.current.contains(event.target)){
+setProfileOpen(false)
+}
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [mobileMenuOpen]);
+if(mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)){
+setMobileMenuOpen(false)
+}
 
-    // Get authentication session and user data
-    useEffect(() => {
-        // Get initial session
-        const fetchSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
+if(filtersRef.current && !filtersRef.current.contains(event.target)){
+setFiltersOpen(false)
+}
 
-            console.log(session, 'this is session in navbar');
+}
 
-            if (session?.user) {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
+document.addEventListener("mousedown",handleClickOutside)
 
-                if (!error && data) {
-                    setUser(data);
-                }
-            }
-        };
+return () => document.removeEventListener("mousedown",handleClickOutside)
 
-        fetchSession();
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, currentSession) => {
-                setSession(currentSession);
-
-                if (currentSession?.user) {
-                    const { data, error } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', currentSession.user.id)
-                        .single();
-
-                    if (!error && data) {
-                        setUser(data);
-                    }
-                } else {
-                    setUser(null);
-                }
-            }
-        );
-
-        return () => {
-            subscription?.unsubscribe();
-        };
-    }, []);
+},[])
 
 
 
-    // console.log(session.user.id,'this is session user id')
+/* SESSION */
 
-    // Fetch areas for filters
-    useEffect(() => {
-        const fetchAreas = async () => {
-            try {
-                const dropdownResponse = await getAddressDropdowns();
-                if (dropdownResponse?.areaData) {
-                    setAreas(dropdownResponse.areaData);
-                }
-            } catch (error) {
-                console.error('Error fetching areas:', error);
-            }
-        };
+useEffect(()=>{
 
-        fetchAreas();
-    }, []);
+const fetchSession = async () => {
 
-    const handleSignOut = async () => {
-        try {
-            await supabase.auth.signOut();
-            setProfileOpen(false);
-            setMobileMenuOpen(false);
-            router.push('/login');
-        } catch (error) {
-            console.error('Error signing out:', error);
-        }
-    };
+const { data:{session} } = await supabase.auth.getSession()
 
-    const toggleProfileDropdown = () => {
-        setProfileOpen(!profileOpen);
-    };
+setSession(session)
 
-    const toggleFiltersDropdown = () => {
-        setFiltersOpen(!filtersOpen);
-    };
+if(session?.user){
 
-    const toggleMobileMenu = () => {
-        setMobileMenuOpen(!mobileMenuOpen);
-    };
+const {data} = await supabase
+.from('users')
+.select('*')
+.eq('id',session.user.id)
+.single()
 
-    // Handle area selection change
-    const handleAreaChange = async (area) => {
-        setSelectedArea(area);
-        setFiltersOpen(false);
+if(data) setUser(data)
 
-        try {
-            setLoading(true);
+}
 
-            if (area === '') {
-                // If "All Areas" is selected, fetch all coupons
-                const response = await fetchAllCoupons();
-                if (window.updateCoupons && response?.coupons) {
-                    window.updateCoupons(response.coupons);
-                }
-            } else {
-                // Fetch coupons for selected area
-                const response = await fetchAreaCoupons(area);
-                if (window.updateCoupons && response?.coupons) {
-                    window.updateCoupons(response.coupons);
-                }
-            }
+}
 
-            // Navigate to coupons page if not already there
-            if (window.location.pathname !== '/coupons') {
-                router.push('/coupons');
-            }
-        } catch (error) {
-            console.error('Error fetching coupons by area:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+fetchSession()
 
-    // Clear all filters
-    const clearFilters = async () => {
-        setSelectedArea('');
+const { data:{subscription} } =
+supabase.auth.onAuthStateChange(async(_,currentSession)=>{
 
-        try {
-            setLoading(true);
-            const response = await fetchAllCoupons();
-            if (window.updateCoupons && response?.coupons) {
-                window.updateCoupons(response.coupons);
-            }
-        } catch (error) {
-            console.error('Error clearing filters:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+setSession(currentSession)
 
-    return (
-        <nav className="bg-white border-b-4 border-black">
-            <div className="px-4 py-3">
+if(currentSession?.user){
 
-                <div className="flex justify-between items-center">
+const {data} = await supabase
+.from('users')
+.select('*')
+.eq('id',currentSession.user.id)
+.single()
 
+if(data) setUser(data)
 
-                    {/* Logo */}
-                    <div className="flex items-center">
-                        <Link href="/">
-                            <h1 className="text-lg font-black uppercase tracking-tight transform -rotate-1">LocalGrow</h1>
-                        </Link>
-                    </div>
+}else{
+setUser(null)
+}
 
-                    {/* Desktop Navigation - Hidden on Mobile */}
-                    <div className="hidden md:flex items-center space-x-6">
-                        <Link href="/" className="text-black font-bold hover:underline uppercase">
-                            Home
-                        </Link>
-                        <Link href="/coupons" className="text-black font-bold hover:underline uppercase">
-                            Coupons
-                        </Link>
-                        <Link href="/about" className="text-black font-bold hover:underline uppercase">
-                            About
-                        </Link>
-                        <Link href="/u/profile" className="text-black font-bold hover:underline uppercase">Profile</Link>
-                        <Link href="/u/profile/my-coupons" className="text-black font-bold hover:underline uppercase">My Coupon</Link>
-                        {session && (
-                            <Link href="/my-coupons" className="text-black font-bold hover:underline uppercase">
-                                My Coupons
-                            </Link>
-                        )}
-                    </div>
+})
 
+return () => subscription?.unsubscribe()
 
-                    <div>
-                        {userId && (
-                            <InternalNotifications userId={userId} />
-
-                        )}
-                    </div>
+},[])
 
 
 
-                    {/* Filters dropdown and Profile dropdown */}
-                    <div className="flex items-center space-x-2">
-                        {/* Filters dropdown */}
-                        <div className="relative" ref={filtersRef}>
-                            <button
-                                onClick={toggleFiltersDropdown}
-                                className="p-1.5 sm:p-2 bg-yellow-200 border-2 border-black rounded-none font-bold text-xs sm:text-sm hover:bg-green-500 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase flex items-center"
-                                aria-label="Open filter menu"
-                                aria-expanded={filtersOpen}
-                            >
-                                <FilterIcon size={14} className="sm:mr-1" />
-                                <span className="hidden sm:inline ml-1">Filters</span>
-                                <ChevronDown
-                                    size={14}
-                                    className={`ml-0.5 sm:ml-1 transition-transform duration-200 ${filtersOpen ? 'transform rotate-180' : ''}`}
-                                />
-                            </button>
+/* SIGN OUT */
 
-                            {/* Filters dropdown menu */}
-                            {filtersOpen && (
-                                <>
-                                    {/* Dark overlay */}
-                                    <div
-                                        className="fixed inset-0 bg-black/50 z-50"
-                                        onClick={() => setFiltersOpen(false)}
-                                    />
-                                    <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 mt-2 sm:w-80 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] z-50 max-h-[80vh] overflow-y-auto">
-                                        <GlobalFilterSection />
-                                    </div>
-                                </>
-                            )}
-                        </div>
+const handleSignOut = async () => {
 
-                        {/* Mobile menu button */}
-                        {/* <button
-                            aria-label="Toggle mobile menu"
-                            className="md:hidden p-2 bg-yellow-200 border-2 border-black rounded-none shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
-                            onClick={toggleMobileMenu}
-                        >
-                            <MenuIcon size={20} />
-                        </button> */}
+await supabase.auth.signOut()
 
-                        {/* Profile dropdown or Login buttons */}
-                        {session && (
-                            <div className="relative" ref={profileRef}>
-                                <button
-                                    onClick={toggleProfileDropdown}
-                                    className="flex items-center p-1.5 sm:p-2 bg-white border-2 border-black rounded-none hover:bg-gray-100 shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
-                                    aria-label="Open user menu"
-                                    aria-expanded={profileOpen}
-                                >
-                                    <div className="h-6 w-6 rounded-none bg-black flex items-center justify-center">
-                                        <UserIcon size={14} className="text-white" />
-                                    </div>
-                                    <ChevronDown
-                                        size={16}
-                                        className={`ml-1 transition-transform duration-200 ${profileOpen ? 'transform rotate-180' : ''}`}
-                                    />
-                                </button>
+setProfileOpen(false)
 
-                                {/* Profile dropdown menu */}
-                                {profileOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0)] py-1 z-50 transform origin-top-right transition-all duration-200 ease-out">
-                                        <div className="px-4 py-3 border-b-2 border-black bg-yellow-400">
-                                            <p className="text-sm font-black uppercase">{user?.username || user?.full_name || 'User'}</p>
-                                            <p className="text-xs font-bold truncate">{user?.email || session?.user?.email}</p>
-                                        </div>
-                                        <Link
-                                            href="/profile"
-                                            className="block px-4 py-2 text-sm font-bold hover:bg-yellow-300 hover:text-black uppercase"
-                                            onClick={() => setProfileOpen(false)}
-                                        >
-                                            Profile
-                                        </Link>
-                                        <button
-                                            onClick={handleSignOut}
-                                            className="flex items-center w-full px-4 py-2 text-sm font-bold hover:bg-red-400 hover:text-black uppercase"
-                                        >
-                                            <LogOutIcon size={16} className="mr-2" />
-                                            Sign Out
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
+router.push('/login')
 
-                {/* Mobile menu, show/hide based on menu state */}
-                {mobileMenuOpen && (
-                    <div
-                        ref={mobileMenuRef}
-                        className="fixed inset-0 z-40 md:hidden"
-                        aria-modal="true"
-                    >
-                        {/* Background overlay */}
-                        <div className="absolute inset-0 bg-black/25 backdrop-blur-xl" aria-hidden="true"></div>
+}
 
-                        {/* Menu panel */}
-                        <div className="absolute top-0 right-0 w-3/4 max-w-xs h-full bg-white border-l-4 border-black shadow-lg transform transition-all ease-in-out duration-300">
-                            <div className="p-4 border-b-4 border-black bg-yellow-400">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-lg font-black uppercase tracking-tight">Menu</h2>
-                                    <button
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="p-2 border-2 border-black bg-white hover:bg-gray-100 active:translate-x-1 active:translate-y-1 transition-all"
-                                    >
-                                        <XIcon size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="py-2">
-                                <Link href="/"
-                                    className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Home
-                                </Link>
-                                <Link href="/coupons"
-                                    className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:rotate-1 transition-all"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Coupons
-                                </Link>
-                                <Link href="/about"
-                                    className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    About
-                                </Link>
 
-                                <Link href="/v/onboard-form"
-                                    className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:-rotate-1 transition-all"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    Become a Seller
-                                </Link>
+/* INVESTOR CHECK */
 
-                                {session && (
-                                    <Link href="/my-coupons"
-                                        className="block px-4 py-3 text-base font-bold uppercase border-b-2 border-black hover:bg-yellow-300 transform hover:rotate-1 transition-all"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        My Coupons
-                                    </Link>
-                                )}
+const handleBecomeInvestor = async () => {
+
+  if (!userId) {
+    router.push('/auth/signin');
+    return;
+  }
+
+  try {
+
+    const { data, error } = await supabase
+      .from("investor_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Investor check error:", error);
+      router.push("/u/profile/apply-for-investor");
+      return;
+    }
+
+    if (data) {
+      router.push("/investors");
+    } else {
+      router.push("/u/profile/apply-for-investor");
+    }
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    router.push("/u/profile/apply-for-investor");
+  }
+
+};
+
+
+const handleApplyBusiness = async () => {
+
+  if (!userId) {
+    router.push('/auth/signin');
+    return;
+  }
+
+  try {
+
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Business check error:", error);
+      router.push("/u/profile/apply-for-business");
+      return;
+    }
+
+    if (data) {
+      router.push("/business/dashboard");
+    } else {
+      router.push("/u/profile/apply-for-business");
+    }
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    router.push("/u/profile/apply-for-business");
+  }
+
+};
+
+const toggleProfileDropdown = () => setProfileOpen(!profileOpen)
+const toggleFiltersDropdown = () => setFiltersOpen(!filtersOpen)
+const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
 
 
-                                {/* User profile section in the mobile menu */}
-                                {session ? (
-                                    <div className="border-t-4 border-black mt-2 pt-2 bg-red-400">
-                                        <div className="px-4 py-3">
-                                            <p className="text-sm font-black uppercase">{user?.username || user?.full_name || 'User'}</p>
-                                            <p className="text-xs font-bold">{user?.email || session?.user?.email}</p>
-                                            <div className="mt-2 flex flex-col space-y-2">
-                                                <Link href="/profile"
-                                                    className="flex items-center px-4 py-2 text-sm font-bold bg-white border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase"
-                                                    onClick={() => setMobileMenuOpen(false)}
-                                                >
-                                                    Profile
-                                                </Link>
-                                                <button
-                                                    onClick={handleSignOut}
-                                                    className="flex items-center px-4 py-2 text-sm font-bold bg-white border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0)] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all uppercase"
-                                                >
-                                                    <LogOutIcon size={16} className="mr-2" />
-                                                    Sign Out
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </nav>
-    );
+return(
+
+<nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+
+<div className="max-w-7xl mx-auto px-4 py-3">
+
+<div className="flex items-center justify-between">
+
+
+{/* Logo */}
+
+<Link href="/" className="text-xl font-bold text-[#3716a8] hover:opacity-80 transition">
+LocalGrow
+</Link>
+
+
+{/* Desktop Navigation */}
+
+<div className="hidden md:flex items-center gap-6 text-sm font-medium">
+
+<Link href="/" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+Home
+</Link>
+
+<Link href="/coupons" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+Coupons
+</Link>
+
+<Link href="/about" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+About
+</Link>
+
+<Link href="/u/profile" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+Profile
+</Link>
+
+<Link href="/u/profile/my-coupons" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+My Coupon
+</Link>
+
+{session && (
+<Link href="/my-coupons" className="px-3 py-2 rounded-lg hover:bg-[#3716a8]/10 transition">
+My Coupons
+</Link>
+)}
+
+{/* Apply Business */}
+
+<button
+onClick={handleApplyBusiness}
+className="px-4 py-2 text-sm border border-[#3716a8] text-[#3716a8] rounded-lg
+hover:bg-[#3716a8] hover:text-white transition"
+>
+Apply Business
+</button>
+
+{/* Become Investor */}
+
+<button
+onClick={handleBecomeInvestor}
+className="px-4 py-2 text-sm text-white bg-[#3716a8] rounded-lg
+hover:bg-[#6C4BFF] transition"
+>
+Become Investor
+</button>
+
+</div>
+
+
+{/* Right Section */}
+
+<div className="flex items-center gap-3">
+
+{userId && <InternalNotifications userId={userId} />}
+
+
+{/* Filters */}
+
+<div ref={filtersRef} className="relative">
+
+<button
+onClick={toggleFiltersDropdown}
+className="flex items-center gap-2 px-4 py-2 text-white bg-[#3716a8] rounded-lg
+hover:bg-[#6C4BFF] transition"
+>
+
+<FilterIcon size={16}/>
+
+Filters
+
+<ChevronDown
+size={16}
+className={`transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
+/>
+
+</button>
+
+{filtersOpen && (
+
+<>
+<div
+className="fixed inset-0 bg-black/30"
+onClick={()=>setFiltersOpen(false)}
+/>
+
+<div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-200">
+
+<GlobalFilterSection/>
+
+</div>
+</>
+
+)}
+
+</div>
+
+
+{/* Profile */}
+
+{session && (
+
+<div className="relative" ref={profileRef}>
+
+<button
+onClick={toggleProfileDropdown}
+className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition"
+>
+
+<div className="w-8 h-8 rounded-full bg-[#3716a8] flex items-center justify-center text-white">
+
+<UserIcon size={16}/>
+
+</div>
+
+<ChevronDown
+size={16}
+className={`transition-transform ${profileOpen ? 'rotate-180' : ''}`}
+/>
+
+</button>
+
+
+{profileOpen && (
+
+<div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+
+<div className="px-4 py-3 border-b">
+
+<p className="font-semibold text-sm">
+{user?.username || user?.full_name || 'User'}
+</p>
+
+<p className="text-xs text-gray-500 truncate">
+{user?.email || session?.user?.email}
+</p>
+
+</div>
+
+<Link
+href="/profile"
+className="block px-4 py-2 text-sm hover:bg-gray-50"
+onClick={()=>setProfileOpen(false)}
+>
+Profile
+</Link>
+
+<button
+onClick={handleSignOut}
+className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+>
+
+<LogOutIcon size={16}/>
+Sign Out
+
+</button>
+
+</div>
+
+)}
+
+</div>
+
+)}
+
+
+{/* Mobile Menu Button */}
+
+<button
+onClick={toggleMobileMenu}
+className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+>
+
+{mobileMenuOpen ? <XIcon size={22}/> : <MenuIcon size={22}/>}
+
+</button>
+
+</div>
+
+</div>
+
+
+{/* Mobile Menu */}
+
+{mobileMenuOpen && (
+
+<div
+ref={mobileMenuRef}
+className="md:hidden mt-4 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+
+<Link href="/" className="block px-4 py-3 hover:bg-gray-50">Home</Link>
+
+<Link href="/coupons" className="block px-4 py-3 hover:bg-gray-50">Coupons</Link>
+
+<Link href="/about" className="block px-4 py-3 hover:bg-gray-50">About</Link>
+
+<Link href="/u/profile" className="block px-4 py-3 hover:bg-gray-50">Profile</Link>
+
+<Link href="/u/profile/my-coupons" className="block px-4 py-3 hover:bg-gray-50">My Coupon</Link>
+
+<button
+onClick={handleApplyBusiness}
+className="w-full text-left px-4 py-3 hover:bg-gray-50"
+>
+Apply Business
+</button>
+
+<button
+onClick={handleBecomeInvestor}
+className="w-full text-left px-4 py-3 hover:bg-gray-50"
+>
+Become Investor
+</button>
+
+</div>
+
+)}
+
+</div>
+
+</nav>
+
+)
+
 }

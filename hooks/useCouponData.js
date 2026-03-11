@@ -296,6 +296,7 @@ export const useCouponData = () => {
 
     return {
         coupons,
+        setCoupons,      // ✅ NEW — exposed so GlobalCouponSection can update on category filter
         loading,
         selectedArea,
         lastRefreshed,

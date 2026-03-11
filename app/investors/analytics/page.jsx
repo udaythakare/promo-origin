@@ -19,184 +19,228 @@ import {
 } from "recharts";
 
 export default function AnalyticsPage() {
+
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+
+    async function fetchAnalytics() {
       try {
+
         const res = await fetch("/api/investors/analytics", {
           credentials: "include",
         });
 
         const data = await res.json();
 
-        if (!data.success) {
-          setError(data.message || "Failed to load analytics");
-          return;
+        if (!res.ok || !data.success) {
+          throw new Error(data.message || "Failed to load analytics");
         }
 
-        setAnalytics(data.analytics);
+        setAnalytics(data.analytics || {});
+
       } catch (err) {
-        console.error("Analytics fetch error:", err);
-        setError("Something went wrong");
+
+        console.error("Analytics error:", err);
+        setError(err.message);
+
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     fetchAnalytics();
+
   }, []);
 
-  // ================= LOADING =================
+  /* ---------------- LOADING ---------------- */
+
   if (loading) {
     return (
-      <div className="p-10 flex justify-center items-center">
-        <div className="animate-pulse space-y-4 w-full max-w-4xl">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-20 bg-gray-200 rounded"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-          </div>
+      <div className="flex items-center justify-center min-h-screen bg-[#e1e4ea]">
+        <div className="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-4 w-full p-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-24 bg-white rounded-xl" />
+          ))}
         </div>
       </div>
     );
   }
 
-  // ================= ERROR =================
+  /* ---------------- ERROR ---------------- */
+
   if (error) {
     return (
-      <div className="p-6 text-red-600 font-semibold">
+      <div className="flex items-center justify-center min-h-screen bg-[#e1e4ea] text-red-600 font-semibold">
         {error}
       </div>
     );
   }
 
-  if (!analytics) {
-    return (
-      <div className="p-6">
-        No analytics data available
-      </div>
-    );
-  }
+  /* ---------------- SAFE DATA ---------------- */
 
-  // ================= FORMATTERS =================
+  const totalInvestments = analytics?.totalInvestments || 0;
+  const totalAmount = analytics?.totalAmount || 0;
+  const totalProfit = analytics?.totalProfit || 0;
+  const overallROI = analytics?.overallROI || 0;
+  const activeInvestments = analytics?.activeInvestments || 0;
+  const completedInvestments = analytics?.completedInvestments || 0;
+  const totalConnections = analytics?.totalConnections || 0;
+  const pendingRequests = analytics?.pendingRequests || 0;
+
+  const monthlyGrowth =
+    analytics?.monthlyGrowth?.length > 0
+      ? analytics.monthlyGrowth
+      : [{ month: "No Data", amount: 0 }];
+
+  const statusData = [
+    { name: "Active", value: activeInvestments },
+    { name: "Completed", value: completedInvestments },
+  ];
+
+  const COLORS = ["#1a6559", "#8bc7bc"];
 
   const formatCurrency = (value) =>
     `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
-  // ================= CHART DATA =================
-
-  const statusData = [
-    { name: "Active", value: analytics.activeInvestments || 0 },
-    { name: "Completed", value: analytics.completedInvestments || 0 },
-  ];
-
-  const pieData = [
-    { name: "Active", value: analytics.activeInvestments || 0 },
-    { name: "Completed", value: analytics.completedInvestments || 0 },
-  ];
-
-  const monthlyGrowth =
-    analytics.monthlyGrowth && analytics.monthlyGrowth.length > 0
-      ? analytics.monthlyGrowth
-      : [{ month: "No Data", amount: 0 }];
-
-  const COLORS = ["#10B981", "#6366F1"];
-
   return (
-    <div className="p-6 space-y-12">
+    <section className="bg-[#e1e4ea] text-[#0d254b] min-h-screen p-4 sm:p-6 lg:p-8">
 
-      <h1 className="text-3xl font-bold">
-        Investor Analytics
-      </h1>
+      {/* HEADER */}
 
-      {/* ================= STAT CARDS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Investments" value={analytics.totalInvestments} />
-        <StatCard title="Total Amount Invested" value={formatCurrency(analytics.totalAmount)} />
-        <StatCard title="Total Profit Earned" value={formatCurrency(analytics.totalProfit)} />
-        <StatCard title="Overall ROI %" value={`${analytics.overallROI}%`} />
-        <StatCard title="Active Investments" value={analytics.activeInvestments} />
-        <StatCard title="Completed Investments" value={analytics.completedInvestments} />
-        <StatCard title="Total Connections" value={analytics.totalConnections} />
-        <StatCard title="Pending Requests" value={analytics.pendingRequests} />
+      <div className="mb-6">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+          Investor Analytics
+        </h1>
+        <p className="text-sm opacity-70">
+          Real-time investment insights
+        </p>
       </div>
 
-      {/* ================= BAR + PIE ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      {/* STAT CARDS */}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+        <StatCard title="Total Investments" value={totalInvestments} />
+        <StatCard title="Total Amount Invested" value={formatCurrency(totalAmount)} />
+        <StatCard title="Total Profit Earned" value={formatCurrency(totalProfit)} />
+        <StatCard title="Overall ROI %" value={`${overallROI}%`} />
+
+        <StatCard title="Active Investments" value={activeInvestments} />
+        <StatCard title="Completed Investments" value={completedInvestments} />
+        <StatCard title="Total Connections" value={totalConnections} />
+        <StatCard title="Pending Requests" value={pendingRequests} />
+
+      </div>
+
+      {/* CHARTS */}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* BAR CHART */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-semibold mb-4">
+
+        <div className="bg-white rounded-xl p-4 shadow-md">
+
+          <h2 className="font-semibold mb-3">
             Investment Status Overview
           </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={statusData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="#16A34A" />
-            </BarChart>
-          </ResponsiveContainer>
+
+          <div className="h-[260px] w-full">
+
+            <ResponsiveContainer>
+
+              <BarChart data={statusData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" stroke="#0d254b" />
+                <YAxis stroke="#0d254b" />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#1a6559" radius={[4,4,0,0]} />
+              </BarChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
         </div>
 
         {/* PIE CHART */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-semibold mb-4">
+
+        <div className="bg-white rounded-xl p-4 shadow-md">
+
+          <h2 className="font-semibold mb-3">
             Active vs Completed
           </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                nameKey="name"
-                outerRadius={100}
-                label
-              >
-                {pieData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+
+          <div className="h-[260px] w-full">
+
+            <ResponsiveContainer>
+
+              <PieChart>
+
+                <Pie
+                  data={statusData}
+                  dataKey="value"
+                  nameKey="name"
+                  outerRadius={90}
+                  label
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={index} fill={COLORS[index]} />
+                  ))}
+                </Pie>
+
+                <Tooltip />
+                <Legend />
+
+              </PieChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
         </div>
 
       </div>
 
-      {/* ================= LINE CHART ================= */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="font-semibold mb-4">
+      {/* LINE CHART */}
+
+      <div className="bg-white rounded-xl p-4 shadow-md mt-4">
+
+        <h2 className="font-semibold mb-3">
           Investment Growth Trend
         </h2>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={monthlyGrowth}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="amount"
-              stroke="#6366F1"
-              strokeWidth={3}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+
+        <div className="h-[300px] w-full">
+
+          <ResponsiveContainer>
+
+            <LineChart data={monthlyGrowth}>
+
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" stroke="#0d254b" />
+              <YAxis stroke="#0d254b" />
+              <Tooltip />
+              <Legend />
+
+              <Line
+                type="monotone"
+                dataKey="amount"
+                stroke="#1a6559"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+              />
+
+            </LineChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
       </div>
 
-    </div>
+    </section>
   );
 }
-

@@ -2,165 +2,324 @@
 
 import { useEffect, useState } from "react";
 import BusinessInfoForm from "../BusinessInfoForm";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function BusinessInfoContent() {
+
   const [businessInfo, setBusinessInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchBusinessInfo = async () => {
-      try {
-        const res = await fetch("/api/business-info");
-        const data = await res.json();
+  const ctx = useLanguage();
+  const t = ctx?.t;
 
-        if (!data.success) {
-          throw new Error(data.message || "Failed to fetch");
+  useEffect(() => {
+
+    const controller = new AbortController();
+    let isMounted = true;
+
+    const fetchBusinessInfo = async () => {
+
+      try {
+
+        const res = await fetch("/api/business-info", {
+          signal: controller.signal
+        });
+
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
         }
 
-        setBusinessInfo(data.businessInfo);
+        const data = await res.json();
+
+        if (!data?.success) {
+          throw new Error(data?.message || "Failed to fetch business information");
+        }
+
+        if (isMounted) {
+          setBusinessInfo(data.businessInfo ?? null);
+        }
+
       } catch (err) {
-        setError("Failed to load business information");
+
+        if (err.name === "AbortError") return;
+
+        console.error("Fetch Error:", err);
+
+        if (isMounted) {
+          setError("Failed to load business information");
+        }
+
       } finally {
-        setLoading(false);
+
+        if (isMounted) {
+          setLoading(false);
+        }
+
       }
+
     };
 
     fetchBusinessInfo();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+
   }, []);
 
+
   /* -------------------- LOADING -------------------- */
+
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="h-7 w-64 bg-gray-200 rounded animate-pulse" />
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 rounded animate-pulse" />
+
+        <div className="h-8 w-64 bg-gray-200 rounded animate-pulse" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="h-28 bg-gray-200 rounded-lg animate-pulse"
+            />
           ))}
         </div>
+
       </div>
     );
   }
 
+
   /* -------------------- ERROR -------------------- */
+
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-          <h2 className="font-semibold text-lg">Error</h2>
-          <p className="text-sm mt-1">{error}</p>
+
+        <div
+          className="border p-4 rounded-lg"
+          style={{
+            borderColor: "#df6824",
+            backgroundColor: "#fff7f3",
+            color: "#df6824"
+          }}
+        >
+
+          <h2 className="font-bold text-lg">
+            {t?.common?.error ?? "Error"}
+          </h2>
+
+          <p className="text-sm mt-1">
+            {error}
+          </p>
+
         </div>
+
       </div>
     );
   }
 
+
+  /* -------------------- NO DATA -------------------- */
+
+  if (!businessInfo) {
+    return (
+      <div className="p-6">
+
+        <div
+          className="border p-4 rounded-lg"
+          style={{
+            borderColor: "#df6824",
+            backgroundColor: "#fff7f3"
+          }}
+        >
+
+          <p className="text-sm font-medium">
+            {t?.business?.noData ?? "No business information found"}
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+
   /* -------------------- MAIN UI -------------------- */
+
   return (
-    <div className="p-6 space-y-8">
-      {/* ================= HEADER ================= */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Business Information
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          View and manage your registered business details
-        </p>
+
+    <div className="p-4 md:p-6 space-y-8">
+
+
+      {/* HEADER */}
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+        <div>
+
+          <h1 className="text-2xl md:text-3xl font-black text-gray-900">
+            {t?.business?.title ?? "Business Information"}
+          </h1>
+
+          <p className="text-sm text-gray-500 mt-1">
+            {t?.business?.subtitle ?? "View and manage your registered business details"}
+          </p>
+
+        </div>
+
       </div>
 
-      {/* ================= OVERVIEW ================= */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">
-          Business Overview
-        </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <Info label="Business Name" value={businessInfo.name} />
-          <Info label="Category ID" value={businessInfo.category_id} />
+      {/* BUSINESS OVERVIEW */}
 
-          <div className="md:col-span-2">
+      <SectionCard title={`🏢 ${t?.business?.overview ?? "Business Overview"}`}>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          <Info label={t?.business?.name ?? "Business Name"} value={businessInfo?.name} />
+
+          <Info label={t?.business?.category ?? "Category"} value={businessInfo?.category_id} />
+
+          <div className="md:col-span-2 xl:col-span-3">
             <Info
-              label="Description"
-              value={businessInfo.description}
+              label={t?.business?.description ?? "Description"}
+              value={businessInfo?.description}
               multiline
             />
           </div>
+
         </div>
-      </div>
 
-      {/* ================= CONTACT ================= */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">
-          Contact Information
-        </h2>
+      </SectionCard>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <Info label="Email" value={businessInfo.email} />
-          <Info label="Phone" value={businessInfo.phone} />
+
+      {/* CONTACT */}
+
+      <SectionCard title={`📞 ${t?.business?.contact ?? "Contact Information"}`}>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          <Info label={t?.business?.email ?? "Email"} value={businessInfo?.email} />
+
+          <Info label={t?.business?.phone ?? "Phone"} value={businessInfo?.phone} />
+
           <Info
-            label="Website"
-            value={businessInfo.website}
+            label={t?.business?.website ?? "Website"}
+            value={businessInfo?.website}
             isLink
           />
-        </div>
-      </div>
 
-      {/* ================= LOCATION ================= */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">
-          Business Location
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <Info label="Address" value={businessInfo.address} />
-          <Info label="Area" value={businessInfo.area} />
-          <Info label="City" value={businessInfo.city} />
-          <Info label="State" value={businessInfo.state} />
-          <Info label="Postal Code" value={businessInfo.postal_code} />
-          <Info label="Country" value={businessInfo.country} />
-        </div>
-      </div>
-
-      {/* ================= EDIT FORM ================= */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b px-6 py-4">
-          <h2 className="text-lg font-medium text-gray-800">
-            Edit Business Details
-          </h2>
         </div>
 
-        <div className="p-6">
-          <BusinessInfoForm businessInfo={businessInfo} />
+      </SectionCard>
+
+
+      {/* LOCATION */}
+
+      <SectionCard title={`📍 ${t?.business?.location ?? "Business Location"}`}>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          <Info label={t?.business?.address ?? "Address"} value={businessInfo?.address} />
+
+          <Info label={t?.business?.area ?? "Area"} value={businessInfo?.area} />
+
+          <Info label={t?.business?.city ?? "City"} value={businessInfo?.city} />
+
+          <Info label={t?.business?.state ?? "State"} value={businessInfo?.state} />
+
+          <Info label={t?.business?.postal ?? "Postal Code"} value={businessInfo?.postal_code} />
+
+          <Info label={t?.business?.country ?? "Country"} value={businessInfo?.country} />
+
         </div>
-      </div>
+
+      </SectionCard>
+
+
+      {/* EDIT FORM */}
+
+      <SectionCard title={`✏️ ${t?.business?.edit ?? "Edit Business Details"}`}>
+
+        <BusinessInfoForm businessInfo={businessInfo} />
+
+      </SectionCard>
+
+
     </div>
+
   );
+
 }
 
-/* ================= SMALL INFO COMPONENT ================= */
+
+/* -------------------- SECTION CARD -------------------- */
+
+function SectionCard({ title, children }) {
+
+  return (
+
+    <div className="bg-white border-4 border-black rounded-lg shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+
+      <div
+        className="px-6 py-4 border-b-4 border-black font-black text-lg"
+        style={{ color: "#df6824" }}
+      >
+        {title}
+      </div>
+
+      <div className="p-6">
+        {children}
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+/* -------------------- INFO COMPONENT -------------------- */
 
 function Info({ label, value, multiline = false, isLink = false }) {
+
   return (
-    <div>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
+
+    <div className="space-y-1">
+
+      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+        {label}
+      </p>
 
       {isLink && value ? (
+
         <a
           href={value}
           target="_blank"
-          className="font-medium text-blue-600 hover:underline"
+          rel="noopener noreferrer"
+          className="font-medium hover:underline break-words"
+          style={{ color: "#df6824" }}
         >
           {value}
         </a>
+
       ) : (
+
         <p
-          className={`font-medium text-gray-800 ${
+          className={`font-semibold text-gray-900 break-words ${
             multiline ? "whitespace-pre-line" : ""
           }`}
         >
           {value || "—"}
         </p>
+
       )}
+
     </div>
+
   );
+
 }
