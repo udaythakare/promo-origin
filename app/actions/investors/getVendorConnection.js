@@ -2,18 +2,11 @@
 
 import { supabaseAdmin } from "../../../lib/supabaseAdmin.js";
 
+export async function getVendorConnection({ investorId, vendorUserId }) {
 
-
-/**
- * Fetch investor ↔ vendor connection status
- */
-export async function getVendorConnection({
-  investorId,
-  vendorUserId,
-}) {
   const { data, error } = await supabaseAdmin
     .from("investor_vendor_connections")
-    .select("status")
+    .select("id, status")
     .eq("investor_id", investorId)
     .eq("vendor_id", vendorUserId)
     .maybeSingle();
@@ -23,5 +16,5 @@ export async function getVendorConnection({
     throw new Error(error.message);
   }
 
-  return data; // null if no connection
+  return data; // { id, status } or null
 }

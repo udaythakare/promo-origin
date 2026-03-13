@@ -7,6 +7,15 @@ export const translations = {
   /* ================= ENGLISH ================= */
 
   en: {
+    investors: {
+  risk: "risk",
+  requested: "Requested",
+  decline: "Decline",
+  accept: "Accept",
+  openChat: "Open Chat",
+  awaitingResponse: "Awaiting Response",
+  declined: "Declined",
+},
 
 performanceChart: "Coupon Performance",
 claims: "Claims",
@@ -94,6 +103,8 @@ redeemed: "Redeemed",
       businessInfo: "Business Info",
       scanCoupon: "Scan",
       analytics: "Analytics",
+      investors: "Investors",
+      browseInvestors: "Browse Investors",
       logout: "Logout",
       profile: "Profile"
     },
@@ -186,6 +197,16 @@ redeemed: "Redeemed",
 
   hi: {
 
+    investors: {
+  risk: "जोखिम",
+  requested: "अनुरोध किया",
+  decline: "अस्वीकार",
+  accept: "स्वीकार",
+  openChat: "चैट खोलें",
+  awaitingResponse: "प्रतीक्षा में",
+  declined: "अस्वीकृत",
+},
+
     performanceChart: "कूपन प्रदर्शन",
 claims: "क्लेम",
 redeemed: "उपयोग",
@@ -273,6 +294,8 @@ redeemed: "उपयोग",
       businessInfo: "दुकान की जानकारी",
       scanCoupon: "स्कैन करें",
       analytics: "रिपोर्ट",
+      investors: "निवेशक",
+      browseInvestors: "निवेशक खोजें",
       logout: "लॉग आउट",
       profile: "प्रोफाइल"
     },
@@ -365,6 +388,16 @@ redeemed: "उपयोग",
 
   mr: {
 
+    investors: {
+  risk: "जोखीम",
+  requested: "विनंती केली",
+  decline: "नकार द्या",
+  accept: "स्वीकारा",
+  openChat: "चॅट उघडा",
+  awaitingResponse: "प्रतीक्षेत",
+  declined: "नाकारले",
+},
+
     
     performanceChart: "कूपन कामगिरी",
 claims: "क्लेम",
@@ -453,6 +486,8 @@ redeemed: "वापर",
       businessInfo: "दुकान माहिती",
       scanCoupon: "स्कॅन करा",
       analytics: "रिपोर्ट",
+      investors: "गुंतवणूकदार",
+      browseInvestors: "गुंतवणूकदार शोधा",
       logout: "लॉग आउट",
       profile: "प्रोफाइल"
     },

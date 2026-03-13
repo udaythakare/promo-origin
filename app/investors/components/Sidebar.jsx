@@ -10,16 +10,18 @@ import {
   MessageSquare,
   Bell,
   User,
+  Handshake,
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", path: "/investors", icon: LayoutDashboard },
-  { name: "Vendors", path: "/investors/vendors", icon: Store },
-  { name: "Investments", path: "/investors/investments", icon: Wallet },
-  { name: "Analytics", path: "/investors/analytics", icon: BarChart3 },
-  { name: "Messages", path: "/investors/messages", icon: MessageSquare },
-  { name: "Notifications", path: "/investors/notifications", icon: Bell },
-  { name: "Profile", path: "/investors/profile", icon: User },
+  { name: "Dashboard",     path: "/investors",              icon: LayoutDashboard },
+  { name: "Vendors",       path: "/investors/vendors",      icon: Store },
+  { name: "Investments",   path: "/investors/investments",  icon: Wallet },
+  { name: "Analytics",     path: "/investors/analytics",    icon: BarChart3 },
+  { name: "Connections",   path: "/investors/connections",  icon: Handshake },
+  { name: "Messages",      path: "/investors/messages",     icon: MessageSquare },
+  { name: "Notifications", path: "/investors/notifications",icon: Bell },
+  { name: "Profile",       path: "/investors/profile",      icon: User },
 ];
 
 export default function Sidebar() {
@@ -41,7 +43,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-4 py-6 space-y-1" suppressHydrationWarning>
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
             const Icon = item.icon;
@@ -73,7 +75,7 @@ export default function Sidebar() {
 
       {/* ================= MOBILE BOTTOM NAV ================= */}
       <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div className="flex justify-between items-center p-2 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)]">
+        <div className="flex justify-between items-center p-2 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0)]" suppressHydrationWarning>
           {menuItems.slice(0, 5).map((item) => {
             const isActive = pathname === item.path;
             const Icon = item.icon;
@@ -105,4 +107,3 @@ export default function Sidebar() {
     </>
   );
 }
-  
