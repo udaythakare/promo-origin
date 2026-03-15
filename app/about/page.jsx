@@ -492,13 +492,23 @@ function SectionRow({ reverse, accent, glowColor, tag, title, desc, checks, imag
         border: `1.5px solid ${accent}18`,
         marginBottom: '16px',
       }}>
-        <Image
-          src={imageSrc}
-          alt={imageAlt}
-          width={600}
-          height={400}
-          style={{ width: '100%', height: 'auto', objectFit: 'cover', display: 'block' }}
-        />
+       <Image
+  src={imageSrc}
+  alt={imageAlt}
+  width={600}
+  height={400}
+  priority
+  sizes="(max-width: 640px) 100vw,
+         (max-width: 1024px) 80vw,
+         600px"
+  unoptimized
+  style={{
+    width: '100%',
+    height: 'auto',
+    objectFit: 'cover',
+    display: 'block'
+  }}
+/>
       </div>
     </div>
   );

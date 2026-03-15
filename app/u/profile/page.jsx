@@ -1,10 +1,12 @@
 import Link from "next/link";
 import React from "react";
 import { getUser, getUserRolesFromDB } from "@/helpers/userHelper";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import LocationSection from "./components/LocationSection";
 import {
     ChevronRight, Settings, User, Briefcase,
     TrendingUp, LogIn, IdCard, Sparkles, Shield,
+    Clock, XCircle,   // ← add these two
 } from "lucide-react";
 import LogoutButton from "./components/LogoutButton";
 import PersonalInfoSection from "./components/PersonalInfoSection";
@@ -66,9 +68,44 @@ export default async function Page() {
         );
     }
 
-    const userRoles      = await getUserRolesFromDB(user.id);
-    const isBusinessOwner = userRoles.includes("app_business_owner");
-    const isInvestor      = userRoles.includes("app_investor");
+    const userRoles       = await getUserRolesFromDB(user.id);
+const isBusinessOwner = userRoles.includes("app_business_owner");
+const isInvestor      = userRoles.includes("app_investor");
+
+// Fetch business status if user is a business owner
+let businessStatus = null
+let businessName = null
+let rejectionReason = null
+if (isBusinessOwner) {
+    const { data: business } = await supabaseAdmin
+        .from('businesses')
+        .select('name, status, rejection_reason')
+        .eq('user_id', user.id)
+        .single()
+    businessStatus = business?.status ?? null
+    businessName = business?.name ?? null
+    rejectionReason = business?.rejection_reason ?? null
+}
+
+// ← ADD THIS RIGHT HERE
+// Fetch investor status if user is an investor
+let investorStatus = null
+let investorRejectionReason = null
+if (isInvestor) {
+    const { data: investorProfile } = await supabaseAdmin
+        .from('investor_profiles')
+        .select('is_verified, rejection_reason')
+        .eq('user_id', user.id)
+        .single()
+    if (investorProfile?.is_verified) {
+        investorStatus = 'approved'
+    } else if (investorProfile?.rejection_reason) {
+        investorStatus = 'rejected'
+        investorRejectionReason = investorProfile.rejection_reason
+    } else {
+        investorStatus = 'pending'
+    }
+}
 
     return (
         <>
@@ -278,68 +315,343 @@ export default async function Page() {
                         ROLE CARDS + SECTIONS
                     ════════════════════════════════════════ */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+{/* Business Dashboard — status aware */}
+{isBusinessOwner && businessStatus === 'approved' && (
+    <div className="pp-role-card pp-c1" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #3716a8 0%, #5b30e0 55%, #6c4bff 100%)',
+        boxShadow: '0 8px 36px rgba(55,22,168,0.32)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <RoleCardInner
+            icon={<IdCard size={20} color="white" />}
+            title="Business Dashboard"
+            desc="Manage your listings, promotions and analytics"
+            href="/business/dashboard"
+            label="MANAGE YOUR BUSINESS"
+        />
+    </div>
+)}
 
-                        {/* Business Dashboard */}
-                        {isBusinessOwner && (
-                            <div className="pp-role-card pp-c1" style={{
-                                borderRadius: '20px',
-                                background: 'linear-gradient(135deg, #3716a8 0%, #5b30e0 55%, #6c4bff 100%)',
-                                boxShadow: '0 8px 36px rgba(55,22,168,0.32)',
-                                overflow: 'hidden', position: 'relative',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                            }}>
-                                <BlobDeco />
-                                <RoleCardInner
-                                    icon={<IdCard size={20} color="white" />}
-                                    title="Business Dashboard"
-                                    desc="Manage your listings, promotions and analytics"
-                                    href="/business/dashboard"
-                                    label="MANAGE YOUR BUSINESS"
-                                />
-                            </div>
-                        )}
+{/* Pending */}
+{isBusinessOwner && businessStatus === 'pending' && (
+    <div className="pp-role-card pp-c1" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #b45309 0%, #d97706 55%, #f59e0b 100%)',
+        boxShadow: '0 8px 36px rgba(180,83,9,0.32)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <div style={{ padding: 'clamp(18px,3vw,26px)', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <div style={{
+                    width: 44, height: 44, borderRadius: '13px', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.18)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    <Clock size={20} color="white" />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <h2 style={{
+                        margin: 0,
+                        fontSize: 'clamp(0.92rem,2.5vw,1.08rem)',
+                        fontWeight: 900, color: 'white', letterSpacing: '-0.01em',
+                    }}>
+                        Application Under Review
+                    </h2>
+                    <p style={{
+                        margin: '2px 0 0',
+                        fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.75)', fontWeight: 500,
+                    }}>
+                        {businessName} — awaiting admin approval
+                    </p>
+                </div>
+            </div>
+            <div style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                marginBottom: '12px',
+            }}>
+                <p style={{
+                    fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                    color: 'rgba(255,255,255,0.9)',
+                    margin: 0, lineHeight: 1.6,
+                }}>
+                    ⏳ Your application is being reviewed. You will receive an email once a decision is made — typically within 1–2 business days.
+                </p>
+            </div>
+            <Link href="/business/pending" className="pp-role-link" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 16px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                color: 'white', fontWeight: 800,
+                fontSize: 'clamp(0.72rem,1.8vw,0.8rem)',
+                letterSpacing: '0.05em', textDecoration: 'none',
+            }}>
+                VIEW APPLICATION STATUS
+                <ChevronRight size={16} />
+            </Link>
+        </div>
+    </div>
+)}
+
+{/* Rejected */}
+{isBusinessOwner && businessStatus === 'rejected' && (
+    <div className="pp-role-card pp-c1" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ef4444 100%)',
+        boxShadow: '0 8px 36px rgba(153,27,27,0.32)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <div style={{ padding: 'clamp(18px,3vw,26px)', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <div style={{
+                    width: 44, height: 44, borderRadius: '13px', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.18)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    <XCircle size={20} color="white" />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <h2 style={{
+                        margin: 0,
+                        fontSize: 'clamp(0.92rem,2.5vw,1.08rem)',
+                        fontWeight: 900, color: 'white', letterSpacing: '-0.01em',
+                    }}>
+                        Application Rejected
+                    </h2>
+                    <p style={{
+                        margin: '2px 0 0',
+                        fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.75)', fontWeight: 500,
+                    }}>
+                        {businessName}
+                    </p>
+                </div>
+            </div>
+            {rejectionReason && (
+                <div style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.24)',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    marginBottom: '12px',
+                }}>
+                    <p style={{
+                        fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)',
+                        fontWeight: 700, textTransform: 'uppercase',
+                        letterSpacing: '0.07em', margin: '0 0 4px',
+                    }}>
+                        Reason
+                    </p>
+                    <p style={{
+                        fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.9)',
+                        margin: 0, lineHeight: 1.6,
+                    }}>
+                        {rejectionReason}
+                    </p>
+                </div>
+            )}
+            <Link href="/u/profile/apply-for-business" className="pp-role-link" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 16px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                color: 'white', fontWeight: 800,
+                fontSize: 'clamp(0.72rem,1.8vw,0.8rem)',
+                letterSpacing: '0.05em', textDecoration: 'none',
+            }}>
+                REAPPLY NOW
+                <ChevronRight size={16} />
+            </Link>
+        </div>
+    </div>
+)}
 
                         {/* Investor / Apply */}
-                        {isInvestor ? (
-                            <div className="pp-role-card pp-c2" style={{
-                                borderRadius: '20px',
-                                background: 'linear-gradient(135deg, #047857 0%, #059669 55%, #10b981 100%)',
-                                boxShadow: '0 8px 36px rgba(5,150,105,0.28)',
-                                overflow: 'hidden', position: 'relative',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                            }}>
-                                <BlobDeco />
-                                <RoleCardInner
-                                    icon={<TrendingUp size={20} color="white" />}
-                                    title="Investment Dashboard"
-                                    desc="Track your ROI, investments and vendor connections"
-                                    href="/investors"
-                                    label="MANAGE YOUR INVESTMENTS"
-                                />
-                            </div>
-                        ) : (
-                            <div className="pp-role-card pp-c2" style={{
-                                borderRadius: '20px',
-                                background: 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 60%, #38bdf8 100%)',
-                                boxShadow: '0 8px 36px rgba(14,165,233,0.26)',
-                                overflow: 'hidden', position: 'relative',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                            }}>
-                                <BlobDeco />
-                                <RoleCardInner
-                                    icon={<Briefcase size={20} color="white" />}
-                                    title="Become an Investor"
-                                    desc="Invest in local businesses and grow your capital"
-                                    href="/u/profile/apply-for-investor"
-                                    label="APPLY AS INVESTOR"
-                                    extra={
-                                        <div className="pp-sparkle" style={{ marginLeft: 'auto' }}>
-                                            <Sparkles size={18} color="rgba(255,255,255,0.55)" />
-                                        </div>
-                                    }
-                                />
-                            </div>
-                        )}
+                       {isInvestor && investorStatus === 'approved' && (
+    <div className="pp-role-card pp-c2" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #047857 0%, #059669 55%, #10b981 100%)',
+        boxShadow: '0 8px 36px rgba(5,150,105,0.28)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <RoleCardInner
+            icon={<TrendingUp size={20} color="white" />}
+            title="Investment Dashboard"
+            desc="Track your ROI, investments and vendor connections"
+            href="/investors"
+            label="MANAGE YOUR INVESTMENTS"
+        />
+    </div>
+)}
+
+{isInvestor && investorStatus === 'pending' && (
+    <div className="pp-role-card pp-c2" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #b45309 0%, #d97706 55%, #f5c518 100%)',
+        boxShadow: '0 8px 36px rgba(180,83,9,0.3)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <div style={{ padding: 'clamp(18px,3vw,26px)', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <div style={{
+                    width: 44, height: 44, borderRadius: '13px', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.18)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    <Clock size={20} color="white" />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <h2 style={{
+                        margin: 0, fontSize: 'clamp(0.92rem,2.5vw,1.08rem)',
+                        fontWeight: 900, color: 'white', letterSpacing: '-0.01em',
+                    }}>
+                        Investor Application Under Review
+                    </h2>
+                    <p style={{
+                        margin: '2px 0 0', fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.75)', fontWeight: 500,
+                    }}>
+                        Awaiting admin approval
+                    </p>
+                </div>
+            </div>
+            <div style={{
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                borderRadius: '12px', padding: '10px 14px', marginBottom: '12px',
+            }}>
+                <p style={{
+                    fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                    color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.6,
+                }}>
+                    ⏳ Your investor application is being reviewed. You will receive an email once a decision is made.
+                </p>
+            </div>
+            <Link href="/investor-status/pending" className="pp-role-link" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 16px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                color: 'white', fontWeight: 800,
+                fontSize: 'clamp(0.72rem,1.8vw,0.8rem)',
+                letterSpacing: '0.05em', textDecoration: 'none',
+            }}>
+                VIEW APPLICATION STATUS
+                <ChevronRight size={16} />
+            </Link>
+        </div>
+    </div>
+)}
+
+{isInvestor && investorStatus === 'rejected' && (
+    <div className="pp-role-card pp-c2" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #ef4444 100%)',
+        boxShadow: '0 8px 36px rgba(153,27,27,0.3)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <div style={{ padding: 'clamp(18px,3vw,26px)', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <div style={{
+                    width: 44, height: 44, borderRadius: '13px', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.18)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    <XCircle size={20} color="white" />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <h2 style={{
+                        margin: 0, fontSize: 'clamp(0.92rem,2.5vw,1.08rem)',
+                        fontWeight: 900, color: 'white', letterSpacing: '-0.01em',
+                    }}>
+                        Investor Application Rejected
+                    </h2>
+                    <p style={{
+                        margin: '2px 0 0', fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.75)', fontWeight: 500,
+                    }}>
+                        Your application was not approved
+                    </p>
+                </div>
+            </div>
+            {investorRejectionReason && (
+                <div style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.24)',
+                    borderRadius: '12px', padding: '10px 14px', marginBottom: '12px',
+                }}>
+                    <p style={{
+                        fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)',
+                        fontWeight: 700, textTransform: 'uppercase',
+                        letterSpacing: '0.07em', margin: '0 0 4px',
+                    }}>
+                        Reason
+                    </p>
+                    <p style={{
+                        fontSize: 'clamp(0.7rem,1.8vw,0.76rem)',
+                        color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.6,
+                    }}>
+                        {investorRejectionReason}
+                    </p>
+                </div>
+            )}
+            <Link href="/u/profile/apply-for-investor" className="pp-role-link" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 16px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.24)',
+                color: 'white', fontWeight: 800,
+                fontSize: 'clamp(0.72rem,1.8vw,0.8rem)',
+                letterSpacing: '0.05em', textDecoration: 'none',
+            }}>
+                REAPPLY NOW
+                <ChevronRight size={16} />
+            </Link>
+        </div>
+    </div>
+)}
+{/* Become an Investor — only for non-investors */}
+{!isInvestor && (
+    <div className="pp-role-card pp-c2" style={{
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #0369a1 0%, #0ea5e9 60%, #38bdf8 100%)',
+        boxShadow: '0 8px 36px rgba(14,165,233,0.26)',
+        overflow: 'hidden', position: 'relative',
+        border: '1px solid rgba(255,255,255,0.1)',
+    }}>
+        <BlobDeco />
+        <RoleCardInner
+            icon={<Briefcase size={20} color="white" />}
+            title="Become an Investor"
+            desc="Invest in local businesses and grow your capital"
+            href="/u/profile/apply-for-investor"
+            label="APPLY AS INVESTOR"
+            extra={
+                <div className="pp-sparkle" style={{ marginLeft: 'auto' }}>
+                    <Sparkles size={18} color="rgba(255,255,255,0.55)" />
+                </div>
+            }
+        />
+    </div>
+)}
 
                         {/* Personal Info */}
                         <div className="pp-section-card pp-c3" style={{

@@ -46,12 +46,12 @@ export default function ApplyForInvestorPage() {
       return;
     }
 
-    try {
+try {
       await saveInvestorProfile(form);
-      router.push("/investors");
+      router.push("/investor-status/pending");
     } catch (error) {
       console.error(error);
-      alert("Something went wrong.");
+      alert(error.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }

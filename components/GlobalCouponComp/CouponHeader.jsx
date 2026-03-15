@@ -16,53 +16,29 @@ export const CouponHeader = ({
     });
   };
 
-  const getLocationBadge = () => {
-    if (locationSource === "area") {
-      return (
-        <span
-          className="flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-md border-2 border-black"
-          style={{ background: "#3716A8" }}
-        >
-          <MapPin size={12} />
-          {locationName?.toUpperCase()} DEALS
-        </span>
-      );
-    }
+  const isLocal = locationSource === "area" || locationSource === "city";
 
-    if (locationSource === "city") {
-      return (
-        <span
-          className="flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-md border-2 border-black"
-          style={{ background: "#3716A8" }}
-        >
-          <MapPin size={12} />
-          {locationName?.toUpperCase()} DEALS
-        </span>
-      );
-    }
-
-    return (
-      <span
-        className="flex items-center gap-1 text-white text-xs font-semibold px-3 py-1 rounded-md border-2 border-black"
-        style={{ background: "#3716A8" }}
-      >
-        <Globe size={12} />
-        ALL COUPONS
-      </span>
-    );
-  };
+  const LocationBadge = () => (
+    <span
+      className="inline-flex items-center gap-1.5 text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-1 border-2 border-black tracking-wide"
+      style={{ background: "#3716A8", boxShadow: "2px 2px 0px 0px rgba(0,0,0,1)" }}
+    >
+      {isLocal ? <MapPin size={11} strokeWidth={2.5} /> : <Globe size={11} strokeWidth={2.5} />}
+      {isLocal ? `${locationName?.toUpperCase()} DEALS` : "ALL COUPONS"}
+    </span>
+  );
 
   return (
-    <div className="flex flex-col gap-3 mb-6">
+    <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-6">
 
       {/* Top Row */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
 
-        <div className="flex items-center gap-3 flex-wrap">
-          {getLocationBadge()}
-
+        {/* Left: badge + updated time */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <LocationBadge />
           {lastRefreshed && (
-            <span className="text-xs text-gray-500">
+            <span className="text-[10px] sm:text-xs text-gray-400 font-medium">
               Updated {formatRefreshTime(lastRefreshed)}
             </span>
           )}
@@ -72,21 +48,22 @@ export const CouponHeader = ({
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="flex items-center gap-2 text-xs font-medium text-white px-3 py-1.5 rounded-md border-2 border-black hover:scale-105 transition-all disabled:opacity-50"
-          style={{ background: "#3716A8" }}
+          className="flex items-center gap-1.5 text-[10px] sm:text-xs font-black text-white px-2.5 sm:px-3 py-1.5 border-2 border-black active:scale-95 hover:opacity-90 transition-all disabled:opacity-40 flex-shrink-0"
+          style={{ background: "#3716A8", boxShadow: "2px 2px 0px 0px rgba(0,0,0,1)" }}
         >
-          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          Refresh
+          <RefreshCw size={13} strokeWidth={2.5} className={loading ? "animate-spin" : ""} />
+          <span>Refresh</span>
         </button>
 
       </div>
 
       {/* Fallback message */}
       {locationSource === "all" && (
-        <p className="text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded border border-gray-200">
+        <p className="text-[10px] sm:text-xs text-gray-500 bg-gray-50 px-3 py-2 border border-gray-200 border-l-2 border-l-[#3716A8]">
           No coupons found near your location — showing all available coupons.
         </p>
       )}
+
     </div>
   );
 };

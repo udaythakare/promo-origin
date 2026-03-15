@@ -1,4 +1,3 @@
-// app/u/profile/apply-for-business/page.jsx
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -10,24 +9,17 @@ import VendorOnboardingForm from './components/VendorOnboardingForm';
 import LoadingState from './components/LoadingState';
 import { ErrorState } from './components/ErrorState';
 
-// Cache for categories to avoid repeated API calls
 let categoriesCache = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000;
 
 const fetchCategories = async () => {
-    // Check if we have valid cached data
     if (categoriesCache && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_DURATION)) {
         return categoriesCache;
     }
-
     try {
-        const response = await apiRequest('/api/vendors/categories', {
-            method: 'GET',
-        });
-
+        const response = await apiRequest('/api/vendors/categories', { method: 'GET' });
         if (response.success) {
-            // Update cache
             categoriesCache = response;
             cacheTimestamp = Date.now();
             return response;
@@ -46,7 +38,6 @@ const submitVendorApplication = async (formData) => {
             method: 'POST',
             body: JSON.stringify(formData),
         });
-
         return response;
     } catch (error) {
         console.error('Error submitting vendor application:', error);
@@ -54,13 +45,9 @@ const submitVendorApplication = async (formData) => {
     }
 };
 
-// Check if user already has a business (optional - for UX improvement)
 const checkExistingBusiness = async () => {
     try {
-        const response = await apiRequest('/api/vendors/my-business', {
-            method: 'GET',
-        });
-
+        const response = await apiRequest('/api/vendors/my-business', { method: 'GET' });
         return response;
     } catch (error) {
         console.error('Error checking existing business:', error);
@@ -99,27 +86,34 @@ export default function VendorOnboardingPage() {
             setError(null);
 
             try {
-                // Check if user already has a business
                 const existingBusinessResponse = await checkExistingBusiness();
+
                 if (existingBusinessResponse.success && existingBusinessResponse.data) {
-                    // User already has a business, redirect them
-                    alert('You already have a registered business. Redirecting to dashboard...');
-                    router.push('/coupons'); // or wherever you want to redirect
-                    return;
+                    const status = existingBusinessResponse.data?.status
+
+                    // ← CHANGED: redirect based on status instead of alert
+                    if (status === 'pending') {
+                        router.push('/business/pending')
+                        return
+                    }
+                    if (status === 'rejected') {
+                        router.push('/business/rejected')
+                        return
+                    }
+                    if (status === 'approved') {
+                        router.push('/business/dashboard')
+                        return
+                    }
                 }
 
-                // Fetch dropdown data and categories in parallel
                 const [addressResponse, categoriesResponse] = await Promise.all([
                     getAddressDropdowns(),
                     fetchCategories()
                 ]);
 
-                // Handle address data
                 if (!addressResponse.success) {
                     throw new Error(addressResponse.message || 'Failed to fetch address data');
                 }
-
-                // Handle categories data
                 if (!categoriesResponse.success) {
                     throw new Error(categoriesResponse.message || 'Failed to fetch categories');
                 }
@@ -147,8 +141,8 @@ export default function VendorOnboardingPage() {
             const response = await submitVendorApplication(submittedFormData);
 
             if (response.success) {
-                alert("Vendor application submitted successfully!");
-                router.push('/coupons');
+                // ← CHANGED: redirect to pending page, no alert
+                router.push('/business/pending')
                 return;
             }
 
@@ -176,15 +170,8 @@ export default function VendorOnboardingPage() {
         }
     };
 
-    // Loading state
-    if (isLoading) {
-        return <LoadingState />;
-    }
-
-    // Error state
-    if (error && !isLoading) {
-        return <ErrorState error={error} />;
-    }
+    if (isLoading) return <LoadingState />;
+    if (error && !isLoading) return <ErrorState error={error} />;
 
     return (
         <div className="min-h-screen py-10 px-4">

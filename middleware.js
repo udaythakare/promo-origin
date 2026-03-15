@@ -1,5 +1,5 @@
-// middleware.ts
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
 // Define paths that should be accessible without authentication
 const publicPaths = [
@@ -17,59 +17,81 @@ const publicPaths = [
     '/sw.js',
     '/workbox-',
     '/icons',
-];
+]
 
 // Helper function to check if the current path is public
 function isPublicPath(path) {
     return publicPaths.some(publicPath => {
-        // For exact matches or paths that start with the public path
-        return path === publicPath || path.startsWith(`${publicPath}/`);
-    });
+        return path === publicPath || path.startsWith(`${publicPath}/`)
+    })
 }
 
 export async function middleware(request) {
-    const path = request.nextUrl.pathname;
+    const path = request.nextUrl.pathname
+
+    // ─────────────────────────────────────────
+    // SUPERADMIN PROTECTION — runs first
+    // ─────────────────────────────────────────
+    if (path.startsWith('/superadmin/dashboard')) {
+        const token = request.cookies.get('superadmin_token')?.value
+
+        // No token → redirect to superadmin login
+        if (!token) {
+            return NextResponse.redirect(new URL('/superadmin/login', request.url))
+        }
+
+        try {
+            const secret = new TextEncoder().encode(process.env.SUPERADMIN_JWT_SECRET)
+            const { payload } = await jwtVerify(token, secret)
+
+            if (payload.role !== 'superadmin') {
+                return NextResponse.redirect(new URL('/superadmin/login', request.url))
+            }
+
+            // Valid superadmin session — let through
+            return NextResponse.next()
+
+        } catch (error) {
+            // Expired or tampered token
+            return NextResponse.redirect(new URL('/superadmin/login', request.url))
+        }
+    }
+
+    // Allow superadmin login page through freely
+    if (path.startsWith('/superadmin/login')) {
+        return NextResponse.next()
+    }
+
+    // ─────────────────────────────────────────
+    // YOUR EXISTING AUTH LOGIC — unchanged
+    // ─────────────────────────────────────────
 
     // Skip authentication check for public paths
     if (isPublicPath(path)) {
-        return NextResponse.next();
+        return NextResponse.next()
     }
 
     // Check for authentication tokens in cookies
-    // Handle both production and development cookie formats
-    const authToken = request.cookies.get('auth-token')?.value;
+    const authToken = request.cookies.get('auth-token')?.value
 
     // Check both the regular and __Secure- prefixed session tokens
     const sessionToken =
         request.cookies.get('next-auth.session-token')?.value ||
-        request.cookies.get('__Secure-next-auth.session-token')?.value;
+        request.cookies.get('__Secure-next-auth.session-token')?.value
 
     // If no auth token found, redirect to login
     if (!authToken && !sessionToken) {
-        const loginUrl = new URL('/auth/signin', request.url);
-        // Add the original URL as a query parameter for redirect after login
-        loginUrl.searchParams.set('callbackUrl', request.url);
-        return NextResponse.redirect(loginUrl);
+        const loginUrl = new URL('/auth/signin', request.url)
+        loginUrl.searchParams.set('callbackUrl', request.url)
+        return NextResponse.redirect(loginUrl)
     }
 
-    // User is authenticated, proceed with the request
-    return NextResponse.next();
+    return NextResponse.next()
 }
 
 // Configure which paths the middleware runs on
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except:
-         * - API routes that handle their own auth
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - manifest.json (PWA manifest)
-         * - sw.js (service worker)
-         * - workbox- (workbox files)
-         * - icons (all icons)
-         */
         '/((?!api/auth|_next/static|_next/image|_next/webpack|favicon.ico|manifest.json|sw.js|icons|workbox-).*)',
     ],
-};
+}

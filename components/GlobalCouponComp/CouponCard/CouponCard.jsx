@@ -29,8 +29,7 @@ export const CouponCard = ({
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric"
     });
@@ -47,40 +46,45 @@ export const CouponCard = ({
   };
 
   return (
-    <div className="w-full max-w-[280px] mx-auto bg-white border-2 border-black rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div className="w-full bg-white border-2 border-black flex flex-col"
+      style={{ boxShadow: '3px 3px 0px 0px rgba(0,0,0,1)' }}>
 
-      {/* TOP BAR */}
+      {/* ── TOP BAR ── */}
       <div
-        className="text-white px-3 py-1.5 flex items-center justify-between text-xs font-semibold"
+        className="px-3 py-2 flex items-center justify-between text-xs font-bold text-white"
         style={{ background: "linear-gradient(90deg,#3716A8,#2C1288)" }}
       >
-        <span className="flex items-center gap-1">
-          <Flame size={14} /> Hot Deal
+        <span className="flex items-center gap-1.5">
+          <Flame size={13} strokeWidth={2.5} />
+          Hot Deal
         </span>
-        <span>Ends {formatDate(coupon.end_date)}</span>
+        <span className="text-white/80 font-semibold">
+          Ends {formatDate(coupon.end_date)}
+        </span>
       </div>
 
+      {/* ── BODY ── */}
       <div className="p-3 flex flex-col gap-2 flex-grow">
 
-        {/* TITLE */}
-        <h2 className="text-sm font-bold text-gray-900 line-clamp-2">
+        {/* Title */}
+        <h2 className="text-sm font-black text-gray-900 line-clamp-2 leading-tight">
           {coupon.title}
         </h2>
 
-        {/* STORE */}
-        <div className="flex items-center gap-1 text-xs text-gray-600">
-          <Store size={13} />
-          <span className="font-semibold">
+        {/* Store */}
+        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+          <Store size={12} strokeWidth={2.5} />
+          <span className="font-bold truncate">
             {coupon?.businesses?.name || "Vendor"}
           </span>
         </div>
 
-        {/* DESCRIPTION */}
-        <p className="text-xs text-gray-600 line-clamp-2">
+        {/* Description */}
+        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
           {coupon.description || "No description available"}
         </p>
 
-        {/* CLAIM COUNTER */}
+        {/* Claims Counter + Progress */}
         <div>
           <ClaimsCounter
             couponId={coupon.id}
@@ -88,115 +92,103 @@ export const CouponCard = ({
             maxClaims={coupon.max_claims}
             userId={userId}
           />
-
-          <div className="w-full bg-gray-200 h-1.5 rounded-full mt-1 overflow-hidden">
+          <div className="w-full bg-gray-200 h-1.5 mt-1 overflow-hidden">
             <div
-              className="h-full"
+              className="h-full transition-all duration-300"
               style={{
-                width: getProgressBarWidth(
-                  coupon.current_claims,
-                  coupon.max_claims
-                ),
+                width: getProgressBarWidth(coupon.current_claims, coupon.max_claims),
                 background: "#3716A8"
               }}
             />
           </div>
         </div>
 
-        {/* DIVIDER */}
-        <div className="border-t border-dashed border-gray-300 my-1"></div>
+        {/* Dashed Divider */}
+        <div className="border-t border-dashed border-gray-300" />
 
-        {/* DETAILS */}
+        {/* Expandable Details */}
         {detailsOpen && (
-          <div className="text-xs text-gray-600 space-y-1">
-            <div className="flex items-start gap-1">
-              <MapPin size={13} />
-              <span>
-                {coupon?.businesses?.business_locations &&
-                coupon.businesses.business_locations[0]
+          <div className="text-xs text-gray-600 space-y-1.5">
+            <div className="flex items-start gap-1.5">
+              <MapPin size={12} className="flex-shrink-0 mt-0.5" />
+              <span className="leading-snug">
+                {coupon?.businesses?.business_locations?.[0]
                   ? joinAddress(coupon.businesses.business_locations[0])
                   : "Store location"}
               </span>
             </div>
-
-            <div
-              className="flex items-center gap-1 font-medium"
-              style={{ color: "#3716A8" }}
-            >
-              <Timer size={13} />
+            <div className="flex items-center gap-1.5 font-semibold" style={{ color: "#3716A8" }}>
+              <Timer size={12} />
               {formatDate(coupon.start_date)} – {formatDate(coupon.end_date)}
             </div>
           </div>
         )}
 
-        {/* TOGGLE */}
+        {/* Toggle Details */}
         <button
           onClick={handleToggleDetails}
-          className="text-xs font-medium flex items-center gap-1"
+          className="text-xs font-bold flex items-center gap-1 w-fit active:scale-95 transition-transform"
           style={{ color: "#3716A8" }}
         >
-          {detailsOpen ? (
-            <>
-              Hide details <ChevronUp size={13} />
-            </>
-          ) : (
-            <>
-              View details <ChevronDown size={13} />
-            </>
-          )}
+          {detailsOpen
+            ? <><ChevronUp size={13} /> Hide details</>
+            : <><ChevronDown size={13} /> View details</>
+          }
         </button>
 
-        {/* ACTION BUTTONS */}
-        <div className="mt-auto pt-2">
-
+        {/* ── ACTION BUTTONS ── */}
+        <div className="mt-auto pt-1">
           {isClaimed ? (
             <div className="flex gap-2">
               <button
                 disabled
-                className="flex-1 bg-green-600 text-white text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1"
+                className="flex-1 bg-green-600 text-white text-xs font-bold py-2.5 border-2 border-black flex items-center justify-center gap-1.5"
               >
-                <Check size={13} />
+                <Check size={13} strokeWidth={2.5} />
                 Claimed
               </button>
-
               <button
                 onClick={() => onShowQR(coupon)}
-                className="px-3 bg-black text-white text-xs font-semibold py-2 rounded-lg hover:bg-gray-900 flex items-center gap-1"
+                className="px-3 bg-black text-white text-xs font-bold py-2.5 border-2 border-black hover:bg-gray-800 active:scale-95 flex items-center gap-1 transition-all"
               >
-                <QrCode size={13} />
+                <QrCode size={14} />
               </button>
             </div>
+
           ) : coupon.current_claims >= coupon.max_claims ? (
             <button
               disabled
-              className="w-full bg-gray-300 text-gray-600 text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1"
+              className="w-full bg-gray-200 text-gray-500 text-xs font-bold py-2.5 border-2 border-black flex items-center justify-center gap-1.5"
             >
-              <X size={13} />
+              <X size={13} strokeWidth={2.5} />
               Fully Claimed
             </button>
+
           ) : claimingStatus === "claiming" ? (
             <button
               disabled
-              className="w-full bg-gray-100 text-gray-600 text-xs font-semibold py-2 rounded-lg"
+              className="w-full bg-gray-100 text-gray-500 text-xs font-bold py-2.5 border-2 border-black"
             >
               Claiming...
             </button>
+
           ) : (
             <button
               onClick={() => onClaimClick(coupon)}
               disabled={!session}
-              className={`w-full text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1 ${
+              className={`w-full text-xs font-bold py-2.5 border-2 border-black flex items-center justify-center gap-1.5 active:scale-95 transition-all ${
                 !session
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "text-white"
+                  : "text-white hover:opacity-90"
               }`}
               style={session ? { background: "#3716A8" } : {}}
             >
-              <Scissors size={13} />
+              <Scissors size={13} strokeWidth={2.5} />
               {!session ? "Sign in to claim" : "Claim Coupon"}
             </button>
           )}
         </div>
+
       </div>
     </div>
   );

@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Superadmin (local only - never push)
+/app/superadmin/
+/app/api/superadmin/
+/lib/superadminAuth.js

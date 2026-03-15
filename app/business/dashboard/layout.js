@@ -3,9 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './_components/Sidebar';
-import TopBar from './_components/TopBar';
 import VendorBottomBar from '@/components/VendorBottomBar';
-import BusinessNavbar from '@/components/BusinessNavbar';
 import { getUserId } from '@/helpers/userHelper';
 import { LanguageProvider } from '@/context/LanguageContext';
 
@@ -28,7 +26,35 @@ export default function DashboardLayout({ children }) {
         const fetchUserId = async () => {
             try {
                 const id = await getUserId();
+
+                if (!id || id?.msg) {
+                    setUserId(null);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // ← NEW: Check business approval status before showing dashboard
+                try {
+                    const res = await fetch('/api/vendors/my-business')
+                    const data = await res.json()
+
+                    if (data?.data?.status === 'pending') {
+                    router.push('/business/pending')
+                     return
+                         }
+
+                    if (data?.data?.status === 'rejected') {
+                        router.push('/business/rejected')
+                     return
+                          }
+                } catch (statusError) {
+                    // If status check fails, still allow access
+                    // Don't block the dashboard for a network error
+                    console.error('Error checking business status:', statusError);
+                }
+
                 setUserId(id);
+
             } catch (error) {
                 console.error('Error fetching user ID:', error);
                 setUserId(null);
@@ -62,7 +88,6 @@ export default function DashboardLayout({ children }) {
         }
     };
 
-    // ✅ LanguageProvider wraps EVERYTHING including loading and error states
     return (
         <LanguageProvider>
             {isLoading ? (
@@ -103,12 +128,9 @@ export default function DashboardLayout({ children }) {
                     />
 
                     <div className="flex-1 flex flex-col overflow-hidden">
-                        {/* <BusinessNavbar userId={userId} /> */}
-
                         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-3 sm:p-4 md:p-6 pb-24 md:pb-6">
                             {children}
                         </main>
-
                         <VendorBottomBar />
                     </div>
                 </div>

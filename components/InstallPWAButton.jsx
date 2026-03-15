@@ -7,36 +7,18 @@ const InstallPWAButton = () => {
 
   useEffect(() => {
     const handler = (e) => {
-      // console.log('[PWA] beforeinstallprompt event fired');
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Update UI to notify the user they can add to home screen
       setShowInstallButton(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Check if the app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    // console.log('[PWA] Is running in standalone mode:', isStandalone);
-    if (isStandalone) {
-      setShowInstallButton(false);
-      // console.log('[PWA] App is already installed, hiding install button.');
-    }
+    if (isStandalone) setShowInstallButton(false);
 
-    // Check for manifest link
-    const manifest = document.querySelector('link[rel="manifest"]');
-    // console.log('[PWA] Manifest present:', !!manifest);
-
-    // Check for service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        // console.log('[PWA] Service worker registrations:', regs.length);
-      });
-    } else {
-      // console.log('[PWA] Service workers not supported in this browser.');
+      navigator.serviceWorker.getRegistrations();
     }
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -44,35 +26,40 @@ const InstallPWAButton = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-
-    // Show the install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    // console.log('[PWA] User choice:', outcome);
-
-    // We no longer need the prompt. Clear it up
     setDeferredPrompt(null);
-
-    // Hide the install button if the app was installed
-    if (outcome === 'accepted') {
-      setShowInstallButton(false);
-      // console.log('[PWA] App installed, hiding install button.');
-    }
+    if (outcome === 'accepted') setShowInstallButton(false);
   };
 
-  if (!showInstallButton) {
-    // console.log('[PWA] Install button not shown.');
-    return null;
-  }
+  if (!showInstallButton) return null;
 
   return (
     <button
       onClick={handleInstallClick}
-      className="px-6 py-3 bg-green-100 border-2 border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all font-bold text-sm sm:text-base whitespace-nowrap flex items-center gap-2"
+      className="
+        inline-flex items-center gap-2
+        px-4 sm:px-5 py-2.5
+        bg-[#3716A8] text-white
+        border-2 border-black
+        text-xs sm:text-sm font-black tracking-wide whitespace-nowrap
+        active:translate-x-[3px] active:translate-y-[3px] active:shadow-none
+        transition-all duration-150
+      "
+      style={{ boxShadow: '3px 3px 0px 0px rgba(0,0,0,1)' }}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Download icon */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16" height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="flex-shrink-0"
+      >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
@@ -82,4 +69,4 @@ const InstallPWAButton = () => {
   );
 };
 
-export default InstallPWAButton; 
+export default InstallPWAButton;
