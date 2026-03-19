@@ -5,6 +5,7 @@ import { getUserId } from "@/helpers/userHelper";
 
 /**
  * Fetch all coupons created by the vendor
+ * Uses business_id → businesses.user_id join to ensure only THIS vendor's coupons
  */
 export async function getAllVendorCoupons() {
 
@@ -14,10 +15,30 @@ export async function getAllVendorCoupons() {
         return { success: false, message: "User not logged in" };
     }
 
+    // Step 1 — get this vendor's business ids
+    const { data: businesses, error: bizError } = await supabaseAdmin
+        .from("businesses")
+        .select("id")
+        .eq("user_id", userId);
+
+    if (bizError) {
+        console.error("Error fetching businesses:", bizError);
+        return { success: false, error: bizError.message };
+    }
+
+    if (!businesses || businesses.length === 0) {
+        return { success: true, coupons: [] };
+    }
+
+    const businessIds = businesses.map(b => b.id);
+
+    // Step 2 — get coupons belonging to those businesses only
     const { data, error } = await supabaseAdmin
         .from("coupons")
         .select("*")
-        .eq("user_id", userId);
+        .in("business_id", businessIds)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
 
     if (error) {
         console.error("Error fetching coupons:", error);
@@ -41,46 +62,63 @@ export async function getVendorAnalyticsStats() {
         return { success: false, message: "User not logged in" };
     }
 
-    /* Get vendor coupons */
+    // Step 1 — get vendor's business ids
+    const { data: businesses, error: bizError } = await supabaseAdmin
+        .from("businesses")
+        .select("id")
+        .eq("user_id", userId);
 
+    if (bizError) {
+        console.error("Error fetching businesses:", bizError);
+        return { success: false, error: bizError.message };
+    }
+
+    if (!businesses || businesses.length === 0) {
+        return {
+            success: true,
+            stats: {
+                totalCoupons: 0,
+                totalAvailable: 0,
+                totalClaims: 0,
+                totalRedemptions: 0,
+                redemptionRate: 0,
+            },
+            couponIds: [],
+        };
+    }
+
+    const businessIds = businesses.map(b => b.id);
+
+    // Step 2 — get coupons for those businesses
     const { data: coupons, error: couponError } = await supabaseAdmin
         .from("coupons")
         .select("id, max_claims, current_claims, current_redemption")
-        .eq("user_id", userId);
+        .in("business_id", businessIds)
+        .eq("is_active", true);
 
     if (couponError) {
         console.error("Error fetching coupons:", couponError);
         return { success: false, error: couponError.message };
     }
 
-    const couponIds = coupons.map(c => c.id);
-
-    /* Total coupons */
+    const couponIds = (coupons || []).map(c => c.id);
 
     const totalCoupons = coupons.length;
-
-    /* Total available claims */
 
     const totalAvailable = coupons.reduce(
         (sum, c) => sum + (c.max_claims || 0),
         0
     );
 
-    /* Total claims */
-
     const totalClaims = coupons.reduce(
         (sum, c) => sum + (c.current_claims || 0),
         0
     );
 
-    /* Total redemptions */
-
     const totalRedemptions = coupons.reduce(
         (sum, c) => sum + (c.current_redemption || 0),
         0
     );
-
-    /* Redemption rate */
 
     const redemptionRate =
         totalClaims > 0

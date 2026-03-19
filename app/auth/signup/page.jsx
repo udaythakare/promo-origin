@@ -16,7 +16,6 @@ export default function SignUpPage() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -25,7 +24,6 @@ export default function SignUpPage() {
         setError('');
         setSuccessMessage('');
 
-        // Validate passwords match
         if (form.password !== form.confirm) {
             setError('Passwords do not match');
             return;
@@ -34,7 +32,6 @@ export default function SignUpPage() {
         setLoading(true);
 
         try {
-            // Step 1: Register the user
             const regRes = await fetch('/api/register-user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -50,10 +47,7 @@ export default function SignUpPage() {
 
             if (regData.success) {
                 setSuccessMessage('Registration successful! Please check your email to verify your account.');
-                // Clear form
                 setForm({ fullname: '', mobile_number: '', email: '', password: '', confirm: '' });
-
-                // Redirect to signin after 5 seconds
                 setTimeout(() => {
                     router.push('/auth/signin');
                 }, 5000);
@@ -68,25 +62,22 @@ export default function SignUpPage() {
         }
     };
 
-
     const handleGoogleSignUp = async () => {
-            try {
-                const result = await signIn('google', {
-                    // callbackUrl: 'http://localhost:3000/',
-                    callbackUrl: process.env.NEXT_PUBLIC_SITE_URL,
-                    redirect: false,
-                });
-    
-                if (result?.error) {
-                    // // console.log(result?.error)
-                    setError(result.error);
-                } else if (result?.url) {
-                    router.push(result.url);
-                }
-            } catch (error) {
-                setError('An error occurred during Google sign-in');
+        try {
+            const result = await signIn('google', {
+                callbackUrl: process.env.NEXT_PUBLIC_SITE_URL,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError(result.error);
+            } else if (result?.url) {
+                router.push(result.url);
             }
-        };
+        } catch (error) {
+            setError('An error occurred during Google sign-in');
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -97,13 +88,19 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="transform mb-6">
-                    <div className="bg-green-400 border-4 border-black rounded-none p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
-                        <h2 className="font-bold text-2xl uppercase text-center mb-2">CREATE ACCOUNT</h2>
-                        <p className="font-medium mb-6 text-center">Join the savings revolution!</p>
+                    <div className="bg-[#3716A8] border-4 border-black rounded-none p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
+                        <h2 className="font-bold text-2xl uppercase text-center mb-2 text-white">CREATE ACCOUNT</h2>
+                        <p className="font-medium mb-6 text-center text-white/80">Join the savings revolution!</p>
 
                         {error && (
                             <div className="mb-4 p-3 bg-red-500 border-2 border-black text-white font-bold rounded-none text-sm transform -rotate-1">
                                 {error}
+                            </div>
+                        )}
+
+                        {successMessage && (
+                            <div className="mb-4 p-3 bg-green-500 border-2 border-black text-white font-bold rounded-none text-sm">
+                                {successMessage}
                             </div>
                         )}
 
@@ -228,7 +225,7 @@ export default function SignUpPage() {
 
                         <div className="relative flex items-center mt-6">
                             <div className="flex-grow border-t-4 border-black"></div>
-                            <span className="flex-shrink mx-4 text-black font-bold">OR</span>
+                            <span className="flex-shrink mx-4 text-white font-bold">OR</span>
                             <div className="flex-grow border-t-4 border-black"></div>
                         </div>
 
@@ -246,7 +243,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="text-center">
-                    <div className="font-bold uppercase inline-block bg-pink-200 px-4 py-2 transform rotate-2 border-2 border-black">
+                    <div className="font-bold uppercase inline-block bg-[#6c42f8] text-white px-4 py-2 transform rotate-2 border-2 border-black">
                         Already have an account?{' '}
                         <a href="/auth/signin" className="underline hover:no-underline">
                             Sign in here
@@ -255,7 +252,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="mt-8 text-center">
-                    <p className="font-bold uppercase inline-block bg-orange-400 px-4 py-2 transform -rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
+                    <p className="font-bold uppercase inline-block bg-[#582fe2] text-white px-4 py-2 transform -rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
                         START SAVING NOW!
                     </p>
                 </div>
@@ -266,4 +263,4 @@ export default function SignUpPage() {
             </div>
         </div>
     );
-} 
+}

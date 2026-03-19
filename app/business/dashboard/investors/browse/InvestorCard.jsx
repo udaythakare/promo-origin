@@ -3,12 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendInvestorRequest } from "@/app/actions/vendor/sendInvestorRequest";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function InvestorCard({ investor }) {
   const router = useRouter();
   const [status, setStatus] = useState(investor.connection?.status || "none");
   const [connectionId, setConnectionId] = useState(investor.connection?.id || null);
   const [loading, setLoading] = useState(false);
+
+  const { t } = useLanguage();
+  const inv = t?.investors;
 
   const handleRequest = async () => {
     try {
@@ -47,7 +51,11 @@ export default function InvestorCard({ investor }) {
           </h2>
           {investor.profile_type && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 whitespace-nowrap font-bold">
-              {investor.profile_type}
+              {investor.profile_type === "individual"
+                ? (inv?.individual || investor.profile_type)
+                : investor.profile_type === "company"
+                ? (inv?.company || investor.profile_type)
+                : investor.profile_type}
             </span>
           )}
         </div>
@@ -75,7 +83,13 @@ export default function InvestorCard({ investor }) {
           )}
           {investor.risk_appetite && (
             <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 font-bold">
-              {investor.risk_appetite} risk
+              {investor.risk_appetite === "low"
+                ? (inv?.low || investor.risk_appetite)
+                : investor.risk_appetite === "medium"
+                ? (inv?.medium || investor.risk_appetite)
+                : investor.risk_appetite === "high"
+                ? (inv?.high || investor.risk_appetite)
+                : investor.risk_appetite} {inv?.risk || "risk"}
             </span>
           )}
           {investor.investment_range_min && investor.investment_range_max && (
@@ -98,21 +112,21 @@ export default function InvestorCard({ investor }) {
             onClick={() => router.push(`/business/dashboard/messages/${connectionId}`)}
             className="w-full py-2 text-sm font-black rounded-lg bg-green-600 text-white border-2 border-black hover:bg-green-700 transition shadow-[3px_3px_0px_rgba(0,0,0,1)]"
           >
-            Open Chat
+            {inv?.openChat || "Open Chat"}
           </button>
         ) : status === "pending" ? (
           <button
             disabled
             className="w-full py-2 text-sm font-black rounded-lg bg-gray-200 text-gray-600 border-2 border-black cursor-not-allowed"
           >
-            Request Sent
+            {inv?.requested || "Request Sent"}
           </button>
         ) : status === "rejected" ? (
           <button
             disabled
             className="w-full py-2 text-sm font-black rounded-lg bg-red-50 text-red-500 border-2 border-black cursor-not-allowed"
           >
-            Request Declined
+            {inv?.declined || "Request Declined"}
           </button>
         ) : (
           <button
@@ -120,7 +134,7 @@ export default function InvestorCard({ investor }) {
             disabled={loading}
             className="w-full py-2 text-sm font-black rounded-lg bg-[#df6824] text-white border-2 border-black hover:bg-orange-600 transition disabled:opacity-50 shadow-[3px_3px_0px_rgba(0,0,0,1)]"
           >
-            {loading ? "Sending..." : "Send Request"}
+            {loading ? (t?.common?.loading || "Sending...") : (inv?.sendRequest || "Send Request")}
           </button>
         )}
       </div>

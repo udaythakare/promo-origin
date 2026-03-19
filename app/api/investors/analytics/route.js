@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { getServerSession } from "next-auth";
+import { options } from "@/app/api/auth/[...nextauth]/options";
 
 export async function GET() {
   try {
 
-    const supabase = await createSupabaseServerClient();
+    // ✅ Get real logged-in user from session
+    const session = await getServerSession(options);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized. Please log in." },
+        { status: 401 }
+      );
+    }
 
-    // TEMP USER (replace later with session user)
-    const userId = "f1d98686-2bc6-4337-a927-6bf55f756e3e";
+    const userId = session.user.id;
+
+    const supabase = await createSupabaseServerClient();
 
     /* ================= INVESTMENTS ================= */
 

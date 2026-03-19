@@ -39,7 +39,6 @@ export default function SignInPage() {
                 return
             }
 
-            // Only check role immediately after login
             const session = await getSession()
             if (session?.user) {
                 const roles = session.user.roles || []
@@ -59,13 +58,11 @@ export default function SignInPage() {
     const handleGoogleSignIn = async () => {
         try {
             const result = await signIn('google', {
-                // callbackUrl: 'http://localhost:3000/',
                 callbackUrl: process.env.NEXT_PUBLIC_SITE_URL,
                 redirect: false,
             });
 
             if (result?.error) {
-                // // console.log(result?.error)
                 setError(result.error);
             } else if (result?.url) {
                 router.push(result.url);
@@ -84,9 +81,9 @@ export default function SignInPage() {
                 </div>
 
                 <div className="transform mb-6">
-                    <div className="bg-yellow-400 border-4 border-black rounded-none p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
-                        <h2 className="font-bold text-2xl uppercase text-center">SIGN IN</h2>
-                        <p className="font-medium mb-4 text-center">Access your savings account</p>
+                    <div className="bg-[#3716A8] border-4 border-black rounded-none p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0)] transition-all duration-200">
+                        <h2 className="font-bold text-2xl uppercase text-center text-white">SIGN IN</h2>
+                        <p className="font-medium mb-4 text-center text-white/80">Access your savings account</p>
 
                         {error && (
                             <div className="mb-4 p-3 bg-red-500 border-2 border-black text-white font-bold rounded-none text-sm transform -rotate-1">
@@ -139,7 +136,7 @@ export default function SignInPage() {
                             </div>
 
                             <div className="flex justify-end">
-                                <a href="#" className="text-sm font-bold text-black underline hover:no-underline transform hover:-translate-y-1 transition-transform duration-200">
+                                <a href="#" className="text-sm font-bold text-white underline hover:no-underline transform hover:-translate-y-1 transition-transform duration-200">
                                     Forgot your password?
                                 </a>
                             </div>
@@ -155,7 +152,7 @@ export default function SignInPage() {
 
                         <div className="relative flex items-center mt-6">
                             <div className="flex-grow border-t-4 border-black"></div>
-                            <span className="flex-shrink mx-4 text-black font-bold">OR</span>
+                            <span className="flex-shrink mx-4 text-white font-bold">OR</span>
                             <div className="flex-grow border-t-4 border-black"></div>
                         </div>
 
@@ -173,7 +170,7 @@ export default function SignInPage() {
                 </div>
 
                 <div className="text-center">
-                    <div className="font-bold uppercase inline-block bg-blue-200 px-4 py-2 transform -rotate-2 border-2 border-black">
+                    <div className="font-bold uppercase inline-block bg-[#3716A8] text-white px-4 py-2 transform -rotate-2 border-2 border-black">
                         Don't have an account?{' '}
                         <a href="/auth/signup" className="underline hover:no-underline">
                             Create one now
@@ -182,7 +179,7 @@ export default function SignInPage() {
                 </div>
 
                 <div className="mt-8 text-center">
-                    <p className="font-bold uppercase inline-block bg-blue-400 px-4 py-2 transform rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
+                    <p className="font-bold uppercase inline-block bg-[#3716A8] text-white px-4 py-2 transform rotate-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0)]">
                         SAVE BIG TODAY!
                     </p>
                 </div>
@@ -193,4 +190,4 @@ export default function SignInPage() {
             </div>
         </div>
     )
-} 
+}
